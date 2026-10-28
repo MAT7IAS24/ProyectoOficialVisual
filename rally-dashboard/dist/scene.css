@@ -1,0 +1,16 @@
+.world { isolation: isolate; }
+#scene3d { position: absolute; inset: 0; z-index: 1; }
+#scene3d canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.world.has-3d > svg { visibility: hidden; }
+.track-overlay { z-index: 2; pointer-events: none; align-items: flex-start; }
+.track-overlay > span { background: #12202bdd; padding: 10px 12px; border-radius: 6px; }
+.track-overlay strong { box-shadow: 0 4px 18px #0002; }
+.view-tools { position: absolute; z-index: 3; bottom: 16px; left: 16px; right: 16px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.view-tools[hidden] { display: none; }
+.view-tools button { padding: 9px 12px; border-radius: 6px; background: #17232ee8; color: #eef3f5; border: 1px solid #657786; cursor: pointer; font: 600 11px system-ui; }
+.view-tools button[aria-pressed="true"] { background: #ffd12e; color: #182028; border-color: #ffd12e; }
+.view-tools button:focus-visible { outline: 3px solid #00bddb; outline-offset: 2px; }
+.view-tools span { margin-left: auto; background: #17232edb; color: #edf4f6; padding: 8px; border-radius: 5px; font-size: 10px; }
+#sceneStatus { position: absolute; z-index: 3; bottom: 12px; left: 16px; right: 16px; margin: 0; font-size: 12px; padding: 10px; background: #17232eee; border-radius: 6px; color: #e7eff2; }
+#sceneStatus[hidden] { display: none; }
+@media (max-width: 540px) { .view-tools span { display: none; } .track-overlay { inset: 10px; font-size: 9px; } .stage-title { gap: 8px; } h1 { font-size: 23px; } .controls { flex-wrap: wrap; } .world { min-height: 340px; } }
