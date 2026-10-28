@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autonomous Rally Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="scene.css" />
+    <script type="importmap">
+      {"imports":{"three":"./vendor/three/three.module.js"}}
+    </script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header>
+        <div class="brand"><span class="brand-mark">⌁</span><span>AUTONOMOUS RALLY</span></div>
+        <div class="live"><i></i> ENTRENAMIENTO EN VIVO</div>
+        <button id="reset" class="icon-button" aria-label="Reiniciar simulación">↻</button>
+      </header>
+      <section class="workspace">
+        <article class="stage">
+          <div class="stage-title">
+            <div><span class="eyebrow">SIMULADOR DE CARRERA</span><h1>Aprender a cruzar la meta.</h1></div>
+            <div class="episode-chip">EPISODIO <strong id="episode">1</strong> / <span id="episodeMax">25</span></div>
+          </div>
+          <div class="world">
+            <div id="scene3d" aria-label="Circuito 3D interactivo: arrastra para girar y usa la rueda para acercarte"></div>
+            <div class="sky-glow"></div>
+            <svg viewBox="0 0 900 490" role="img" aria-label="Pista de un kilómetro y coche autónomo">
+              <defs>
+                <linearGradient id="asphalt" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#323744"/><stop offset="1" stop-color="#171b24"/></linearGradient>
+                <linearGradient id="grass" x1="0" x2="1"><stop stop-color="#405c49"/><stop offset="1" stop-color="#253c33"/></linearGradient>
+                <filter id="carShadow"><feDropShadow dx="0" dy="8" stdDeviation="7" flood-opacity=".55"/></filter>
+              </defs>
+              <rect width="900" height="490" fill="url(#grass)"/>
+              <path d="M75 155 C155 65 730 75 824 155 L824 335 C735 425 164 425 75 335 Z" fill="url(#asphalt)" stroke="#ced5db" stroke-width="15"/>
+              <path d="M75 155 C155 65 730 75 824 155 L824 335 C735 425 164 425 75 335 Z" fill="none" stroke="#ffcd35" stroke-width="4" stroke-dasharray="24 22" opacity=".8"/>
+              <path d="M125 183 C202 115 690 115 774 183 L774 308 C690 375 208 375 125 308 Z" fill="#26303a" stroke="#7e8790" stroke-width="2"/>
+              <g opacity=".75" stroke="#edf1ed" stroke-width="3" stroke-dasharray="15 18"><path d="M130 182 C220 121 684 121 770 182"/><path d="M770 182 L770 307"/><path d="M770 307 C680 367 217 367 130 307"/><path d="M130 307 L130 182"/></g>
+              <path id="racingLine" d="M483 350 C252 350 125 320 125 250 C125 140 285 120 483 120 C681 120 770 150 770 250 C770 325 660 350 483 350" fill="none"/>
+              <g class="checkpoint"><path d="M442 108v55M525 108v55" stroke="#34d0e8" stroke-width="8"/><path d="M442 108h83" stroke="#34d0e8" stroke-width="7"/><text x="483" y="96" text-anchor="middle">SECTOR · 500 m</text></g>
+              <g id="car" filter="url(#carShadow)"><ellipse cx="0" cy="8" rx="28" ry="10" fill="#10141b"/><path d="M-30 0 Q-20-20 0-20 Q20-20 30 0 L26 17 Q0 24 -26 17Z" fill="#ffb300"/><path d="M-14-16 L13-16 L21-2 L-22-2Z" fill="#b8e6f4"/><circle cx="-20" cy="17" r="7" fill="#111"/><circle cx="20" cy="17" r="7" fill="#111"/></g>
+              <g class="start-line"><path d="M442 335v53M525 335v53" stroke="#eff4f0" stroke-width="5"/><path d="M442 337h83" stroke="#eff4f0" stroke-width="3"/><text x="483" y="412" text-anchor="middle">SALIDA / META · 0 / 1000 m</text></g>
+            </svg>
+            <div class="track-overlay"><span>CIRCUITO CERRADO · 1.000 m</span><strong id="trackScore">PUNTOS +0.0</strong></div>
+            <div class="view-tools" aria-label="Cámara del circuito" hidden>
+              <button type="button" id="cameraOverview" aria-pressed="true">Perspectiva</button>
+              <button type="button" id="cameraTop" aria-pressed="false">Vista aérea</button>
+              <span>Arrastra para girar · rueda para acercar</span>
+            </div>
+            <p id="sceneStatus" role="status">Preparando vista 3D…</p>
+          </div>
+          <div class="legend"><span><b class="dot car-dot"></b>Coche autónomo</span><span><b class="dot goal-dot"></b>Meta</span><span><b class="dot line-dot"></b>Trayectoria</span></div>
+          <div class="controls"><button id="toggle" class="primary">Pausar simulación</button><label>Velocidad <input id="speed" type="range" min="100" max="1200" step="50" value="420" /></label></div>
+        </article>
+        <aside class="telemetry">
+          <div class="side-head"><span class="eyebrow">TELEMETRÍA</span><strong id="status">EN CARRERA</strong></div>
+          <div class="metric big"><span>Progreso</span><strong id="progress">0<span>%</span></strong><div class="meter"><i id="progressBar"></i></div><small id="distance">0 m de 1000 m</small></div>
+          <div class="metric-grid"><div class="metric"><span>Paso</span><strong id="step">0 <small>/ 50</small></strong></div><div class="metric"><span>Acción</span><strong id="action">—</strong></div><div class="metric"><span>Recompensa</span><strong id="reward">+0.0</strong></div><div class="metric"><span>Retorno</span><strong id="return">+0.0</strong></div></div>
+          <section class="q-card"><div class="q-head"><span class="eyebrow">VALORES Q</span><span id="stateLabel">TRAMO 0</span></div><div class="q-row"><span>Reversa</span><b id="qWait">+0.000</b></div><div class="q-row"><span>Acelerar</span><b id="qDrive">+0.000</b></div><div class="q-row value"><span>V(s)</span><b id="qValue">+0.000</b></div></section>
+          <div class="note">Regla: <b>+10</b> al cruzar la meta. <b>−1</b> por cada paso sin meta. El episodio se trunca en 50 pasos.</div>
+        </aside>
+      </section>
+    </main>
+    <script src="app.js"></script>
+    <script type="module" src="scene.js"></script>
+  </body>
+</html>
