@@ -1,0 +1,48 @@
+{
+  "environment_version": "rally-v2",
+  "reward_version": "v2",
+  "environment": {
+    "track_length_meters": 1000,
+    "segment_meters": 100,
+    "initial_speed_level": 0,
+    "max_speed_level": 3,
+    "initial_fuel": 100,
+    "fuel_base_cost": 2,
+    "fuel_speed_cost": 3,
+    "fuel_bucket_thresholds": [25, 50, 75],
+    "max_off_track_count": 3,
+    "off_track_rollback_segments": 1,
+    "max_steps": 50,
+    "actions": [
+      {"name": "frenar", "speed_delta": -1},
+      {"name": "mantener", "speed_delta": 0},
+      {"name": "acelerar", "speed_delta": 1}
+    ],
+    "zones": [
+      {"id": 0, "name": "recta", "segments": [], "grip": 1.0, "safe_speed": null},
+      {"id": 1, "name": "curva_seca", "segments": [3, 4], "grip": 0.8, "safe_speed": 2},
+      {"id": 2, "name": "curva_mojada", "segments": [7, 8], "grip": 0.5, "safe_speed": 1}
+    ]
+  },
+  "reward": {
+    "step": -1,
+    "new_segment": 2,
+    "fuel_unit": -0.05,
+    "off_track": -8,
+    "finish": 20,
+    "remaining_fuel_unit": 0.1
+  },
+  "training": {
+    "episodes": 3000,
+    "alpha": 0.25,
+    "gamma": 0.95,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "seed": 7,
+    "seeds": [7, 21, 42],
+    "evaluation_episodes": 30,
+    "evaluation_seed_offset": 10000,
+    "summary_window": 100
+  },
+  "tracking": {"experiment_name": "autonomous-rally-v2"}
+}

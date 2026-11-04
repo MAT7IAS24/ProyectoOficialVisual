@@ -1,0 +1,15 @@
+.experiment-nav { display: flex; gap: 20px; padding-top: 16px; }
+.experiment-nav a { color: #9bdbe4; }
+.experiment-nav a[aria-current] { color: #ffd12e; }
+.replay-selectors { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+.replay-selectors label { display: grid; gap: 6px; font-size: 12px; color: #aebbc4; }
+.replay-selectors select { background: #26323f; color: #fff; padding: 9px; border: 1px solid #657786; border-radius: 6px; max-width: 100%; }
+#loadStatus { font-size: 12px; color: #b9cad6; }
+.telemetry > .metric-grid { margin-bottom: 10px; }
+#zone { font-size: 13px; }
+#status { max-width: 150px; text-align: right; }
+#stateLabel { font-size: 10px; }
+.stage-title { gap: 12px; }
+.episode-chip { flex-shrink: 0; }
+.world { min-height: 350px; }
+@media(max-width:540px) { .stage-title { flex-wrap: wrap; } .live { font-size: 9px; } }

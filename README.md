@@ -1,5 +1,9 @@
 # Autonomous Rally: primer entorno
 
+**Experimento 2 (N2) disponible:** [guía de rally-v2](docs/rally-v2.md).
+El experimento 1 conserva su ambiente, entrenamiento y registro originales.
+La web ofrece enlaces para seleccionar ambos experimentos.
+
 Prototipo de una carrera automática con Gymnasium y Q-learning tabular.
 
 - Pista cerrada de **1.000 m**: completar la vuelta devuelve el coche a la
