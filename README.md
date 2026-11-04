@@ -1,8 +1,12 @@
 # Autonomous Rally: primer entorno
 
+**Experimento 3 (N3) disponible:** [guía de rally-v3](docs/rally-v3.md): pista de 3.000 m,
+4 carriles con obstáculos propios, rampas, puente elevado, cámara que sigue al coche e
+incidente de lluvia con dos intervenciones. Web: `rally-dashboard/dist/v3.html`.
+
 **Experimento 2 (N2) disponible:** [guía de rally-v2](docs/rally-v2.md).
 El experimento 1 conserva su ambiente, entrenamiento y registro originales.
-La web ofrece enlaces para seleccionar ambos experimentos.
+La web ofrece enlaces para seleccionar los tres experimentos.
 
 Prototipo de una carrera automática con Gymnasium y Q-learning tabular.
 

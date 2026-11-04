@@ -1,0 +1,102 @@
+{
+  "environment_version": "rally-v3",
+  "reward_version": "v3",
+  "level_id": "N3",
+  "experiment": {
+    "hypothesis": "Con 4 carriles, rampas, puente elevado y obstáculos, un agente tabular aprende a cambiar de carril y a llegar a las rampas con la velocidad justa: se espera al menos 90% de vueltas completas y superar a la política de reglas por más de 30 puntos de retorno.",
+    "change_vs_previous": "v2 -> v3: pista de 3000 m (30 tramos), 4 carriles con obstáculo propio, acciones nuevas (cambiar de carril), rampas con salto, puente elevado y terrenos nuevos (lodo, agua, terreno suelto, foso, barril). Cambian las dimensiones de la observación y de las acciones: es una familia de modelos nueva e incompatible con v1 y v2.",
+    "selection_criteria": {"min_success_rate": 0.9, "min_return_margin_over_rules": 30}
+  },
+  "environment": {
+    "track_length_meters": 3000,
+    "segment_meters": 100,
+    "lanes": 4,
+    "initial_lane": 1,
+    "random_start_lane": true,
+    "initial_speed_level": 0,
+    "max_speed_level": 3,
+    "initial_fuel": 150,
+    "fuel_base_cost": 2,
+    "fuel_speed_cost": 3,
+    "fuel_lane_change_cost": 1,
+    "fuel_bucket_thresholds": [40, 80, 120],
+    "lane_change_max_speed": 2,
+    "max_accidents": 4,
+    "accident_rollback_segments": 1,
+    "max_steps": 100,
+    "actions": [
+      {"name": "frenar", "speed_delta": -1, "lane_delta": 0},
+      {"name": "mantener", "speed_delta": 0, "lane_delta": 0},
+      {"name": "acelerar", "speed_delta": 1, "lane_delta": 0},
+      {"name": "carril_izquierda", "speed_delta": 0, "lane_delta": -1},
+      {"name": "carril_derecha", "speed_delta": 0, "lane_delta": 1}
+    ],
+    "terrains": [
+      {"id": 0, "code": ".", "name": "asfalto", "kind": "free"},
+      {"id": 1, "code": "L", "name": "lodo", "kind": "slow", "speed_cap": 1},
+      {"id": 2, "code": "A", "name": "agua", "kind": "skid", "safe_speed": 2},
+      {"id": 3, "code": "S", "name": "sin_pista", "kind": "slow", "speed_cap": 2},
+      {"id": 4, "code": "F", "name": "foso", "kind": "pit"},
+      {"id": 5, "code": "B", "name": "barril", "kind": "barrel"},
+      {"id": 6, "code": "R", "name": "rampa", "kind": "ramp", "min_speed": 2, "slow_cap": 1, "barrel_on_ramp": false},
+      {"id": 7, "code": "K", "name": "rampa_con_barril", "kind": "ramp", "min_speed": 2, "slow_cap": 1, "barrel_on_ramp": true},
+      {"id": 8, "code": "P", "name": "puente", "kind": "deck"},
+      {"id": 9, "code": "G", "name": "puente_roto", "kind": "deck_gap", "min_speed": 3}
+    ],
+    "flight_segments": {"2": 2, "3": 3},
+    "lane_layout": [
+      {
+        "name": "Carril 1 · Lodo",
+        "ground": "....LLL.....LL......LLL.......",
+        "deck":   "------------------------------"
+      },
+      {
+        "name": "Carril 2 · Agua",
+        "ground": "......AA.....AA......AAA....A.",
+        "deck":   "------------------------------"
+      },
+      {
+        "name": "Carril 3 · Pista incompleta",
+        "ground": "...SSS..RFFA.....SSS...RFFA...",
+        "deck":   "------------------------------"
+      },
+      {
+        "name": "Carril 4 · Rampas y puente",
+        "ground": "...B..K...R.LLAA.FLL..K...B.R.",
+        "deck":   "------------PPPPPGPP----------"
+      }
+    ]
+  },
+  "perturbations": {
+    "lluvia": {
+      "descripcion": "Lluvia: aparecen charcos y barro justo en la ruta que usa el coche (carriles 3 y 4) y en parte del carril 1.",
+      "ground_overrides": [
+        {"lane": 3, "segments": [20, 21, 24, 25], "code": "A"},
+        {"lane": 2, "segments": [2, 3], "code": "A"},
+        {"lane": 2, "segments": [27, 28, 29], "code": "L"},
+        {"lane": 0, "segments": [8, 9], "code": "A"}
+      ]
+    }
+  },
+  "reward": {
+    "step": -1,
+    "new_segment": 2,
+    "fuel_unit": -0.05,
+    "accident": -8,
+    "finish": 20,
+    "remaining_fuel_unit": 0.1
+  },
+  "training": {
+    "episodes": 4000,
+    "alpha": 0.25,
+    "gamma": 0.97,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "seed": 7,
+    "seeds": [7, 21, 42],
+    "evaluation_episodes": 40,
+    "evaluation_seed_offset": 10000,
+    "summary_window": 100
+  },
+  "tracking": {"experiment_name": "autonomous-rally-v3"}
+}

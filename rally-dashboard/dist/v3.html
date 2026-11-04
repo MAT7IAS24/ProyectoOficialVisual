@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rally v3 · N3</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="scene.css" />
+    <link rel="stylesheet" href="v2.css" />
+    <link rel="stylesheet" href="v3.css" />
+    <script type="importmap">
+      {"imports":{"three":"./vendor/three/three.module.js"}}
+    </script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header>
+        <div class="brand"><span class="brand-mark">⌁</span><span>AUTONOMOUS RALLY</span></div>
+        <div class="live"><i></i> REPRODUCCIÓN · PYTHON</div>
+        <button id="reset" class="icon-button" aria-label="Reiniciar episodio">↻</button>
+      </header>
+      <nav class="experiment-nav" aria-label="Experimento"><a href="index.html">Experimento 1</a><a href="v2.html">Experimento 2 · N2</a><a href="v3.html" aria-current="page">Experimento 3 · N3</a></nav>
+      <section class="workspace">
+        <article class="stage">
+          <div class="stage-title">
+            <div><span class="eyebrow">RALLY-V3 · REWARD V3 · 3.000 m · 4 CARRILES</span><h1>Rampas, puente y obstáculos por carril.</h1></div>
+            <div class="episode-chip">EPISODIO <strong id="episode">—</strong></div>
+          </div>
+          <div class="mode-banner" id="modeBanner">CARGANDO…</div>
+          <div class="world">
+            <div id="scene3d" aria-label="Pista 3D: usa los botones de cámara"></div>
+            <div class="track-overlay"><span id="trackLabel">PISTA · 30 TRAMOS DE 100 m</span><strong id="trackScore">PUNTOS +0.0</strong></div>
+            <div class="event-toast" id="eventToast" aria-live="polite"></div>
+            <div class="view-tools" aria-label="Cámara" hidden>
+              <button type="button" data-cam="follow" aria-pressed="true">Seguir coche</button>
+              <button type="button" data-cam="side" aria-pressed="false">Lateral (Excitebike)</button>
+              <button type="button" data-cam="top" aria-pressed="false">Vista aérea</button>
+              <button type="button" data-cam="free" aria-pressed="false">Libre</button>
+              <span>En «Libre»: arrastra para girar · rueda para acercar</span>
+            </div>
+            <p id="sceneStatus" role="status">Preparando vista 3D…</p>
+          </div>
+          <section class="lane-map" aria-label="Mapa de los 4 carriles">
+            <div class="lane-map-head"><span class="eyebrow">MAPA DE CARRILES · CADA CUADRO = 100 m</span><span id="layoutName">Condiciones normales</span></div>
+            <canvas id="laneMap" width="1200" height="230"></canvas>
+            <div class="terrain-legend" id="terrainLegend"></div>
+          </section>
+          <div id="replaySelectors" class="replay-selectors"><label>Semilla <select id="seedSelect" disabled></select></label><label>Escenario <select id="replaySelect" disabled></select></label></div>
+          <p id="loadStatus" role="status">Cargando las corridas registradas…</p>
+          <div class="controls"><button id="toggle" class="primary" disabled>Pausar reproducción</button><label>Velocidad <input id="speed" type="range" min="150" max="1500" step="50" value="700" /></label></div>
+          <section class="compare">
+            <div class="q-head"><span class="eyebrow">COMPARACIÓN CON EVIDENCIA · MEDIA DE LAS SEMILLAS · MISMA SUITE</span><span id="selection"></span></div>
+            <div class="table-wrap"><table id="compareTable"><thead><tr><th>Política</th><th>Condición</th><th>Éxito</th><th>Retorno</th><th>Pasos</th><th>Accidentes</th></tr></thead><tbody></tbody></table></div>
+            <p class="note" id="hypothesis"></p>
+            <p class="note" id="incidentNote"></p>
+          </section>
+        </article>
+        <aside class="telemetry">
+          <div class="side-head"><span class="eyebrow">TELEMETRÍA</span><strong id="status">EN CARRERA</strong></div>
+          <div class="metric big"><span>Progreso</span><strong id="progress">0<span>%</span></strong><div class="meter"><i id="progressBar"></i></div><small id="distance">0 m de 3000 m</small></div>
+          <div class="metric-grid"><div class="metric"><span>Paso</span><strong id="step">0 <small>/ —</small></strong></div><div class="metric"><span>Acción</span><strong id="action">—</strong></div><div class="metric"><span>Recompensa</span><strong id="reward">+0.0</strong></div><div class="metric"><span>Retorno</span><strong id="return">+0.0</strong></div></div>
+          <div class="metric-grid"><div class="metric"><span>Carril</span><strong id="lane">—</strong></div><div class="metric"><span>Altura</span><strong id="layer">—</strong></div><div class="metric"><span>Velocidad</span><strong id="speedLevel">—</strong></div><div class="metric"><span>Combustible</span><strong id="fuel">—</strong></div></div>
+          <div class="metric-grid"><div class="metric"><span>Pisa</span><strong id="here">—</strong></div><div class="metric"><span>Adelante</span><strong id="ahead">—</strong></div><div class="metric"><span>Accidentes</span><strong id="accidents">—</strong></div><div class="metric"><span>Qué pasó</span><strong id="events">—</strong></div></div>
+          <section class="q-card"><div class="q-head"><span class="eyebrow">VALORES Q</span><span id="stateLabel">—</span></div><div id="qRows"></div></section>
+          <div class="note" id="rewardRule"></div><div class="note" id="seedSummary"></div>
+        </aside>
+      </section>
+    </main>
+    <script type="module" src="app-v3.js"></script>
+  </body>
+</html>

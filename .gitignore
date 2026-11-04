@@ -8,3 +8,4 @@ mlflow.db-*
 models/
 .dvc-storage/
 rally-dashboard/.openai/
+.prueba-sin-tracking/
