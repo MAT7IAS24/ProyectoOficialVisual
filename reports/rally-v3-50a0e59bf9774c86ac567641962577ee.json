@@ -1,9 +1,9 @@
 {
-  "suite_id": "rally-v3-70032ce737bc4504a238a5c5811f69af",
+  "suite_id": "rally-v3-50a0e59bf9774c86ac567641962577ee",
   "environment_version": "rally-v3",
   "reward_version": "v3",
   "level_id": "N3",
-  "tracking": "omitido (--skip-tracking): sin DVC ni MLflow, no es corrida oficial",
+  "tracking": "DVC + MLflow",
   "config": {
     "environment_version": "rally-v3",
     "reward_version": "v3",
@@ -289,11 +289,11 @@
     {
       "seed": 7,
       "condition": "normal",
-      "experiment_id": "rally-v3-a22bb259606547238a266aa135b909da",
-      "mlflow_run_id": null,
-      "dvc_pointer": null,
+      "experiment_id": "rally-v3-fc54cb51f69d45d5a123f19ce43d81eb",
+      "mlflow_run_id": "cab0590b238a45338eabd83a08075d13",
+      "dvc_pointer": "data\\experiments\\rally-v3-fc54cb51f69d45d5a123f19ce43d81eb\\transitions.csv.dvc",
       "metadata": {
-        "experiment_id": "rally-v3-a22bb259606547238a266aa135b909da",
+        "experiment_id": "rally-v3-fc54cb51f69d45d5a123f19ce43d81eb",
         "level_id": "N3",
         "training_condition": "normal",
         "parent_run_id": null,
@@ -350,16 +350,16 @@
           }
         ],
         "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-        "config_sha256": "0ca085c3ac11062beb890a8f9fa8f0d0ade0bbbdff237d2f2b076640af68a9ad",
+        "config_sha256": "a3c881b23d538949fbbdaf08e084f0a459bf7a6d51799b56506071981fe146b2",
         "dataset_sha256": "a139905921453fbe47f1fcfe9c9efcdf16385e693b7e8fd620272074456e185a",
         "model_sha256": "359bfad185035e422f3e9e50103654918b4d0bd5dd48295125bf17d73eda4aef",
-        "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+        "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
         "source_sha256": {
-          "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-          "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-          "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-          "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-          "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+          "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+          "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+          "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+          "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+          "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
         },
         "evaluation_suite_id": "rally-v3-suite-1",
         "evaluation": {
@@ -399,11 +399,11 @@
     {
       "seed": 21,
       "condition": "normal",
-      "experiment_id": "rally-v3-edf83621a2ea4238b4ba995f5d31a30d",
-      "mlflow_run_id": null,
-      "dvc_pointer": null,
+      "experiment_id": "rally-v3-5ef9df4077584e8a9fb4f4b38accc22f",
+      "mlflow_run_id": "f41c9a8394754033818942036826e483",
+      "dvc_pointer": "data\\experiments\\rally-v3-5ef9df4077584e8a9fb4f4b38accc22f\\transitions.csv.dvc",
       "metadata": {
-        "experiment_id": "rally-v3-edf83621a2ea4238b4ba995f5d31a30d",
+        "experiment_id": "rally-v3-5ef9df4077584e8a9fb4f4b38accc22f",
         "level_id": "N3",
         "training_condition": "normal",
         "parent_run_id": null,
@@ -460,16 +460,16 @@
           }
         ],
         "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-        "config_sha256": "0cd46f622ba83a982e68c113bb96bcdafe107321c079a80cf628916eb95abbda",
+        "config_sha256": "0370b4d1809450a725ec6246edae717db837cfef7f92c5670f7795b44a84fc01",
         "dataset_sha256": "beea7d986e7165be9e0bc584a6e18031c1c927f7b7533f5d0971962960293234",
         "model_sha256": "3d15136881c985afc88ef5016541127cbed105cc78e3d2fe1d0bc1e26f2ea3b5",
-        "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+        "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
         "source_sha256": {
-          "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-          "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-          "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-          "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-          "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+          "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+          "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+          "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+          "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+          "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
         },
         "evaluation_suite_id": "rally-v3-suite-1",
         "evaluation": {
@@ -509,11 +509,11 @@
     {
       "seed": 42,
       "condition": "normal",
-      "experiment_id": "rally-v3-9baab18606bf4554bbaef1e6e968b71c",
-      "mlflow_run_id": null,
-      "dvc_pointer": null,
+      "experiment_id": "rally-v3-71a1e459e6ad4226b26dc189efaedd26",
+      "mlflow_run_id": "207ba89a3b3e44a1a24a8bbd07d4e8c5",
+      "dvc_pointer": "data\\experiments\\rally-v3-71a1e459e6ad4226b26dc189efaedd26\\transitions.csv.dvc",
       "metadata": {
-        "experiment_id": "rally-v3-9baab18606bf4554bbaef1e6e968b71c",
+        "experiment_id": "rally-v3-71a1e459e6ad4226b26dc189efaedd26",
         "level_id": "N3",
         "training_condition": "normal",
         "parent_run_id": null,
@@ -570,16 +570,16 @@
           }
         ],
         "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-        "config_sha256": "e8946eb120b23873921dc2456dac373728c986816f33fa5a22c56f972c3b1dd9",
+        "config_sha256": "89014f30eb463d19093238e48787e7ac66bcf73ed272e8a40908fb193223d331",
         "dataset_sha256": "82875192e6a183be3803369dc8f787f26b6043c2639d00aa2474d1bf4864eec0",
         "model_sha256": "306864649577f09f7ff283e6b6efd7431801d2060d9b9986d47bec725e916910",
-        "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+        "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
         "source_sha256": {
-          "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-          "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-          "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-          "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-          "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+          "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+          "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+          "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+          "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+          "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
         },
         "evaluation_suite_id": "rally-v3-suite-1",
         "evaluation": {
@@ -658,14 +658,14 @@
           {
             "seed": 7,
             "condition": "solo_lluvia",
-            "experiment_id": "rally-v3-450f0bc938bf477e9cdfd640b1c8f642",
-            "mlflow_run_id": null,
-            "dvc_pointer": null,
+            "experiment_id": "rally-v3-cf8e3f55d37f4193b9ab2bed6e5994ee",
+            "mlflow_run_id": "7b7b5573c8894e2aa2f1cd3f71cbe4b5",
+            "dvc_pointer": "data\\experiments\\rally-v3-cf8e3f55d37f4193b9ab2bed6e5994ee\\transitions.csv.dvc",
             "metadata": {
-              "experiment_id": "rally-v3-450f0bc938bf477e9cdfd640b1c8f642",
+              "experiment_id": "rally-v3-cf8e3f55d37f4193b9ab2bed6e5994ee",
               "level_id": "N3",
               "training_condition": "solo_lluvia",
-              "parent_run_id": "rally-v3-a22bb259606547238a266aa135b909da",
+              "parent_run_id": "rally-v3-fc54cb51f69d45d5a123f19ce43d81eb",
               "environment_version": "rally-v3",
               "reward_version": "v3",
               "algorithm": "tabular_q_learning",
@@ -719,16 +719,16 @@
                 }
               ],
               "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-              "config_sha256": "9d39eb8d1b4cc867fd7c1a7cc590711d2d0e6ac9dc60342fae6644af7cb85a59",
+              "config_sha256": "2957b4100d3bd92e84b5ee83cdc3ec7541fec56cb863b2ace71ab26ca235156f",
               "dataset_sha256": "eb276844d905c524b19ce5612d025a784473548d73f90a0fcf28fec54ce182ce",
               "model_sha256": "918307fa7b661a8c470ae565b885cb4d954566e3a8f6ed5a84ec0e57c53a92d5",
-              "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+              "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
               "source_sha256": {
-                "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-                "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-                "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-                "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-                "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+                "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+                "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+                "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+                "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+                "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
               },
               "evaluation_suite_id": "rally-v3-suite-1",
               "evaluation": {
@@ -768,14 +768,14 @@
           {
             "seed": 21,
             "condition": "solo_lluvia",
-            "experiment_id": "rally-v3-bb2a5abe09ab48358d1979ee4dd9de18",
-            "mlflow_run_id": null,
-            "dvc_pointer": null,
+            "experiment_id": "rally-v3-f69c95de465f450191f2fa26f15bd81e",
+            "mlflow_run_id": "21538b3dea5f46609ba7ddff8cb275e4",
+            "dvc_pointer": "data\\experiments\\rally-v3-f69c95de465f450191f2fa26f15bd81e\\transitions.csv.dvc",
             "metadata": {
-              "experiment_id": "rally-v3-bb2a5abe09ab48358d1979ee4dd9de18",
+              "experiment_id": "rally-v3-f69c95de465f450191f2fa26f15bd81e",
               "level_id": "N3",
               "training_condition": "solo_lluvia",
-              "parent_run_id": "rally-v3-edf83621a2ea4238b4ba995f5d31a30d",
+              "parent_run_id": "rally-v3-5ef9df4077584e8a9fb4f4b38accc22f",
               "environment_version": "rally-v3",
               "reward_version": "v3",
               "algorithm": "tabular_q_learning",
@@ -829,16 +829,16 @@
                 }
               ],
               "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-              "config_sha256": "f70082206dd21e5d3818007f584ee0a5ea3bb238a839530b6a34c69b5b722366",
+              "config_sha256": "20e7a03f6b34daedea66665dee9cdc3e2aef8eab9226b64267eb5a91d34a6d58",
               "dataset_sha256": "249d21c3ad861c430bab2eb6b17a912d05637062cf9c9e12920c7a6dbff38eeb",
               "model_sha256": "6a935e8e7bd61b77dde4461dd47ea489367555a2366ab7e0168b7e2701e8d3c0",
-              "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+              "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
               "source_sha256": {
-                "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-                "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-                "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-                "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-                "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+                "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+                "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+                "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+                "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+                "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
               },
               "evaluation_suite_id": "rally-v3-suite-1",
               "evaluation": {
@@ -878,14 +878,14 @@
           {
             "seed": 42,
             "condition": "solo_lluvia",
-            "experiment_id": "rally-v3-66877ce6d7844672a619a9c24470002f",
-            "mlflow_run_id": null,
-            "dvc_pointer": null,
+            "experiment_id": "rally-v3-661cf580d5144fcc97d592b2ece4c02c",
+            "mlflow_run_id": "da6f99dfe2e6442e8560271ea701af38",
+            "dvc_pointer": "data\\experiments\\rally-v3-661cf580d5144fcc97d592b2ece4c02c\\transitions.csv.dvc",
             "metadata": {
-              "experiment_id": "rally-v3-66877ce6d7844672a619a9c24470002f",
+              "experiment_id": "rally-v3-661cf580d5144fcc97d592b2ece4c02c",
               "level_id": "N3",
               "training_condition": "solo_lluvia",
-              "parent_run_id": "rally-v3-9baab18606bf4554bbaef1e6e968b71c",
+              "parent_run_id": "rally-v3-71a1e459e6ad4226b26dc189efaedd26",
               "environment_version": "rally-v3",
               "reward_version": "v3",
               "algorithm": "tabular_q_learning",
@@ -939,16 +939,16 @@
                 }
               ],
               "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-              "config_sha256": "afe4791af0ee99d0caa0b691c69d3ce95f1265fc42d39d38e9c7148accf4d866",
+              "config_sha256": "fc99ada4546c17f7996db67cc0df2c4163a1cc892ad0d799ea43db228d7ca7f6",
               "dataset_sha256": "5848be5402a3e8087d6994d6c99bd646d69c64ca9ed81b4feb4c1df0237d6824",
               "model_sha256": "5016aab8b0c855a220791136ec749930c4f54242eefe9762161a29dd48e52765",
-              "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+              "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
               "source_sha256": {
-                "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-                "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-                "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-                "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-                "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+                "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+                "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+                "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+                "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+                "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
               },
               "evaluation_suite_id": "rally-v3-suite-1",
               "evaluation": {
@@ -1009,14 +1009,14 @@
           {
             "seed": 7,
             "condition": "clima_mixto",
-            "experiment_id": "rally-v3-c7b7d9f5a6d1443cb084c4d1a05bf2ca",
-            "mlflow_run_id": null,
-            "dvc_pointer": null,
+            "experiment_id": "rally-v3-e7226c28a84f4a11835cd2b2e2d2680b",
+            "mlflow_run_id": "d673805c05ff499c9ce13741de44995a",
+            "dvc_pointer": "data\\experiments\\rally-v3-e7226c28a84f4a11835cd2b2e2d2680b\\transitions.csv.dvc",
             "metadata": {
-              "experiment_id": "rally-v3-c7b7d9f5a6d1443cb084c4d1a05bf2ca",
+              "experiment_id": "rally-v3-e7226c28a84f4a11835cd2b2e2d2680b",
               "level_id": "N3",
               "training_condition": "clima_mixto",
-              "parent_run_id": "rally-v3-a22bb259606547238a266aa135b909da",
+              "parent_run_id": "rally-v3-fc54cb51f69d45d5a123f19ce43d81eb",
               "environment_version": "rally-v3",
               "reward_version": "v3",
               "algorithm": "tabular_q_learning",
@@ -1070,16 +1070,16 @@
                 }
               ],
               "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-              "config_sha256": "d0e5ce2bd6f7fde2bbd0e51ef29f62cf97f20ec79bee8adaa4f2cab3c5d0ab6f",
+              "config_sha256": "6545f746b69cb2a3062b74875daaed3101764f8f44e2423de5ae60a8f0ac56be",
               "dataset_sha256": "c8f016c22a054dfff16d6f8388ffcad9edddcb49897cf23fb982c08d36390a31",
               "model_sha256": "e863818c2035d5148d144210b46530601d4626db68d2eadc6090ea06a97abf70",
-              "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+              "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
               "source_sha256": {
-                "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-                "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-                "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-                "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-                "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+                "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+                "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+                "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+                "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+                "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
               },
               "evaluation_suite_id": "rally-v3-suite-1",
               "evaluation": {
@@ -1119,14 +1119,14 @@
           {
             "seed": 21,
             "condition": "clima_mixto",
-            "experiment_id": "rally-v3-93b87d3a9ff747d9925324fdef6e7ebe",
-            "mlflow_run_id": null,
-            "dvc_pointer": null,
+            "experiment_id": "rally-v3-aca63edbf2fa4ba29014a610641e493f",
+            "mlflow_run_id": "e128ff45e440494693c72e197d1e607a",
+            "dvc_pointer": "data\\experiments\\rally-v3-aca63edbf2fa4ba29014a610641e493f\\transitions.csv.dvc",
             "metadata": {
-              "experiment_id": "rally-v3-93b87d3a9ff747d9925324fdef6e7ebe",
+              "experiment_id": "rally-v3-aca63edbf2fa4ba29014a610641e493f",
               "level_id": "N3",
               "training_condition": "clima_mixto",
-              "parent_run_id": "rally-v3-edf83621a2ea4238b4ba995f5d31a30d",
+              "parent_run_id": "rally-v3-5ef9df4077584e8a9fb4f4b38accc22f",
               "environment_version": "rally-v3",
               "reward_version": "v3",
               "algorithm": "tabular_q_learning",
@@ -1180,16 +1180,16 @@
                 }
               ],
               "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-              "config_sha256": "2646e953dcd1ce293b3f20ad39de43bccf002fb2040c09f15c9e81a2032e25be",
+              "config_sha256": "254141f8bc9e787820e17d1b228ec8a391a4d9a390c9ebd69f87fadd8e67b1da",
               "dataset_sha256": "1d8c475b79f18c147a8797c3e7822218230c0aa0b118f61b884a0e04c8a3f0e4",
               "model_sha256": "9fd133ee86af0d8557a9563247c02a89433b636c1de1836776d5c27396ca04c5",
-              "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+              "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
               "source_sha256": {
-                "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-                "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-                "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-                "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-                "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+                "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+                "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+                "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+                "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+                "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
               },
               "evaluation_suite_id": "rally-v3-suite-1",
               "evaluation": {
@@ -1229,14 +1229,14 @@
           {
             "seed": 42,
             "condition": "clima_mixto",
-            "experiment_id": "rally-v3-1da9181601914ddea40474186b1853e8",
-            "mlflow_run_id": null,
-            "dvc_pointer": null,
+            "experiment_id": "rally-v3-80999358d955408db7d4055da44a2f6c",
+            "mlflow_run_id": "3ee07d17dcf147b0b1edbc0a26d3f6dd",
+            "dvc_pointer": "data\\experiments\\rally-v3-80999358d955408db7d4055da44a2f6c\\transitions.csv.dvc",
             "metadata": {
-              "experiment_id": "rally-v3-1da9181601914ddea40474186b1853e8",
+              "experiment_id": "rally-v3-80999358d955408db7d4055da44a2f6c",
               "level_id": "N3",
               "training_condition": "clima_mixto",
-              "parent_run_id": "rally-v3-9baab18606bf4554bbaef1e6e968b71c",
+              "parent_run_id": "rally-v3-71a1e459e6ad4226b26dc189efaedd26",
               "environment_version": "rally-v3",
               "reward_version": "v3",
               "algorithm": "tabular_q_learning",
@@ -1290,16 +1290,16 @@
                 }
               ],
               "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
-              "config_sha256": "c034ee2c668107eb7da9b83407f2d481b993b3ba29994f8402365eb7b7da58e8",
+              "config_sha256": "b8da10f30c81825f2ff327f26fc7f39ef49eec76e9c8efd2cdbc19d03ad43541",
               "dataset_sha256": "f71ebba64a1587ee9eb8431131ba9eb2edb90abc2665a90dcc41153841e91cd8",
               "model_sha256": "8b5c1cf7eacb0d50c22961530610cd8ea59db7c2a2e411aa807c493ecbdfaf20",
-              "source_git_head": "6ce6ebc071d04f04986b24083b9f0b7091d31b7a",
+              "source_git_head": "7434795495cc9efcce2054e5ea4fd87e76114981",
               "source_sha256": {
-                "race_env_v3.py": "2582a7ff707bc4231c288d10bd81fd8efe99720471fedd64ba4fb860470abb34",
-                "training_v3.py": "a928ddbe4af1aad49299c117436da7a7b77b5e1158f02193eeb787ed9a11172f",
-                "pipeline_v3.py": "36c8571624ae56dbc377567abeddedbd5a530025f2a3257c2c257f5137a10fad",
-                "environments.py": "29c8694cccb3790d9053c51fa17675181e569f37e88d9a738e5570b8797f2823",
-                "configs/rally-v3.json": "6f4543fb3ce9fdc6d078bcd7b26ddcbbaac2bb2757df6f9876ba47ee8e110c92"
+                "race_env_v3.py": "75975cf4ed927fe96f57fc25da7f5f3acdd18ae424a54eac3c163b87b9bdf233",
+                "training_v3.py": "5c67b70b6e7ff048cf4677bf7b9b399178e29ab971f49c19935eb217dfeb0c9d",
+                "pipeline_v3.py": "93f4b8a52cddff999f49ffb1a1f7e02e6f53b0dd318d79fec00da1d5a031d192",
+                "environments.py": "0c791f6591d318b7b940f01ed27e3a27d8cc7aba5f7fbeec2a70bb329933feff",
+                "configs/rally-v3.json": "70e3e1ca7a2981f654a6f3579d54bb5d3057b6d90bba1dfdd273b5d5d039d094"
               },
               "evaluation_suite_id": "rally-v3-suite-1",
               "evaluation": {
