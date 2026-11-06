@@ -1,4 +1,22 @@
-# Autonomous Rally: primer entorno
+# Autonomous Rally · Proyecto final de MLOps
+
+Visualización 2 · Universidad Externado de Colombia. Un coche aprende a correr una pista con
+aprendizaje por refuerzo. Cada experimento es una **versión con nombre** (etiqueta de Git) con su
+código, sus datos versionados (DVC), sus corridas (MLflow) y su vista web.
+
+| Versión | Qué agrega | Resultado | Código | Documentación |
+|---|---|---|---|---|
+| **N1** · `rally-v1-n1` | Pista de 1 km, 2 acciones, pipeline Prefect + DVC + MLflow | 100 % vueltas, 10 pasos | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v1-n1) | [README](https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v1-n1/README.md) |
+| **N2** · `rally-v2-n2` | Velocidad, combustible, curvas seca y mojada, 3 semillas, Hugging Face | 100 %, retorno +36,4 | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v2-n2) | [rally-v2.md](docs/rally-v2.md) |
+| **N3** · `rally-v3-n3` | 4 carriles, rampas, puente, referencias, incidente de lluvia con intervenciones A/B | 100 % vs 53 % reglas; B recupera la lluvia | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v3-n3) | [rally-v3.md](docs/rally-v3.md) |
+
+**Web:** `rally-dashboard/dist/historial.html` es la portada con el historial y enlaces a la carrera
+de cada versión (`index.html`, `v2.html`, `v3.html`). Para volver exactamente a una versión:
+`git checkout rally-v3-n3` (o la etiqueta que corresponda).
+
+---
+
+## Detalle del experimento 1
 
 **Experimento 3 (N3) disponible:** [guía de rally-v3](docs/rally-v3.md): pista de 3.000 m,
 4 carriles con obstáculos propios, rampas, puente elevado, cámara que sigue al coche e

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Autonomous Rally · Historial</title>
+<meta name="description" content="Historial versionado de los experimentos del proyecto final de MLOps: Autonomous Rally." />
+<style>
+  :root { --bg:#0f161d; --panel:#17212b; --line:#2d3a46; --text:#e8eef2; --muted:#9aabb7; --accent:#ffd12e; --ok:#47df9a; --bad:#ff8a7a; --blue:#9bdbe4; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: var(--blue); }
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 16px 64px; }
+  header .brand { display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.14em; font-size:13px; color:var(--accent); }
+  h1 { font-size: clamp(28px, 5vw, 44px); line-height:1.1; margin:14px 0 10px; }
+  .lead { color: var(--muted); max-width: 760px; margin: 0 0 22px; }
+  .eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .quick { display:flex; flex-wrap:wrap; gap:10px; margin: 0 0 36px; }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border-radius:8px; border:1px solid var(--line); background:#1d2833; color:var(--text); text-decoration:none; font-weight:650; font-size:14px; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); color:#111; border-color: var(--accent); }
+  .timeline { display:grid; gap: 22px; }
+  .card { background: var(--panel); border:1px solid var(--line); border-radius: 14px; padding: 22px; display:grid; grid-template-columns: 170px minmax(0,1fr); gap: 22px; }
+  .card .side { border-right: 1px solid var(--line); padding-right: 18px; }
+  .num { font-size: 44px; font-weight: 900; color: var(--accent); line-height: 1; }
+  .tag { display:inline-block; margin-top:10px; font: 700 12px ui-monospace, Menlo, Consolas, monospace; background:#0d1318; border:1px solid var(--line); padding:4px 8px; border-radius:6px; color: var(--blue); }
+  .date { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .card h2 { margin: 0 0 6px; font-size: 22px; }
+  .card p { margin: 6px 0; }
+  .kv { display:grid; grid-template-columns: 150px minmax(0,1fr); gap: 4px 14px; margin: 12px 0; font-size: 14px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; }
+  .result { display:flex; flex-wrap:wrap; gap:10px; margin: 12px 0; }
+  .stat { background:#0d1318; border:1px solid var(--line); border-radius:10px; padding:8px 12px; min-width:110px; }
+  .stat b { display:block; font-size: 20px; }
+  .stat span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing:.08em; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  .links { display:flex; flex-wrap:wrap; gap:8px; margin-top: 14px; }
+  .links .btn { font-size: 13px; padding: 7px 11px; }
+  .card.next { opacity: .75; border-style: dashed; }
+  section { margin-top: 48px; }
+  section h2 { font-size: 22px; margin: 0 0 12px; }
+  .table-wrap { overflow-x: auto; border:1px solid var(--line); border-radius: 12px; }
+  table { width:100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align:left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; background:#141d26; }
+  tr:last-child td { border-bottom: 0; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; background:#0d1318; padding: 1px 5px; border-radius: 4px; }
+  .note { color: var(--muted); font-size: 13px; }
+  footer { margin-top: 56px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
+  @media (max-width: 720px) {
+    .card { grid-template-columns: minmax(0,1fr); gap: 12px; }
+    .card .side { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; display:flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .card .side .tag, .card .side .date { margin-top: 0; }
+    .kv { grid-template-columns: minmax(0,1fr); }
+    .kv dt { margin-top: 6px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">⌁ AUTONOMOUS RALLY</div>
+    <h1>Historial de experimentos</h1>
+    <p class="lead">Proyecto final de MLOps · Visualización 2 · Universidad Externado de Colombia. Un coche aprende a correr una pista con aprendizaje por refuerzo. Cada experimento es una versión con nombre propio en Git: su código, sus datos (DVC), sus corridas (MLflow) y su vista en esta web.</p>
+    <div class="quick">
+      <a class="btn primary" href="v3.html">▶ Ver la versión más reciente (N3)</a>
+      <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual">Repositorio en GitHub</a>
+      <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tags">Todas las versiones (tags)</a>
+    </div>
+  </header>
+
+  <div class="timeline">
+    <article class="card">
+      <div class="side"><div class="num">N1</div><div class="tag">rally-v1-n1</div><div class="date">28 oct 2026</div></div>
+      <div>
+        <span class="eyebrow">Experimento 1 · línea base</span>
+        <h2>Pista de 1 km y un pipeline reproducible</h2>
+        <p>El coche solo puede acelerar o retroceder 100 m por paso en una pista de 1.000 m. El objetivo era montar el ciclo completo de MLOps: entrenar, versionar los datos y registrar el experimento.</p>
+        <dl class="kv">
+          <dt>Ambiente</dt><dd>1 carril, 10 tramos, 2 acciones (reversa, acelerar)</dd>
+          <dt>Recompensa</dt><dd>−1 por paso, +10 al llegar a la meta; corte a los 50 pasos</dd>
+          <dt>Agente</dt><dd>Q-learning tabular, 25 episodios, semilla 7</dd>
+          <dt>Herramientas</dt><dd>Gymnasium, Prefect, DVC, MLflow, web Three.js</dd>
+        </dl>
+        <div class="result">
+          <div class="stat"><b class="ok">100 %</b><span>Vueltas completas</span></div>
+          <div class="stat"><b>10</b><span>Pasos (mínimo posible)</span></div>
+          <div class="stat"><b>+1,0</b><span>Retorno</span></div>
+        </div>
+        <p class="note">Aprendizaje: el problema era demasiado fácil (siempre acelerar). Siguiente paso: agregar decisiones reales.</p>
+        <div class="links">
+          <a class="btn" href="index.html">▶ Ver carrera</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v1-n1">Código de esta versión</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v1-n1/README.md">Documentación</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="side"><div class="num">N2</div><div class="tag">rally-v2-n2</div><div class="date">4 nov 2026</div></div>
+      <div>
+        <span class="eyebrow">Experimento 2 · velocidad, combustible y curvas</span>
+        <h2>Curvas secas y mojadas que obligan a frenar</h2>
+        <p>Se agregan niveles de velocidad, combustible limitado y dos curvas (una seca y una mojada) donde ir rápido saca al coche de la pista. Ahora el agente tiene que decidir cuándo frenar.</p>
+        <dl class="kv">
+          <dt>Ambiente</dt><dd>1 carril, 10 tramos, 3 acciones (frenar, mantener, acelerar), 528 estados</dd>
+          <dt>Recompensa</dt><dd>v2: avance, consumo, salidas de pista (−8), meta (+20) y bonus por combustible</dd>
+          <dt>Agente</dt><dd>Q-learning tabular, 3.000 episodios × 3 semillas (7, 21, 42)</dd>
+          <dt>Nuevo en MLOps</dt><dd>Configuración en JSON, varias semillas, modelos publicados en Hugging Face</dd>
+        </dl>
+        <div class="result">
+          <div class="stat"><b class="ok">100 %</b><span>Vueltas completas</span></div>
+          <div class="stat"><b>7</b><span>Pasos</span></div>
+          <div class="stat"><b>+36,4</b><span>Retorno</span></div>
+          <div class="stat"><b>0</b><span>Salidas de pista</span></div>
+        </div>
+        <p class="note">Aprendizaje: las 3 semillas dieron exactamente lo mismo; con un solo carril hay una sola ruta óptima. Siguiente paso: dar opciones de ruta.</p>
+        <div class="links">
+          <a class="btn" href="v2.html">▶ Ver carrera</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v2-n2">Código de esta versión</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v2-n2/docs/rally-v2.md">Documentación</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v2-n2/reports/rally-v2-7ab407ddd3f64be3921db0b3f878004e.json">Informe</a>
+          <a class="btn" href="https://huggingface.co/MAT7IAS24/autonomous-rally-q-learning">Modelos (Hugging Face)</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="side"><div class="num">N3</div><div class="tag">rally-v3-n3</div><div class="date">4 nov 2026</div></div>
+      <div>
+        <span class="eyebrow">Experimento 3 · 4 carriles, rampas y puente</span>
+        <h2>Elegir carril, saltar rampas y sobrevivir a la lluvia</h2>
+        <p>Pista de 3 km con 4 carriles, cada uno con su obstáculo (lodo, agua, pista incompleta, barriles), rampas para saltar y un puente elevado. Además, un incidente controlado: lluvia que pone charcos donde antes no había.</p>
+        <dl class="kv">
+          <dt>Ambiente</dt><dd>4 carriles, 30 tramos, 5 acciones (incluye cambiar de carril), 43.648 estados</dd>
+          <dt>Hipótesis</dt><dd>≥ 90 % de vueltas completas y más de 30 puntos sobre una política de reglas</dd>
+          <dt>Agente</dt><dd>Q-learning tabular, 4.000 episodios × 3 semillas; comparado con reglas y azar</dd>
+          <dt>Nuevo en MLOps</dt><dd>Criterio de selección fijado antes, incidente y dos intervenciones con parent_run_id</dd>
+        </dl>
+        <div class="result">
+          <div class="stat"><b class="ok">100 %</b><span>Q-learning</span></div>
+          <div class="stat"><b>53 %</b><span>Reglas a mano</span></div>
+          <div class="stat"><b>8 %</b><span>Azar</span></div>
+          <div class="stat"><b class="bad">0 %</b><span>Con lluvia (original)</span></div>
+          <div class="stat"><b class="ok">100 %</b><span>Con lluvia (intervención B)</span></div>
+        </div>
+        <p class="note">Aprendizaje: con lluvia el agente se congela frente a charcos que nunca vio. Reentrenar solo con lluvia lo arregla pero olvida la pista normal (A, rechazada); entrenar con clima mixto funciona en ambas (B, aceptada). Una tabla no generaliza a situaciones nuevas.</p>
+        <div class="links">
+          <a class="btn" href="v3.html">▶ Ver carrera</a>
+          <a class="btn" href="v3.html?seed=7&amp;escenario=lluvia-original">▶ Incidente de lluvia</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v3-n3">Código de esta versión</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v3-n3/docs/rally-v3.md">Documentación</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v3-n3/reports/rally-v3-50a0e59bf9774c86ac567641962577ee.json">Informe</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="card next">
+      <div class="side"><div class="num">N4</div><div class="tag">rally-v4-n4</div><div class="date">en diseño</div></div>
+      <div>
+        <span class="eyebrow">Experimento 4 · próximo</span>
+        <h2>Pistas que cambian en cada carrera</h2>
+        <p>Propuesta: obstáculos en posiciones distintas en cada episodio y un agente con red neuronal (PPO) para comprobar si generaliza mejor que la tabla Q del N3.</p>
+      </div>
+    </article>
+  </div>
+
+  <section>
+    <h2>Cómo creció el problema</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>N1</th><th>N2</th><th>N3</th></tr></thead>
+      <tbody>
+        <tr><td>Largo de la pista</td><td>1 km</td><td>1 km</td><td>3 km</td></tr>
+        <tr><td>Carriles</td><td>1</td><td>1</td><td>4</td></tr>
+        <tr><td>Acciones</td><td>2</td><td>3</td><td>5</td></tr>
+        <tr><td>Estados posibles</td><td>11</td><td>528</td><td>43.648</td></tr>
+        <tr><td>Obstáculos</td><td>—</td><td>2 curvas</td><td>lodo, agua, pasto, fosos, barriles, rampas, puente</td></tr>
+        <tr><td>Episodios × semillas</td><td>25 × 1</td><td>3.000 × 3</td><td>4.000 × 3 (+ 2 intervenciones)</td></tr>
+        <tr><td>Comparación con referencias</td><td>—</td><td>—</td><td>reglas y azar</td></tr>
+        <tr><td>Incidente controlado</td><td>—</td><td>—</td><td>lluvia</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Dónde vive cada cosa</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Componente</th><th>Dónde</th><th>Cómo verlo</th></tr></thead>
+      <tbody>
+        <tr><td>Código, configuración y pipeline de cada versión</td><td>GitHub, una etiqueta por experimento (<code>rally-v1-n1</code>, <code>rally-v2-n2</code>, <code>rally-v3-n3</code>); <code>main</code> contiene los tres</td><td><a href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tags">Lista de versiones</a></td></tr>
+        <tr><td>Esta web</td><td>Vercel, publicada desde <code>rally-dashboard/dist</code></td><td>Esta página</td></tr>
+        <tr><td>Datos de entrenamiento</td><td>DVC: los punteros <code>.dvc</code> están en Git; los CSV en la caché local de quien entrenó</td><td><code>data/experiments/</code> en cada versión</td></tr>
+        <tr><td>Corridas, métricas y artefactos</td><td>MLflow local (<code>autonomous-rally</code>, <code>-v2</code>, <code>-v3</code>)</td><td>Resumen en el informe JSON de cada versión</td></tr>
+        <tr><td>Modelos</td><td>N2 en Hugging Face (privado); N1 y N3 como artefactos de MLflow</td><td>Enlace en cada tarjeta</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Pendiente: almacenamiento remoto compartido para DVC y MLflow, para que cualquier persona pueda recuperar los datos y el historial completo con <code>dvc pull</code>.</p>
+  </section>
+
+  <footer>Cada vista "Ver carrera" reproduce episodios reales registrados por Python; la web no entrena ni simula reglas propias. Para volver exactamente a una versión: <code>git checkout rally-v3-n3</code> (o la etiqueta que corresponda).</footer>
+</main>
+</body>
+</html>
