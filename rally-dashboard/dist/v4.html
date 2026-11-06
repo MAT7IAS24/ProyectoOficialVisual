@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rally v4 · N4</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="scene.css" />
+    <link rel="stylesheet" href="v2.css" />
+    <link rel="stylesheet" href="v3.css" />
+    <link rel="stylesheet" href="v4.css" />
+    <script type="importmap">
+      {"imports":{"three":"./vendor/three/three.module.js"}}
+    </script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header>
+        <div class="brand"><span class="brand-mark">⌁</span><span>AUTONOMOUS RALLY</span></div>
+        <div class="live"><i></i> REPRODUCCIÓN · PYTHON</div>
+        <button id="reset" class="icon-button" aria-label="Reiniciar episodio">↻</button>
+      </header>
+      <nav class="experiment-nav" aria-label="Experimento"><a href="historial.html">← Historial</a><a href="index.html">Experimento 1</a><a href="v2.html">Experimento 2 · N2</a><a href="v3.html">Experimento 3 · N3</a><a href="v4.html" aria-current="page">Experimento 4 · N4</a></nav>
+      <section class="workspace">
+        <article class="stage">
+          <div class="stage-title">
+            <div><span class="eyebrow">RALLY-V4 · FÍSICA CONTINUA · PISTA NUEVA EN CADA CARRERA</span><h1>PPO contra Q-learning en pistas que nunca vio.</h1></div>
+            <div class="episode-chip">PISTA <strong id="episode">—</strong></div>
+          </div>
+          <div class="mode-banner" id="modeBanner">CARGANDO…</div>
+          <div class="world">
+            <div id="scene3d" aria-label="Pista 3D: usa los botones de cámara"></div>
+            <div class="track-overlay"><span id="trackLabel">1.103 m · 4 CARRILES · CHECKPOINTS CADA 50 m</span><strong id="trackScore">PUNTOS +0.0</strong></div>
+            <div class="legend-cars" id="legendCars"></div>
+            <div class="event-toast" id="eventToast" aria-live="polite"></div>
+            <div class="view-tools" aria-label="Cámara" hidden>
+              <button type="button" data-cam="follow" aria-pressed="true">Seguir coche</button>
+              <button type="button" data-cam="side" aria-pressed="false">Lateral</button>
+              <button type="button" data-cam="top" aria-pressed="false">Vista aérea</button>
+              <button type="button" data-cam="free" aria-pressed="false">Libre</button>
+            </div>
+            <p id="sceneStatus" role="status">Cargando estadio, coche y vallas…</p>
+          </div>
+          <div id="replaySelectors" class="replay-selectors"><label>Escenario <select id="replaySelect" disabled></select></label></div>
+          <p id="loadStatus" role="status">Cargando las corridas registradas…</p>
+          <div class="controls"><button id="toggle" class="primary" disabled>Pausar</button><label>Velocidad <select id="speed"><option value="500">0,5×</option><option value="250" selected>1× (tiempo real)</option><option value="125">2×</option><option value="62">4×</option></select></label></div>
+          <section class="compare">
+            <div class="q-head"><span class="eyebrow">RESULTADOS EN 30 PISTAS NUNCA VISTAS · MEDIA DE 3 SEMILLAS</span><span id="selection"></span></div>
+            <div class="table-wrap"><table id="compareTable"><thead><tr><th>Política</th><th>Condición</th><th>Vueltas completas</th><th>Retorno</th><th>Tiempo de vuelta</th><th>Accidentes</th><th>Avance</th></tr></thead><tbody></tbody></table></div>
+            <p class="note" id="hypothesis"></p>
+            <div class="curves">
+              <div class="q-head"><span class="eyebrow">CURVAS DE APRENDIZAJE · ÉXITO EN PISTAS DE PRUEBA (SIN EXPLORACIÓN) VS ENTRENAMIENTO (CON EXPLORACIÓN)</span></div>
+              <svg id="curveChart" viewBox="0 0 720 260" role="img" aria-label="Curvas de aprendizaje de PPO y Q-learning"></svg>
+              <p class="note">Línea continua: evaluación sin exploración en 5 pistas de la suite. Punteada: episodios de entrenamiento (con exploración). Eje horizontal: pasos de simulación (0,25 s cada uno).</p>
+            </div>
+          </section>
+        </article>
+        <aside class="telemetry">
+          <div class="side-head"><span class="eyebrow">TELEMETRÍA · <span id="policyName">—</span></span><strong id="status">EN CARRERA</strong></div>
+          <div class="metric big"><span>Progreso</span><strong id="progress">0<span>%</span></strong><div class="meter"><i id="progressBar"></i></div><small id="distance">0 m</small></div>
+          <div class="metric big"><span>Velocidad</span><strong id="speedKmh">0<span> km/h</span></strong><small id="speedMs">0 m/s</small></div>
+          <div class="pedals"><div><span>Acelerador / freno</span><div class="bar"><i id="throttleBar"></i></div></div><div><span>Volante</span><div class="bar"><i id="steerBar"></i></div></div></div>
+          <div class="metric-grid"><div class="metric"><span>Altura</span><strong id="height">0 m</strong></div><div class="metric"><span>Pisa</span><strong id="here">—</strong></div><div class="metric"><span>Carril</span><strong id="lane">—</strong></div><div class="metric"><span>Combustible</span><strong id="fuel">—</strong></div></div>
+          <div class="metric-grid"><div class="metric"><span>Checkpoints</span><strong id="cps">—</strong></div><div class="metric"><span>Accidentes</span><strong id="accidents">—</strong></div><div class="metric"><span>Recompensa</span><strong id="reward">—</strong></div><div class="metric"><span>Tiempo</span><strong id="time">—</strong></div></div>
+          <div class="metric"><span>Qué pasó</span><strong id="events">—</strong></div>
+          <div class="note" id="rewardRule"></div>
+          <div class="note" id="modelInfo"></div>
+        </aside>
+      </section>
+    </main>
+    <script type="module" src="app-v4.js"></script>
+  </body>
+</html>

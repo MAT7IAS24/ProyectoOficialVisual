@@ -9,4 +9,7 @@ def make_env(environment_version="rally-v1", config=None, perturbation=None):
     if environment_version == "rally-v3":
         from race_env_v3 import RallyV3Env, DEFAULT_CONFIG
         return RallyV3Env(DEFAULT_CONFIG if config is None else config, perturbation)
+    if environment_version == "rally-v4":
+        from race_env_v4 import RallyV4Env, DEFAULT_CONFIG
+        return RallyV4Env(DEFAULT_CONFIG if config is None else config, perturbation)
     raise ValueError(f"Versión desconocida: {environment_version}")

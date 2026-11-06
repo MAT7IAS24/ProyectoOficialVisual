@@ -1,0 +1,13 @@
+.legend-cars { position: absolute; z-index: 3; right: 14px; top: 62px; display: grid; gap: 6px; font: 700 12px system-ui; }
+.legend-cars span { display: flex; align-items: center; gap: 6px; background: #111b24dd; color: #e8f0f4; padding: 5px 9px; border-radius: 6px; }
+.legend-cars b { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+.pedals { display: grid; gap: 10px; margin: 12px 0; }
+.pedals span { font-size: 11px; color: #9aabb7; text-transform: uppercase; letter-spacing: .08em; }
+.pedals .bar { position: relative; height: 10px; background: #26323d; border-radius: 5px; margin-top: 4px; overflow: hidden; }
+.pedals .bar::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #8899a6; }
+.pedals .bar i { position: absolute; top: 0; bottom: 0; background: #ffd12e; }
+.curves { margin-top: 18px; }
+#curveChart { width: 100%; height: auto; display: block; background: #121a22; border: 1px solid #2d3a46; border-radius: 8px; margin-top: 8px; }
+#curveChart text { font: 11px system-ui; fill: #9aabb7; }
+#speedKmh span, #progress span { font-size: .5em; }
+#events { font-size: 12px; line-height: 1.35; }
