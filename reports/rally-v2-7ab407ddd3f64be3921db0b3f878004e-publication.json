@@ -1,0 +1,74 @@
+{
+  "suite_id": "rally-v2-7ab407ddd3f64be3921db0b3f878004e",
+  "environment_version": "rally-v2",
+  "reward_version": "v2",
+  "published_at_utc": "2026-11-04T16:51:22.386051+00:00",
+  "source_commit": "ef4926ca298da7f509fea8b6182879050b10be4e",
+  "github_branch": "experiment/rally-v2",
+  "huggingface_repo": "MAT7IAS24/autonomous-rally-q-learning",
+  "huggingface_private": true,
+  "storage": {
+    "datasets": "DVC local cache; no remote configured",
+    "mlflow": "Local SQLite database and local artifacts",
+    "prefect": "Executed locally; pipeline source versioned in Git"
+  },
+  "runs": [
+    {
+      "seed": 7,
+      "experiment_id": "rally-v2-44047738c32c4d9ebd213632aadb8e79",
+      "mlflow_run_id": "a59a9a0c674343f8871561b4e60d00a4",
+      "dvc_pointer": "data/experiments/rally-v2-44047738c32c4d9ebd213632aadb8e79/transitions.csv.dvc",
+      "model_sha256": "2ffe5fef0babbb3c64d133e212a161a352d51f8b5594fc05573c5e1d004cd358",
+      "dataset_sha256": "25b50e31ac6f0fa9fc408144d9315adcec6c8f91d5345b2bbeba1b54a8b2d2cb",
+      "config_sha256": "4f57d637b66028dec43f8a13ca67c8d6036a83515d1c706f3af2861b2531276e",
+      "evaluation": {
+        "success_rate": 1.0,
+        "mean_return": 36.400000000000006,
+        "mean_steps": 7.0,
+        "mean_fuel": 56.0,
+        "mean_off_track_count": 0.0
+      },
+      "huggingface_path": "runs/rally-v2-44047738c32c4d9ebd213632aadb8e79",
+      "huggingface_commit": "b1aaedf8a55238d42301807e43db5d76f977d925",
+      "huggingface_url": "https://huggingface.co/MAT7IAS24/autonomous-rally-q-learning/tree/b1aaedf8a55238d42301807e43db5d76f977d925/runs/rally-v2-44047738c32c4d9ebd213632aadb8e79"
+    },
+    {
+      "seed": 21,
+      "experiment_id": "rally-v2-b2c9f88394ac4dc2acb60a3405da224f",
+      "mlflow_run_id": "1a4ac93b2fdb4229b41ecd77213c9543",
+      "dvc_pointer": "data/experiments/rally-v2-b2c9f88394ac4dc2acb60a3405da224f/transitions.csv.dvc",
+      "model_sha256": "28ff57c0f2d1f9a9fbeeb682e8ab364a00cef2af6af304d9e70e7ce5ce2c739c",
+      "dataset_sha256": "4ac7e884b48c1ad5c81e1cff40487b33ac66963e54a4c949091eb11b079e3e90",
+      "config_sha256": "6da8c65d5841e597df3d27a71fd71301c391474400c47d0d33d0fb877c5e8a2b",
+      "evaluation": {
+        "success_rate": 1.0,
+        "mean_return": 36.400000000000006,
+        "mean_steps": 7.0,
+        "mean_fuel": 56.0,
+        "mean_off_track_count": 0.0
+      },
+      "huggingface_path": "runs/rally-v2-b2c9f88394ac4dc2acb60a3405da224f",
+      "huggingface_commit": "653371ba3b1fd47ce45dd7439f3a9df1462723ca",
+      "huggingface_url": "https://huggingface.co/MAT7IAS24/autonomous-rally-q-learning/tree/653371ba3b1fd47ce45dd7439f3a9df1462723ca/runs/rally-v2-b2c9f88394ac4dc2acb60a3405da224f"
+    },
+    {
+      "seed": 42,
+      "experiment_id": "rally-v2-398b87d65a34468db2b37d1c03f98d06",
+      "mlflow_run_id": "fd8a4532476b4335a3bb004018ab4406",
+      "dvc_pointer": "data/experiments/rally-v2-398b87d65a34468db2b37d1c03f98d06/transitions.csv.dvc",
+      "model_sha256": "03d4fceff8a728da66b43b56cc82d2067dcc28792395e407e53ae2b6620fdd7c",
+      "dataset_sha256": "0de347e4b58ad97f8a1335c88a2b66d29f0f97ba9bb4b812a5a9c1113c22b108",
+      "config_sha256": "f0ea2d1b1db7dac5e3f7976eb94e811b797f457d26880cd23a2952445d8b8706",
+      "evaluation": {
+        "success_rate": 1.0,
+        "mean_return": 36.400000000000006,
+        "mean_steps": 7.0,
+        "mean_fuel": 56.0,
+        "mean_off_track_count": 0.0
+      },
+      "huggingface_path": "runs/rally-v2-398b87d65a34468db2b37d1c03f98d06",
+      "huggingface_commit": "0b47ed26233691f42edad2ff19c0316dbf75f0ae",
+      "huggingface_url": "https://huggingface.co/MAT7IAS24/autonomous-rally-q-learning/tree/0b47ed26233691f42edad2ff19c0316dbf75f0ae/runs/rally-v2-398b87d65a34468db2b37d1c03f98d06"
+    }
+  ]
+}

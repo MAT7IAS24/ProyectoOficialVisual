@@ -1,0 +1,299 @@
+{
+  "suite_id": "rally-v2-7ab407ddd3f64be3921db0b3f878004e",
+  "environment_version": "rally-v2",
+  "reward_version": "v2",
+  "config": {
+    "environment_version": "rally-v2",
+    "reward_version": "v2",
+    "environment": {
+      "track_length_meters": 1000,
+      "segment_meters": 100,
+      "initial_speed_level": 0,
+      "max_speed_level": 3,
+      "initial_fuel": 100,
+      "fuel_base_cost": 2,
+      "fuel_speed_cost": 3,
+      "fuel_bucket_thresholds": [
+        25,
+        50,
+        75
+      ],
+      "max_off_track_count": 3,
+      "off_track_rollback_segments": 1,
+      "max_steps": 50,
+      "actions": [
+        {
+          "name": "frenar",
+          "speed_delta": -1
+        },
+        {
+          "name": "mantener",
+          "speed_delta": 0
+        },
+        {
+          "name": "acelerar",
+          "speed_delta": 1
+        }
+      ],
+      "zones": [
+        {
+          "id": 0,
+          "name": "recta",
+          "segments": [],
+          "grip": 1.0,
+          "safe_speed": null
+        },
+        {
+          "id": 1,
+          "name": "curva_seca",
+          "segments": [
+            3,
+            4
+          ],
+          "grip": 0.8,
+          "safe_speed": 2
+        },
+        {
+          "id": 2,
+          "name": "curva_mojada",
+          "segments": [
+            7,
+            8
+          ],
+          "grip": 0.5,
+          "safe_speed": 1
+        }
+      ]
+    },
+    "reward": {
+      "step": -1,
+      "new_segment": 2,
+      "fuel_unit": -0.05,
+      "off_track": -8,
+      "finish": 20,
+      "remaining_fuel_unit": 0.1
+    },
+    "training": {
+      "episodes": 3000,
+      "alpha": 0.25,
+      "gamma": 0.95,
+      "epsilon_start": 1.0,
+      "epsilon_end": 0.05,
+      "seed": 7,
+      "seeds": [
+        7,
+        21,
+        42
+      ],
+      "evaluation_episodes": 30,
+      "evaluation_seed_offset": 10000,
+      "summary_window": 100
+    },
+    "tracking": {
+      "experiment_name": "autonomous-rally-v2"
+    }
+  },
+  "between_seed_evaluation": {
+    "success_rate": {
+      "mean": 1.0,
+      "sample_std": 0.0,
+      "sample_variance": 0.0
+    },
+    "mean_return": {
+      "mean": 36.400000000000006,
+      "sample_std": 0.0,
+      "sample_variance": 0.0
+    },
+    "mean_steps": {
+      "mean": 7.0,
+      "sample_std": 0.0,
+      "sample_variance": 0.0
+    },
+    "mean_fuel": {
+      "mean": 56.0,
+      "sample_std": 0.0,
+      "sample_variance": 0.0
+    },
+    "mean_off_track_count": {
+      "mean": 0.0,
+      "sample_std": 0.0,
+      "sample_variance": 0.0
+    }
+  },
+  "runs": [
+    {
+      "seed": 7,
+      "experiment_id": "rally-v2-44047738c32c4d9ebd213632aadb8e79",
+      "mlflow_run_id": "a59a9a0c674343f8871561b4e60d00a4",
+      "dvc_pointer": "data/experiments/rally-v2-44047738c32c4d9ebd213632aadb8e79/transitions.csv.dvc",
+      "metadata": {
+        "experiment_id": "rally-v2-44047738c32c4d9ebd213632aadb8e79",
+        "environment_version": "rally-v2",
+        "reward_version": "v2",
+        "algorithm": "tabular_q_learning",
+        "seed": 7,
+        "episodes": 3000,
+        "state_shape": [
+          11,
+          4,
+          4,
+          3
+        ],
+        "q_shape": [
+          528,
+          3
+        ],
+        "actions": [
+          {
+            "name": "frenar",
+            "speed_delta": -1
+          },
+          {
+            "name": "mantener",
+            "speed_delta": 0
+          },
+          {
+            "name": "acelerar",
+            "speed_delta": 1
+          }
+        ],
+        "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
+        "config_sha256": "4f57d637b66028dec43f8a13ca67c8d6036a83515d1c706f3af2861b2531276e",
+        "dataset_sha256": "25b50e31ac6f0fa9fc408144d9315adcec6c8f91d5345b2bbeba1b54a8b2d2cb",
+        "model_sha256": "2ffe5fef0babbb3c64d133e212a161a352d51f8b5594fc05573c5e1d004cd358",
+        "source_git_head": "a17930d2a02ca82d6524d07d24862b674016a9bb",
+        "source_sha256": {
+          "race_env_v2.py": "a771f3f78b99554e323ecc66ff2cf8a7591af8b9f14011b8f2cc2f252d4a645f",
+          "training_v2.py": "e44174f82dfaa676b932589c9c1873ebcbe9383b29a2d0f21c0aa68ac2bc77ed",
+          "pipeline_v2.py": "f334678f6d42806e05aba440029f5cc6700d6903fdaacfa12330ae7e5b7deac8",
+          "environments.py": "c310dce5ee7e774e0abc9e6d26be88cd49c4c7ca6f63e137ad6da717502443c3"
+        },
+        "evaluation": {
+          "success_rate": 1.0,
+          "mean_return": 36.400000000000006,
+          "mean_steps": 7.0,
+          "mean_fuel": 56.0,
+          "mean_off_track_count": 0.0
+        },
+        "training_success_rate": 0.9876666666666667,
+        "last_window_success_rate": 1.0
+      }
+    },
+    {
+      "seed": 21,
+      "experiment_id": "rally-v2-b2c9f88394ac4dc2acb60a3405da224f",
+      "mlflow_run_id": "1a4ac93b2fdb4229b41ecd77213c9543",
+      "dvc_pointer": "data/experiments/rally-v2-b2c9f88394ac4dc2acb60a3405da224f/transitions.csv.dvc",
+      "metadata": {
+        "experiment_id": "rally-v2-b2c9f88394ac4dc2acb60a3405da224f",
+        "environment_version": "rally-v2",
+        "reward_version": "v2",
+        "algorithm": "tabular_q_learning",
+        "seed": 21,
+        "episodes": 3000,
+        "state_shape": [
+          11,
+          4,
+          4,
+          3
+        ],
+        "q_shape": [
+          528,
+          3
+        ],
+        "actions": [
+          {
+            "name": "frenar",
+            "speed_delta": -1
+          },
+          {
+            "name": "mantener",
+            "speed_delta": 0
+          },
+          {
+            "name": "acelerar",
+            "speed_delta": 1
+          }
+        ],
+        "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
+        "config_sha256": "6da8c65d5841e597df3d27a71fd71301c391474400c47d0d33d0fb877c5e8a2b",
+        "dataset_sha256": "4ac7e884b48c1ad5c81e1cff40487b33ac66963e54a4c949091eb11b079e3e90",
+        "model_sha256": "28ff57c0f2d1f9a9fbeeb682e8ab364a00cef2af6af304d9e70e7ce5ce2c739c",
+        "source_git_head": "a17930d2a02ca82d6524d07d24862b674016a9bb",
+        "source_sha256": {
+          "race_env_v2.py": "a771f3f78b99554e323ecc66ff2cf8a7591af8b9f14011b8f2cc2f252d4a645f",
+          "training_v2.py": "e44174f82dfaa676b932589c9c1873ebcbe9383b29a2d0f21c0aa68ac2bc77ed",
+          "pipeline_v2.py": "f334678f6d42806e05aba440029f5cc6700d6903fdaacfa12330ae7e5b7deac8",
+          "environments.py": "c310dce5ee7e774e0abc9e6d26be88cd49c4c7ca6f63e137ad6da717502443c3"
+        },
+        "evaluation": {
+          "success_rate": 1.0,
+          "mean_return": 36.400000000000006,
+          "mean_steps": 7.0,
+          "mean_fuel": 56.0,
+          "mean_off_track_count": 0.0
+        },
+        "training_success_rate": 0.9886666666666667,
+        "last_window_success_rate": 1.0
+      }
+    },
+    {
+      "seed": 42,
+      "experiment_id": "rally-v2-398b87d65a34468db2b37d1c03f98d06",
+      "mlflow_run_id": "fd8a4532476b4335a3bb004018ab4406",
+      "dvc_pointer": "data/experiments/rally-v2-398b87d65a34468db2b37d1c03f98d06/transitions.csv.dvc",
+      "metadata": {
+        "experiment_id": "rally-v2-398b87d65a34468db2b37d1c03f98d06",
+        "environment_version": "rally-v2",
+        "reward_version": "v2",
+        "algorithm": "tabular_q_learning",
+        "seed": 42,
+        "episodes": 3000,
+        "state_shape": [
+          11,
+          4,
+          4,
+          3
+        ],
+        "q_shape": [
+          528,
+          3
+        ],
+        "actions": [
+          {
+            "name": "frenar",
+            "speed_delta": -1
+          },
+          {
+            "name": "mantener",
+            "speed_delta": 0
+          },
+          {
+            "name": "acelerar",
+            "speed_delta": 1
+          }
+        ],
+        "state_encoding": "numpy.ravel_multi_index(obs, state_shape), orden C",
+        "config_sha256": "f0ea2d1b1db7dac5e3f7976eb94e811b797f457d26880cd23a2952445d8b8706",
+        "dataset_sha256": "0de347e4b58ad97f8a1335c88a2b66d29f0f97ba9bb4b812a5a9c1113c22b108",
+        "model_sha256": "03d4fceff8a728da66b43b56cc82d2067dcc28792395e407e53ae2b6620fdd7c",
+        "source_git_head": "a17930d2a02ca82d6524d07d24862b674016a9bb",
+        "source_sha256": {
+          "race_env_v2.py": "a771f3f78b99554e323ecc66ff2cf8a7591af8b9f14011b8f2cc2f252d4a645f",
+          "training_v2.py": "e44174f82dfaa676b932589c9c1873ebcbe9383b29a2d0f21c0aa68ac2bc77ed",
+          "pipeline_v2.py": "f334678f6d42806e05aba440029f5cc6700d6903fdaacfa12330ae7e5b7deac8",
+          "environments.py": "c310dce5ee7e774e0abc9e6d26be88cd49c4c7ca6f63e137ad6da717502443c3"
+        },
+        "evaluation": {
+          "success_rate": 1.0,
+          "mean_return": 36.400000000000006,
+          "mean_steps": 7.0,
+          "mean_fuel": 56.0,
+          "mean_off_track_count": 0.0
+        },
+        "training_success_rate": 0.9866666666666667,
+        "last_window_success_rate": 1.0
+      }
+    }
+  ]
+}
