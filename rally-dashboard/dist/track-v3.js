@@ -14,6 +14,19 @@ export const TERRAIN_COLORS = {
   puente_roto: '#17110e',
 };
 
+export const TERRAIN_COLORS_V4 = {
+  asfalto: '#343a42',
+  lodo: '#59402e',
+  agua: '#208acb',
+  sin_pista: '#839553',
+  foso: '#15191e',
+  barril: '#343a42',
+  rampa: '#ba7548',
+  rampa_con_barril: '#ba7548',
+  puente: '#d3ac83',
+  puente_roto: '#15191e',
+};
+
 export const LANE_ACCENTS = ['#8a5a36', '#2f86d6', '#9fbf2e', '#e8553d'];
 
 export function makeTrack({ straight = 120, radius = 30, laneWidth = 4.4, lanes = 4, startOffset = 14 } = {}) {

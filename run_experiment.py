@@ -4,7 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-SCRIPTS = {"rally-v1": "train.py", "rally-v2": "pipeline_v2.py", "rally-v3": "pipeline_v3.py"}
+SCRIPTS = {"rally-v1": "train.py", "rally-v2": "pipeline_v2.py", "rally-v3": "pipeline_v3.py", "rally-v4": "pipeline_v4.py"}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Seleccionar experimento Rally")

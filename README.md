@@ -1,12 +1,21 @@
 # Autonomous Rally: primer entorno
 
+**Experimento 4 (N4) disponible:** [guía de rally-v4](docs/rally-v4.md).
+Mantiene Q-learning y la pista N3, pero expone al agente combustible exacto,
+accidentes, pasos, mejor progreso y clima. Usa Q dispersa, entrenamiento con
+clima mixto y gráficas de aprendizaje en `rally-dashboard/dist/v4.html`. La
+corrida oficial inicial alcanzó 100 % de éxito en evaluación normal y con
+lluvia; el informe está en [reports/](reports/rally-v4-d3818c9157a64757aa94a27c9f427370.json).
+El rediseño visual del coche y del circuito está documentado en
+[modificación_ambiente.md](modificación_ambiente.md).
+
 **Experimento 3 (N3) disponible:** [guía de rally-v3](docs/rally-v3.md): pista de 3.000 m,
 4 carriles con obstáculos propios, rampas, puente elevado, cámara que sigue al coche e
 incidente de lluvia con dos intervenciones. Web: `rally-dashboard/dist/v3.html`.
 
 **Experimento 2 (N2) disponible:** [guía de rally-v2](docs/rally-v2.md).
-El experimento 1 conserva su ambiente, entrenamiento y registro originales.
-La web ofrece enlaces para seleccionar los tres experimentos.
+Los experimentos 1–3 conservan sus ambientes y registros. La web ofrece enlaces
+para seleccionar las cuatro versiones.
 
 Prototipo de una carrera automática con Gymnasium y Q-learning tabular.
 
