@@ -4,6 +4,8 @@
 El experimento 1 conserva su ambiente, entrenamiento y registro originales.
 La web ofrece enlaces para seleccionar ambos experimentos.
 
+**Experimentos públicos:** [datasets y exportaciones de MLflow](https://huggingface.co/datasets/MAT7IAS24/autonomous-rally-experimentos) y [modelos Q](https://huggingface.co/MAT7IAS24/autonomous-rally-q-learning). Los datasets se pueden descargar directamente desde Hugging Face. Las exportaciones de MLflow son instantáneas estáticas; no constituyen un servidor compartido ni se actualizan automáticamente. El remoto DVC todavía no está configurado para compartir los CSV con `dvc pull`.
+
 Prototipo de una carrera automática con Gymnasium y Q-learning tabular.
 
 - Pista cerrada de **1.000 m**: completar la vuelta devuelve el coche a la

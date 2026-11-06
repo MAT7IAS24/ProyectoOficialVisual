@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/three/OrbitControls.js';
+import { surfaceTexture, createRallyCar, addTrackDetails } from './rally-visuals.js';
 
 // Presentation only. The original SVG route and trainer remain the source of truth.
 const host = document.getElementById('scene3d');
@@ -27,8 +28,10 @@ try {
   controls.minDistance = 22;
   controls.maxDistance = 350;
   controls.maxPolarAngle = Math.PI / 2 - .08;
-  scene.add(new THREE.HemisphereLight('#ddecff', '#62774d', 2.6));
-  const sun = new THREE.DirectionalLight('#fff0d3', 3.6);
+  scene.add(new THREE.HemisphereLight('#ddecff', '#62774d', 2.1));
+  const fill = new THREE.DirectionalLight('#a8caff', .7);
+  fill.position.set(35, 25, -45); scene.add(fill);
+  const sun = new THREE.DirectionalLight('#fff0d3', 3.3);
   sun.position.set(-32, 60, 30);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
@@ -37,7 +40,11 @@ try {
   scene.add(sun);
 
   const mat = (color, roughness = .8, metalness = 0) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
-  const asphalt = mat('#303940'), grass = mat('#527d56'), concrete = mat('#afc1bd');
+  const roadTexture = surfaceTexture('asphalt'), grassTexture = surfaceTexture('grass');
+  grassTexture.repeat.set(10, 7);
+  const asphalt = new THREE.MeshStandardMaterial({ color: '#abb2b0', map: roadTexture, roughness: .95 });
+  const grass = new THREE.MeshStandardMaterial({ color: '#c6d5b7', map: grassTexture, roughness: 1 });
+  const concrete = mat('#afc1bd');
   const white = mat('#f0eee5'), red = mat('#ed5c43'), dark = mat('#17232c');
   const yellow = mat('#ffc320', .3, .35), glass = mat('#193a4a', .18, .6);
   function box(parent, size, xyz, material) {
@@ -69,14 +76,15 @@ try {
     return point(after).sub(point(before)).normalize();
   }
   function ribbon(inner, outer, height, material, start = 0, end = 1, segments = 700) {
-    const vertices = [], indices = [];
+    const vertices = [], indices = [], uvs = [];
     for (let i = 0; i <= segments; i++) {
       const t = start + (end - start) * i / segments, p = point(t), d = tangent(t);
-      for (const offset of [inner, outer]) vertices.push(p.x - d.z * offset, height, p.z + d.x * offset);
+      for (const offset of [inner, outer]) { vertices.push(p.x - d.z * offset, height, p.z + d.x * offset); uvs.push(offset / 4, t * 36); }
       if (i < segments) { const k = i * 2; indices.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     geometry.setIndex(indices); geometry.computeVertexNormals();
     material.side = THREE.DoubleSide;
     const mesh = new THREE.Mesh(geometry, material); mesh.receiveShadow = true; scene.add(mesh);
@@ -86,7 +94,7 @@ try {
   const settings = window.rallyV2Config.environment;
   const totalSegments = settings.track_length_meters / settings.segment_meters;
   for (const zone of settings.zones.filter(z => z.safe_speed !== null)) {
-    const material = mat(zone.name === 'curva_mojada' ? '#237baf' : '#bc8a35', zone.grip);
+    const material = new THREE.MeshStandardMaterial({color: zone.name === 'curva_mojada' ? '#4f9cba' : '#c69b55', map: roadTexture, roughness: zone.grip});
     for (const segment of zone.segments) ribbon(-2.9, 2.9, .075, material, segment / totalSegments, (segment + 1) / totalSegments, 50);
   }
   for (let i = 0; i < 100; i++) {
@@ -138,24 +146,9 @@ try {
     tree.position.set(x, 2.6, z); tree.scale.y = 1.3; tree.castShadow = true; scene.add(tree);
   }
 
-  const car = new THREE.Group(); car.name = 'rally-car'; car.scale.setScalar(1.3); scene.add(car);
-  box(car, [1.48, .42, 2.9], [0, .58, 0], yellow);
-  box(car, [1.22, .52, 1.35], [0, 1.01, -.1], glass);
-  box(car, [1.3, .12, 1.3], [0, 1.31, -.14], yellow);
-  box(car, [.28, .035, 1.05], [0, .815, .94], dark);
-  box(car, [1.5, .18, .15], [0, .49, 1.5], dark);
-  for (const x of [-.48, .48]) {
-    box(car, [.35, .12, .06], [x, .68, 1.49], new THREE.MeshStandardMaterial({ color: '#fff4ca', emissive: '#fff2bd', emissiveIntensity: .6 }));
-    box(car, [.32, .1, .06], [x, .69, -1.49], mat('#ff342d'));
-  }
-  box(car, [1.65, .1, .35], [0, 1, -1.37], dark);
-  const wheels = [];
-  for (const x of [-.8, .8]) for (const z of [-.94, .94]) {
-    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(.36, .36, .23, 20), dark);
-    wheel.rotation.z = Math.PI / 2; wheel.position.set(x, .4, z); wheel.castShadow = true; car.add(wheel); wheels.push(wheel);
-    const rim = new THREE.Mesh(new THREE.CylinderGeometry(.19, .19, .245, 12), mat('#b2bec6', .3, .8));
-    rim.rotation.z = Math.PI / 2; rim.position.copy(wheel.position); car.add(rim);
-  }
+  addTrackDetails(scene, point, tangent);
+  const { car, wheels } = createRallyCar();
+  scene.add(car);
 
   let episode = -1, shown = 0, from = 0, target = 0, started = 0, duration = 0;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
