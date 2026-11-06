@@ -116,7 +116,7 @@ try {
   const r = data.config.reward;
   $('rewardRule').textContent = `Recompensa: +${r.per_meter} por metro nuevo · +${r.checkpoint} por checkpoint · ${r.step} por paso de 0,25 s · ${r.accident} por accidente · ${r.stalled} si se atasca · +${r.finish} al terminar y +${r.remaining_fuel_per_l} por litro sobrante.`;
   const rec = data.runs.find(x => x.run_id === data.selection.recommended_run_id);
-  $('modelInfo').textContent = rec ? `Modelo recomendado: PPO semilla ${rec.seed} · ${rec.run_id} · SHA-256 ${rec.model_sha256.slice(0, 12)}… · red en el navegador: ${rec.onnx}` : '';
+  $('modelInfo').textContent = rec ? `Modelo recomendado: PPO semilla ${rec.seed} · ${rec.run_id} · SHA-256 ${rec.model_sha256.slice(0, 12)}… · paquete publicado en modelos/n4/ppo-recomendado/ (model.zip, policy.onnx, normalization.json, manifest.json)` : '';
   $('replaySelect').replaceChildren(...scenarios.map((s, i) => new Option(s.label, String(i))));
   $('replaySelect').disabled = $('toggle').disabled = false;
   fillTable(); drawCurves();

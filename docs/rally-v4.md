@@ -181,7 +181,45 @@ versionan (guía, sección 10) **el generador** (`generate_layout` + configuraci
 
 ## 7. Resultados
 
-Ver `reports/rally-v4-<id>.json` y la página `v4.html`. (Esta sección se completa con la corrida oficial.)
+Corrida `rally-v4-fdd4946a04d948c8b720b802263b99dc` (informe en `reports/`). 3 semillas (7, 21, 42),
+1.000.000 de pasos por modelo, evaluación sin exploración en las mismas 30 pistas nunca vistas.
+
+| Política | Condición | Vueltas completas | Avance medio | Accidentes | Tiempo de vuelta |
+|---|---|---|---|---|---|
+| Azar | normal | 0 % | 5 % | 1,20 | — |
+| Reglas a mano | normal | **87 %** | 95 % | 1,60 | 68,6 s |
+| Reglas a mano | lluvia | 67 % | 93 % | 3,17 | 72,6 s |
+| Q-learning (tabla) | normal | 6 % (±5) | 38 % | 2,21 | 109,6 s |
+| **PPO (red neuronal)** | normal | **20 %** (±9) | 56 % | 2,67 | 57,4 s |
+| PPO | lluvia | 4 % | 48 % | 3,94 | 55,6 s |
+| PPO | sensores con ruido | 10 % | 52 % | 3,19 | 68,9 s |
+
+Por semilla, PPO: 27 %, 10 % y 23 %; Q-learning: 7 %, 10 % y 0 %.
+
+**Decisión: hipótesis NO confirmada.** El criterio fijado antes de entrenar pedía PPO ≥ 70 % y al
+menos 30 puntos sobre Q-learning; se obtuvo 20 % y 14 puntos. Se registra igual, como pide la guía.
+
+**Qué sí muestra la evidencia:**
+- PPO **generaliza mejor que la tabla**: más del triple de vueltas, 56 % de avance contra 38 %, y
+  cuando termina lo hace mucho más rápido (57 s contra 110 s).
+- Con este presupuesto **ninguno de los dos aprende a manejar tan bien como las reglas** (87 %).
+- La lluvia y el ruido en los sensores bajan a PPO a la mitad o menos: su conducción es frágil.
+- **Por qué falla:** 18 de las 30 carreras de PPO terminan "atascado" (10 s sin avanzar), sobre
+  todo después de un accidente: vuelve a intentar lo mismo. Solo 4 terminan por demasiados accidentes.
+- Nota de equidad: la perturbación "sensores con ruido" no afecta a Q-learning, porque su versión
+  discretizada lee el estado del ambiente y no la observación con ruido. Se corrige en el siguiente nivel.
+
+**Siguientes hipótesis (N5):** (1) más presupuesto (la curva de entrenamiento de PPO todavía subía despacio al final, aunque la de evaluación oscila entre 20 % y 40 %);
+(2) empezar con lo que hacen las reglas (aprendizaje por imitación) y luego mejorar con PPO;
+(3) currículo: primero pistas fáciles y luego difíciles.
+
+El modelo recomendado (PPO semilla 7, `rally-v4-ppo-9e2c4b8847f8457189bb869fb9a8db81`) y la mejor
+tabla Q quedan publicados en `rally-dashboard/dist/modelos/n4/` (pesos, normalización, ONNX,
+manifiesto, evaluación por pista y curvas), así se recuperan sin depender de ningún computador.
+
+**Importante:** estos números salieron de una corrida con `--skip-tracking` (sin DVC ni MLflow).
+Para la evidencia oficial hay que repetirla en el PC del equipo con `run_experiment.py --environment-version rally-v4`
+(la física y las semillas son las mismas, así que debe dar resultados equivalentes).
 
 ## 8. Cómo ejecutarlo
 
