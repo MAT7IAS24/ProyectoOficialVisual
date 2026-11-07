@@ -138,7 +138,13 @@ def rally_v5_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
     between = {k: {m: stats([r["evaluations"]["normal"]["summary"] for r in v], m) for m in ("success_rate", "mean_return")} for k, v in by.items()}
     crit = config["experiment"]["selection_criteria"]
     ppo_s, q_s = summary["ppo"]["normal"]["success_rate"], summary["qlearning"]["normal"]["success_rate"]
-    best = max(by["ppo"], key=lambda r: (r["evaluations"]["normal"]["summary"]["success_rate"], r["evaluations"]["normal"]["summary"]["mean_return"]))
+    def validation_key(r):
+        # Intento 2: el modelo recomendado se elige por su nota en las pistas de VALIDACIÓN, no en el examen.
+        pts = [p for p in r["eval_curve"] if p["timesteps"] == r["chosen_checkpoint"]["timesteps"] and "validation_success_rate" in p]
+        if pts:
+            return (pts[-1]["validation_success_rate"], pts[-1]["validation_progress_pct"])
+        return (r["evaluations"]["normal"]["summary"]["success_rate"], r["evaluations"]["normal"]["summary"]["mean_return"])
+    best = max(by["ppo"], key=validation_key)
     rules = baselines["reglas"]["summary"]
     n4 = config["experiment"]["n4_reference"]
     checks = {"barro_sin_diagonal": bool(rules["mean_mud_course_deg"] is not None and rules["mean_mud_course_deg"] < crit["max_mean_mud_course_deg"]),
@@ -147,7 +153,9 @@ def rally_v5_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
     selection = {"criteria": crit, "checks": checks, "accepted": all(checks.values()),
                  "rules_success_rate": rules["success_rate"], "rules_mud_course_deg": rules["mean_mud_course_deg"],
                  "rules_mud_lateral_mps": rules["mean_mud_lateral_mps"], "ppo_success_rate": ppo_s, "qlearning_success_rate": q_s,
-                 "n4_reference": n4, "recommended_run_id": best["run_id"], "recommended_seed": best["seed"]}
+                 "n4_reference": n4, "recommended_run_id": best["run_id"], "recommended_seed": best["seed"],
+                 "recommended_by": "validación" if config["training"].get("validation_episodes") else "suite",
+                 "attempt": config["experiment"].get("attempt", 1), "previous_attempt": config["experiment"].get("previous_attempt")}
 
     # DVC: suite de pistas + resultados por caso (los datos de este experimento de RL).
     data_dir = output_root / "data" / "experiments" / suite_id
@@ -172,6 +180,7 @@ def rally_v5_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
               "dvc_pointers": dvc_pointers,
               "runs": [{"algorithm": r["algorithm"], "seed": r["seed"], "run_id": r["run_id"], "mlflow_run_id": r["mlflow_run_id"],
                         "manifest": r["manifest"], "evaluation": {c: ev["summary"] for c, ev in r["evaluations"].items()},
+                        "chosen_checkpoint": r.get("chosen_checkpoint"),
                         "curves": {"entrenamiento": r["train_curve"], "evaluacion": r["eval_curve"]}} for r in results]}
     write_json(ROOT / "reports" / f"{suite_id}.json", report)
 
@@ -207,7 +216,7 @@ def rally_v5_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
                 "track_samples": samples, "track_length": track.length, "scenarios": scenarios,
                 "runs": [{k: v for k, v in run.items() if k != "manifest"} | {"model_sha256": run["manifest"]["model_sha256"], "onnx": run["manifest"].get("browser_model_uri")} for run in report["runs"]]})
     write_json(ROOT / "rally-dashboard" / "dist" / "v5-results.json", web)
-    print(f"Informe: reports/{suite_id}.json | reglas {rules['success_rate']:.0%}, barro {rules['mean_mud_course_deg']:.1f}° | PPO {ppo_s:.0%} vs Q-learning {q_s:.0%} | {'ACEPTADO' if selection['accepted'] else 'RECHAZADO'}")
+    print(f"Informe (intento {selection['attempt']}): reports/{suite_id}.json | reglas {rules['success_rate']:.0%}, barro {rules['mean_mud_course_deg']:.1f}° | PPO {ppo_s:.0%} vs Q-learning {q_s:.0%} | {'ACEPTADO' if selection['accepted'] else 'RECHAZADO'}")
     return report
 
 

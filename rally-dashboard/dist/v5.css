@@ -18,4 +18,11 @@
 .explain-grid div { background: #19212b; border: 1px solid #34414d; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; color: #c9d4dc; }
 .explain-grid b { display: block; color: #ffd12e; font-size: 13px; margin-bottom: 4px; }
 #compareTable td.n4 { color: #8d9aa5; }
+.attempt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.attempt { background: #19212b; border: 1px solid #34414d; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; color: #c9d4dc; }
+.attempt h3 { margin: 0 0 6px; font: 800 13px system-ui; color: #e8f0f4; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.attempt h3 em { font-style: normal; font-size: 10px; letter-spacing: .08em; padding: 2px 7px; border-radius: 99px; background: #4a2328; color: #ff8a7a; }
+.attempt h3 em.ok { background: #1d3d30; color: #47df9a; }
+.attempt ul { margin: 6px 0 0; padding-left: 18px; }
+.attempt .big { font: 800 24px system-ui; color: #ffd12e; }
 @media (max-width: 540px) { .slip-gauge { width: 104px; bottom: 64px; } .slip-gauge svg { width: 92px; height: 48px; } }

@@ -12,6 +12,7 @@ normalization.json), red exportada a ONNX con la normalización incluida
 """
 from __future__ import annotations
 
+import copy
 import csv
 import hashlib
 import json
@@ -49,6 +50,19 @@ def evaluation_layouts(config, count=None):
     t = config["training"]
     count = count or t["evaluation_episodes"]
     return [generate_layout(config, t["evaluation_layout_seed_offset"] + i) for i in range(count)]
+
+
+def validation_layouts(config):
+    """Pistas de VALIDACIÓN (semillas 200000, 200001, ...): sirven para elegir el mejor punto del
+    entrenamiento sin mirar las 30 pistas del examen (la suite), que quedan solo para el resultado final."""
+    t = config["training"]
+    count = t.get("validation_episodes", 0)
+    return [generate_layout(config, t.get("validation_layout_seed_offset", 200000) + i) for i in range(count)]
+
+
+def score_of(summary):
+    """Orden para elegir el mejor punto: primero vueltas completas, luego avance medio, luego retorno."""
+    return (summary["success_rate"], summary["mean_progress_pct"], summary["mean_return"])
 
 
 # ---------------- políticas de referencia ----------------
@@ -228,10 +242,16 @@ def train_ppo(config, seed, output_root=ROOT, eval_layouts=None, log=print):
     folder = Path(output_root) / "models" / run_id
     folder.mkdir(parents=True, exist_ok=False)
     venv = make_vec(config, seed, pc["n_envs"])
+    lr0 = pc["learning_rate"]
+    # Intento 2: la tasa de aprendizaje puede bajar en línea recta hasta 0 (evita "olvidar" al final).
+    learning_rate = (lambda progress_remaining: lr0 * progress_remaining) if pc.get("lr_schedule") == "linear" else lr0
     model = PPO("MlpPolicy", venv, seed=seed, n_steps=pc["n_steps"], batch_size=pc["batch_size"], n_epochs=pc["n_epochs"],
-                learning_rate=pc["learning_rate"], gamma=pc["gamma"], gae_lambda=pc["gae_lambda"], clip_range=pc["clip_range"],
-                ent_coef=pc["ent_coef"], policy_kwargs={"net_arch": pc["net_arch"], "log_std_init": pc["log_std_init"]}, verbose=0, device="cpu")
+                learning_rate=learning_rate, gamma=pc["gamma"], gae_lambda=pc["gae_lambda"], clip_range=pc["clip_range"],
+                ent_coef=pc["ent_coef"], use_sde=pc.get("use_sde", False), sde_sample_freq=pc.get("sde_sample_freq", -1),
+                policy_kwargs={"net_arch": pc["net_arch"], "log_std_init": pc["log_std_init"]}, verbose=0, device="cpu")
     probe = eval_layouts[: pc["eval_layouts_during_training"]] if eval_layouts else evaluation_layouts(config, pc["eval_layouts_during_training"])
+    valid = validation_layouts(config)
+    best = {"score": None, "timesteps": None, "path": folder / "_mejor_punto.zip", "obs_rms": None}
     train_curve, eval_curve = [], []
 
     class Curves(BaseCallback):
@@ -252,15 +272,33 @@ def train_ppo(config, seed, output_root=ROOT, eval_layouts=None, log=print):
                                         "success_rate": float(np.mean(self.ep_success[-50:]))})
                 venv.training = False
                 res = evaluate(ppo_policy_factory(model, venv), config, probe, seed=seed)
+                point = {"timesteps": int(self.num_timesteps), **res["summary"]}
+                extra = ""
+                if valid:
+                    vres = evaluate(ppo_policy_factory(model, venv), config, valid, seed=seed)["summary"]
+                    point.update({"validation_success_rate": vres["success_rate"], "validation_progress_pct": vres["mean_progress_pct"]})
+                    if best["score"] is None or score_of(vres) > best["score"]:
+                        best.update(score=score_of(vres), timesteps=int(self.num_timesteps), obs_rms=copy.deepcopy(venv.obs_rms))
+                        model.save(best["path"])
+                        extra = " · ★ mejor en validación"
+                    extra = f" · validación {vres['success_rate']:.0%}" + extra
                 venv.training = True
-                eval_curve.append({"timesteps": int(self.num_timesteps), **res["summary"]})
-                log(f"   PPO semilla {seed} · {self.num_timesteps:>7} pasos · éxito {res['summary']['success_rate']:.0%} · retorno {res['summary']['mean_return']:.1f}")
+                eval_curve.append(point)
+                log(f"   PPO semilla {seed} · {self.num_timesteps:>7} pasos · éxito {res['summary']['success_rate']:.0%} · retorno {res['summary']['mean_return']:.1f}{extra}")
             return True
 
     start = time.time()
     model.learn(total_timesteps=pc["total_timesteps"], callback=Curves(), progress_bar=False)
     train_seconds = time.time() - start
     venv.training = False
+    chosen = {"rule": "final", "timesteps": int(model.num_timesteps)}
+    if best["score"] is not None:
+        # Nos quedamos con el punto del entrenamiento que mejor manejó en las pistas de validación.
+        model.set_parameters(str(best["path"]), exact_match=True, device="cpu")
+        venv.obs_rms = best["obs_rms"]
+        best["path"].unlink()
+        chosen = {"rule": "mejor_en_validacion", "timesteps": best["timesteps"], "validation_layouts": len(valid),
+                  "validation_layout_seed_offset": config["training"].get("validation_layout_seed_offset", 200000)}
     model.save(folder / "model.zip")
     venv.save(str(folder / "vecnormalize.pkl"))
     n_obs = RallyV5Env(config).observation_space.shape[0]
@@ -272,7 +310,7 @@ def train_ppo(config, seed, output_root=ROOT, eval_layouts=None, log=print):
     log(f"   ONNX verificado: diferencia máxima con SB3 = {onnx_error:.2e}")
     return {"algorithm": "ppo", "run_id": run_id, "seed": seed, "folder": folder, "model": model, "vecnorm": venv,
             "policy_factory": ppo_policy_factory(model, venv), "train_curve": train_curve, "eval_curve": eval_curve,
-            "train_seconds": train_seconds, "timesteps": int(model.num_timesteps), "onnx_max_abs_error": onnx_error}
+            "train_seconds": train_seconds, "timesteps": int(model.num_timesteps), "onnx_max_abs_error": onnx_error, "chosen_checkpoint": chosen}
 
 
 # ---------------- Q-learning ----------------
@@ -289,6 +327,8 @@ def train_qlearning(config, seed, output_root=ROOT, eval_layouts=None, log=print
     budget = config["training"]["ppo"]["total_timesteps"]   # mismo presupuesto de pasos que PPO
     every = max(1, budget // 12)
     next_eval, ep = every, 0
+    valid = validation_layouts(config)
+    best_score, best_q, best_steps = None, None, None
     start = time.time()
     while steps_total < budget:
         ep += 1
@@ -309,12 +349,24 @@ def train_qlearning(config, seed, output_root=ROOT, eval_layouts=None, log=print
             next_eval += every
             train_curve.append({"timesteps": steps_total, "mean_return": float(np.mean(returns[-50:])), "success_rate": float(np.mean(success[-50:]))})
             res = evaluate(q_policy_factory(q), config, probe, seed=seed)
-            eval_curve.append({"timesteps": steps_total, **res["summary"]})
-            log(f"   Q-learning semilla {seed} · {steps_total:>7} pasos · éxito {res['summary']['success_rate']:.0%} · retorno {res['summary']['mean_return']:.1f}")
+            point, extra = {"timesteps": steps_total, **res["summary"]}, ""
+            if valid:
+                vres = evaluate(q_policy_factory(q), config, valid, seed=seed)["summary"]
+                point.update({"validation_success_rate": vres["success_rate"], "validation_progress_pct": vres["mean_progress_pct"]})
+                if best_score is None or score_of(vres) > best_score:
+                    best_score, best_q, best_steps, extra = score_of(vres), q.copy(), steps_total, " · ★ mejor en validación"
+                extra = f" · validación {vres['success_rate']:.0%}" + extra
+            eval_curve.append(point)
+            log(f"   Q-learning semilla {seed} · {steps_total:>7} pasos · éxito {res['summary']['success_rate']:.0%} · retorno {res['summary']['mean_return']:.1f}{extra}")
+    chosen = {"rule": "final", "timesteps": steps_total}
+    if best_q is not None:
+        q = best_q
+        chosen = {"rule": "mejor_en_validacion", "timesteps": best_steps, "validation_layouts": len(valid),
+                  "validation_layout_seed_offset": config["training"].get("validation_layout_seed_offset", 200000)}
     np.save(folder / "q_table.npy", q, allow_pickle=False)
     return {"algorithm": "qlearning", "run_id": run_id, "seed": seed, "folder": folder, "q": q,
             "policy_factory": q_policy_factory(q), "train_curve": train_curve, "eval_curve": eval_curve,
-            "train_seconds": time.time() - start, "timesteps": steps_total}
+            "train_seconds": time.time() - start, "timesteps": steps_total, "chosen_checkpoint": chosen}
 
 
 def q_policy_factory(q):
@@ -352,6 +404,7 @@ def package(result, config, evaluations, extra=None):
                 "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
                 "evaluation_suite_id": EVALUATION_SUITE_ID, "seed": result["seed"], "parent_run_id": None, "training_origin": "desde_cero",
                 "budget": {"timesteps": result["timesteps"], "train_seconds": round(result["train_seconds"], 1)},
+                "chosen_checkpoint": result.get("chosen_checkpoint"),
                 "optimizer_state": "incluido en model.zip (Adam), se puede continuar con PPO.load(...).learn()" if result["algorithm"] == "ppo" else None,
                 "contract": contract, "files_sha256": files, "source_sha256": sources, **(extra or {})}
     write_json(folder / "manifest.json", manifest)

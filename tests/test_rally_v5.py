@@ -8,7 +8,7 @@ from gymnasium.utils.env_checker import check_env
 
 from race_env_v5 import DiscreteRallyV5, RallyV5Env, Track, generate_layout, load_config, magic_formula
 from race_env_v4 import generate_layout as generate_layout_v4, load_config as load_config_v4
-from training_v5 import ROOT, evaluate, evaluation_layouts, rule_policy
+from training_v5 import ROOT, evaluate, evaluation_layouts, rule_policy, score_of, validation_layouts
 
 G = 9.81
 
@@ -266,6 +266,18 @@ class AgentTests(unittest.TestCase):
         a = evaluate(rule_policy, c, lay)["summary"]
         self.assertEqual(a, evaluate(rule_policy, c, lay)["summary"])
         self.assertGreater(a["success_rate"], 0.5)
+
+    def test_validation_tracks_are_not_the_exam(self):
+        # Intento 2: el mejor punto del entrenamiento se elige en pistas de validación, distintas del examen.
+        c = load_config()
+        valid = validation_layouts(c)
+        self.assertGreaterEqual(len(valid), 5)
+        exam = {l["seed"] for l in evaluation_layouts(c)}
+        self.assertFalse(exam & {l["seed"] for l in valid})
+        self.assertEqual(len({l["seed"] for l in valid}), len(valid))
+        better = {"success_rate": 0.2, "mean_progress_pct": 40.0, "mean_return": 1.0}
+        worse = {"success_rate": 0.1, "mean_progress_pct": 90.0, "mean_return": 9.0}
+        self.assertGreater(score_of(better), score_of(worse))   # primero cuentan las vueltas completas
 
     def test_previous_levels_are_untouched(self):
         expected = {

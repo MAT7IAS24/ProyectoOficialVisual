@@ -107,6 +107,26 @@ function fillMud() {
     (data.tracking.startsWith('omitido') ? ' Nota: datos generados sin DVC ni MLflow; la corrida oficial se repite con tracking.' : '');
 }
 
+function fillAttempts() {
+  const sel = data.selection, prev = sel.previous_attempt;
+  if (!prev) return;
+  const ppo = data.summary.ppo.normal, q = data.summary.qlearning.normal;
+  const box = (title, ok, okLabel, items, big) => `<div class="attempt"><h3>${title}<em class="${ok ? 'ok' : ''}">${okLabel}</em></h3><div class="big">${big}</div><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
+  $('attemptGrid').innerHTML = [
+    box(`Intento 1 · ${prev.date}`, false, 'RECHAZADO', [
+      `PPO ${pct(prev.ppo_success_rate)} · Q-learning ${pct(prev.qlearning_success_rate)} · reglas ${pct(prev.rules_success_rate)}`,
+      `Barro ${deg(prev.rules_mud_course_deg)} (sí cumplía)`,
+      ...prev.diagnosis,
+    ], `PPO ${pct(prev.ppo_success_rate)}`),
+    box(`Intento ${sel.attempt} · misma física y recompensa`, sel.accepted, sel.accepted ? 'ACEPTADO' : 'RECHAZADO', [
+      `PPO ${pct(ppo.success_rate)} · Q-learning ${pct(q.success_rate)} · reglas ${pct(sel.rules_success_rate)}`,
+      ...data.config.experiment.changes_vs_attempt_1,
+    ], `PPO ${pct(ppo.success_rate)}`),
+  ].join('');
+  $('attemptNote').textContent = `El intento 1 sigue guardado: código en el commit ${prev.commit}, informe ${prev.report}. Solo cambió cómo aprende la IA; la pista, la física, la recompensa y las 30 pistas del examen son las mismas.`;
+  $('attempts').hidden = false;
+}
+
 function fillTable() {
   const rows = [];
   const old = v4 ? { aleatoria: v4.baselines.aleatoria, reglas: v4.baselines.reglas, reglas_lluvia: v4.baselines.reglas_lluvia, ...v4.summary } : null;
@@ -154,7 +174,10 @@ function drawCurves() {
     const path = pts => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.timesteps).toFixed(1)} ${y(p.success_rate).toFixed(1)}`).join(' ');
     if (r.curves.entrenamiento.length) el('path', { d: path(r.curves.entrenamiento), fill: 'none', stroke: color[r.algorithm], 'stroke-width': 1.2, 'stroke-dasharray': '4 4', opacity: 0.6 });
     el('path', { d: path(r.curves.evaluacion), fill: 'none', stroke: color[r.algorithm], 'stroke-width': 2.2 });
+    const cp = r.chosen_checkpoint, pick = cp && cp.rule !== 'final' && r.curves.evaluacion.find(p => p.timesteps === cp.timesteps);
+    if (pick) el('circle', { cx: x(pick.timesteps), cy: y(pick.success_rate), r: 5, fill: '#0d141b', stroke: color[r.algorithm], 'stroke-width': 2.5 });
   }
+  if (runs.some(r => r.chosen_checkpoint && r.chosen_checkpoint.rule !== 'final')) el('text', { x: W - 190, y: 80 }).textContent = '○ punto elegido (validación)';
   el('text', { x: W - 190, y: 26, style: 'fill:#ffc320' }).textContent = '■ PPO (3 semillas)';
   el('text', { x: W - 190, y: 44, style: 'fill:#5a8ee8' }).textContent = '■ Q-learning (3 semillas)';
   el('text', { x: W - 190, y: 62 }).textContent = '— evaluación  ··· entrenamiento';
@@ -173,7 +196,7 @@ try {
   $('modelInfo').textContent = rec ? `Modelo recomendado: PPO semilla ${rec.seed} · ${rec.run_id} · SHA-256 ${rec.model_sha256.slice(0, 12)}… · paquete en modelos/n5/ppo-recomendado/ (model.zip, policy.onnx, normalization.json, manifest.json)` : '';
   $('replaySelect').replaceChildren(...scenarios.map((s, i) => new Option(s.label, String(i))));
   $('replaySelect').disabled = $('toggle').disabled = false;
-  fillMud(); fillTable(); fillExplainer(); drawCurves();
+  fillMud(); fillAttempts(); fillTable(); fillExplainer(); drawCurves();
   const params = new URLSearchParams(location.search);
   let wanted = scenarios.findIndex(s => s.id === params.get('escenario'));
   if (wanted < 0) wanted = scenarios.findIndex(s => s.id === 'antes-despues-0');
