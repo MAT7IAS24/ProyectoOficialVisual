@@ -126,7 +126,67 @@ Por eso es `reward v5`.
 
 ## 5. Resultados
 
-RESULTADOS_N5
+Corridas sin DVC ni MLflow (`--skip-tracking`), 3 semillas (7, 21, 42), 1 millón de pasos por
+modelo, evaluadas en las **mismas 30 pistas del N4** que nunca se usaron para entrenar.
+
+### Resultado de la hipótesis
+
+| Criterio (fijado antes de entrenar) | Meta | N4 | Intento 1 | Intento 2 | ¿Cumple? |
+|---|---|---|---|---|---|
+| Diagonal al cruzar el barro (reglas) | < 3° | 12,1° | 2,7° | 2,7° | Sí |
+| Velocidad de lado en el barro (reglas) | — | 2,5 m/s | 0,5 m/s | 0,5 m/s | — |
+| Vueltas completas · reglas | ≥ 80 % | 87 % | 87 % | 87 % | Sí |
+| Vueltas completas · PPO (media de 3 semillas) | ≥ 15 % | 20 % | **0 %** | **10 %** | No |
+
+**Veredicto: RECHAZADO.** La parte de física se confirmó: el coche ya no cruza el barro en
+diagonal y las reglas manejan igual de bien. La parte de aprendizaje no: PPO quedó por debajo
+de la meta en los dos intentos.
+
+### Intento 1 (6 nov · commit `9d3c8d1` · informe `reports/rally-v5-132e21c5….json`)
+
+PPO 0 % en las 3 semillas, Q-learning 2 %, 3,4 accidentes por vuelta. Diagnóstico:
+
+* PPO manejaba "todo o nada": acelerador a fondo el **46 %** del tiempo y volante a tope el **32 %**.
+  En el N4 eso funcionaba porque el coche iba siempre hacia donde apuntaba; con llantas reales
+  hace derrapar y salirse de la pista (la mayoría de los accidentes fueron `sale_de_la_pista`).
+* Llegó a 20–40 % a mitad del entrenamiento (semilla 21: 40 % a los 450 mil pasos) y después lo
+  olvidó, pero se guardaba siempre el modelo del final.
+
+### Intento 2 (7 nov · informe `reports/rally-v5-e7e8a036….json`)
+
+Misma pista, física, recompensa y suite. Solo cambió cómo aprende y se elige el modelo:
+
+1. **Pistas de validación**: 10 pistas aparte (semillas 200000…) que no son ni de entrenamiento
+   ni del examen. Cada 50 mil pasos se prueba el modelo ahí y **se guarda el mejor punto**.
+2. **Tasa de aprendizaje que baja en línea recta hasta 0**, para que al final no "olvide".
+3. El **modelo recomendado** también se elige por validación, no por el examen.
+4. Se probó **exploración suave (gSDE)** en una prueba corta y **se descartó**: a los 200 mil pasos
+   seguía sin completar vueltas (con la exploración normal ya llegaba a 20 % a los 300 mil).
+
+| Política | Normal | Lluvia | Sensores con ruido | Accidentes por vuelta |
+|---|---|---|---|---|
+| Reglas a mano | 87 % | 80 % | — | 0,77 |
+| PPO (semillas 7 / 21 / 42) | 10 % (17 / 7 / 7) | 0 % | 0 % | 1,9 (antes 3,4) |
+| Q-learning | 6 % (3 / 3 / 10) | 1 % | 6 % | 2,0 |
+| Azar | 0 % | — | — | 0,97 |
+
+* PPO mejoró de 0 % a 10 % y bajó los accidentes casi a la mitad, pero sigue sin aguantar la lluvia
+  ni el ruido de los sensores.
+* El modelo recomendado es **PPO semilla 42** porque fue el mejor en **validación**, aunque en el
+  examen la semilla 7 sacó más (17 %). Elegir por el examen sería hacer trampa: así es como se
+  hace en MLOps aunque el número se vea peor.
+* Deslizamiento medio en asfalto: reglas 0,3°, PPO 5°. PPO todavía maneja "nervioso".
+
+### Qué aprendimos y qué sigue
+
+Con física realista, aprender a manejar desde cero es mucho más difícil: el agente tiene que
+descubrir solo que debe frenar antes de la curva y no girar a fondo. Las reglas ya lo saben
+(87 %). Esto confirma el plan: en el **N7** el agente recibirá sensores tipo Gran Turismo Sophy
+(curvatura adelante según la velocidad) y en el **N8** aprenderá primero imitando a las reglas
+(*behavior cloning*) y después mejorará con PPO.
+
+Paquetes publicados en la web: `modelos/n5/ppo-recomendado/` (model.zip, policy.onnx,
+normalization.json, manifest.json) y `modelos/n5/qlearning-mejor/` (q_table.npy).
 
 ## 6. Cómo ejecutarlo
 
@@ -137,6 +197,9 @@ $env:PYTHONUTF8="1"; $env:PREFECT_SERVER_EPHEMERAL_ENABLED="true"; $env:DVC_NO_A
 ```
 
 Prueba rápida sin DVC ni MLflow: `python pipeline_v5.py --timesteps 20000 --seeds 7 --skip-tracking`.
+
+Para repetir el intento 1: `git checkout 9d3c8d1` y el mismo comando (sin pistas de validación ni
+tasa decreciente). El intento 2 es la etiqueta `rally-v5-n5`.
 
 ## 7. Límites
 

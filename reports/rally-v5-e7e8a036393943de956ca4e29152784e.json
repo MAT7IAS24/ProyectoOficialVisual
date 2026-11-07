@@ -1,0 +1,3930 @@
+{
+  "suite_id": "rally-v5-e7e8a036393943de956ca4e29152784e",
+  "environment_version": "rally-v5",
+  "reward_version": "v5",
+  "level_id": "N5",
+  "tracking": "omitido (--skip-tracking): sin DVC ni MLflow, no es corrida oficial",
+  "config": {
+    "environment_version": "rally-v5",
+    "reward_version": "v5",
+    "level_id": "N5",
+    "experiment": {
+      "title": "Un coche que se comporta como coche",
+      "hypothesis": "Con llantas realistas (fórmula de Pacejka y círculo de agarre), volante y pedal que reaccionan de forma gradual y un barro con surcos que frena y no deja ir de lado, (1) el coche deja de cruzar el barro en diagonal: su ángulo de avance respecto a la pista dentro del barro baja de 12° (reglas en el N4) a menos de 3°, y (2) las reglas conservan al menos el 80% de vueltas completas y PPO no empeora más de 5 puntos frente al N4 (20%) en las mismas 30 pistas nuevas.",
+      "change_vs_previous": "v4 -> v5: el coche pasa de un modelo cinemático (va siempre hacia donde apunta) a uno dinámico de dos ejes: velocidad hacia adelante y de lado, giro con inercia, fuerza de cada eje según la fórmula mágica de Pacejka, y círculo de agarre (acelerar y girar comparten el agarre). Volante y pedal con velocidad máxima de cambio. El barro frena con resistencia a la rodadura y sus surcos se oponen a moverse de lado respecto a la pista y enderezan el coche. La pista base pasa de tierra a asfalto. Hacer un trompo (deslizar más de 70°) cuenta como accidente. La observación agrega 6 datos (velocidad lateral, giro, volante y pedal reales, deslizamiento y agarre bajo las ruedas): familia de modelos nueva.",
+      "selection_criteria": {
+        "max_mean_mud_course_deg": 3.0,
+        "min_success_rate_rules": 0.8,
+        "n4_ppo_success_rate": 0.2,
+        "ppo_not_worse_than_n4_by": 0.05
+      },
+      "attempt": 2,
+      "previous_attempt": {
+        "date": "6 nov",
+        "commit": "9d3c8d1",
+        "report": "reports/rally-v5-132e21c5a8cd4e7f8e6df073eb8270bb.json",
+        "accepted": false,
+        "ppo_success_rate": 0.0,
+        "qlearning_success_rate": 0.022,
+        "rules_success_rate": 0.867,
+        "rules_mud_course_deg": 2.71,
+        "ppo_mean_accidents": 3.38,
+        "diagnosis": [
+          "PPO manejaba «todo o nada»: acelerador a fondo el 46 % del tiempo y volante a tope el 32 %",
+          "Con la física nueva eso hace derrapar y salirse de la pista (3,4 accidentes por vuelta)",
+          "Llegó a 20–40 % a mitad del entrenamiento y lo olvidó: se guardaba el modelo del final"
+        ]
+      },
+      "changes_vs_attempt_1": [
+        "Se guarda el mejor punto del entrenamiento, elegido en 10 pistas de VALIDACIÓN (no en las 30 del examen)",
+        "La tasa de aprendizaje baja en línea recta hasta 0 para no olvidar al final",
+        "El modelo recomendado también se elige por validación",
+        "Se probó exploración suave (gSDE) y se descartó: aprendía más lento"
+      ],
+      "n4_reference": {
+        "rules_success_rate": 0.867,
+        "rules_mud_course_deg": 12.11,
+        "rules_mud_lateral_mps": 2.52,
+        "ppo_success_rate": 0.2,
+        "ppo_mud_course_deg": 5.51,
+        "qlearning_success_rate": 0.06
+      }
+    },
+    "track": {
+      "straight_m": 300,
+      "radius_m": 80,
+      "lanes": 4,
+      "lane_width_m": 4.0,
+      "cell_m": 10,
+      "checkpoint_every_m": 50,
+      "start_clear_m": 40,
+      "finish_clear_m": 30
+    },
+    "physics": {
+      "dt_s": 0.25,
+      "substeps": 10,
+      "gravity_mps2": 9.81,
+      "max_speed_mps": 35,
+      "max_accel_mps2": 6.0,
+      "max_brake_mps2": 9.0,
+      "drag_per_v2": 0.0008,
+      "wheelbase_m": 2.7,
+      "cg_to_front_m": 1.25,
+      "cg_to_rear_m": 1.45,
+      "mass_kg": 1250,
+      "yaw_inertia_kgm2": 1900,
+      "max_steer_rad": 0.4,
+      "steer_rate_rad_s": 1.2,
+      "pedal_rate_per_s": 5.0,
+      "drive_front_share": 0.5,
+      "brake_front_share": 0.6,
+      "tire_B_front": 9.0,
+      "tire_B_rear": 11.0,
+      "tire_C": 1.8,
+      "tire_E": 0.95,
+      "kinematic_below_mps": 1.5,
+      "slide_event_deg": 6.0,
+      "spin_deg": 70.0,
+      "ramp_angle_deg": 20,
+      "ramp_height_m": 1.2,
+      "deck_height_m": 3.0,
+      "landing_lip_m": 0.6,
+      "hard_landing_vz_mps": 12.0,
+      "barrier_length_m": 2.0,
+      "barrier_crash_speed_mps": 6.0,
+      "fall_accident_drop_m": 2.0,
+      "initial_fuel_l": 40,
+      "fuel_idle_l_per_s": 0.08,
+      "fuel_throttle_l_per_s": 0.32
+    },
+    "terrains": {
+      "asfalto": {
+        "code": ".",
+        "grip": 1.0,
+        "rolling": 0.015,
+        "plow": 0.0,
+        "color": "#3b3f45"
+      },
+      "lodo": {
+        "code": "L",
+        "grip": 0.45,
+        "rolling": 0.22,
+        "plow": 0.55,
+        "color": "#5a3b24"
+      },
+      "agua": {
+        "code": "A",
+        "grip": 0.35,
+        "rolling": 0.04,
+        "plow": 0.0,
+        "color": "#2f86d6"
+      },
+      "pasto": {
+        "code": "S",
+        "grip": 0.55,
+        "rolling": 0.08,
+        "plow": 0.1,
+        "color": "#6f9a2e"
+      },
+      "foso": {
+        "code": "F",
+        "grip": 0.0,
+        "rolling": 0.0,
+        "plow": 0.0,
+        "color": "#17110e"
+      },
+      "rampa": {
+        "code": "R",
+        "grip": 0.9,
+        "rolling": 0.015,
+        "plow": 0.0,
+        "color": "#b9622f"
+      },
+      "valla": {
+        "code": "B",
+        "grip": 1.0,
+        "rolling": 0.015,
+        "plow": 0.0,
+        "color": "#d8332a"
+      }
+    },
+    "generator": {
+      "section_m": 100,
+      "min_free_lanes_per_section": 1,
+      "patch_probabilities": {
+        "lodo": 0.22,
+        "agua": 0.18,
+        "pasto": 0.15,
+        "valla": 0.16,
+        "rampa_foso": 0.1,
+        "nada": 0.19
+      },
+      "patch_length_cells": [
+        1,
+        3
+      ],
+      "bridge_probability": 0.6,
+      "bridge_length_cells": [
+        6,
+        9
+      ],
+      "bridge_gap_m": 6
+    },
+    "sensors": {
+      "lookahead_cells": 6,
+      "features_per_cell": [
+        "peligro",
+        "rampa",
+        "frena",
+        "agarre",
+        "puente"
+      ]
+    },
+    "perturbations": {
+      "lluvia": {
+        "descripcion": "Lluvia: todo el agarre baja un 30% y el lodo frena un 30% más.",
+        "grip_factor": 0.7,
+        "rolling_factor": 1.3
+      },
+      "sensor_ruidoso": {
+        "descripcion": "Sensores con ruido gaussiano (desviación 0,1) en cada lectura. Desde el N5 también afecta a Q-learning.",
+        "obs_noise_std": 0.1
+      }
+    },
+    "reward": {
+      "per_meter": 0.05,
+      "checkpoint": 0.5,
+      "step": -0.02,
+      "accident": -5.0,
+      "stalled": -10.0,
+      "finish": 30.0,
+      "remaining_fuel_per_l": 0.2
+    },
+    "episode": {
+      "max_steps": 600,
+      "max_accidents": 5,
+      "stall_steps": 40
+    },
+    "training": {
+      "seeds": [
+        7,
+        21,
+        42
+      ],
+      "ppo": {
+        "total_timesteps": 1000000,
+        "n_envs": 4,
+        "n_steps": 512,
+        "batch_size": 256,
+        "n_epochs": 10,
+        "learning_rate": 0.0003,
+        "gamma": 0.99,
+        "gae_lambda": 0.95,
+        "clip_range": 0.2,
+        "ent_coef": 0.005,
+        "log_std_init": -0.5,
+        "lr_schedule": "linear",
+        "use_sde": false,
+        "net_arch": [
+          64,
+          64
+        ],
+        "eval_every_steps": 50000,
+        "eval_layouts_during_training": 5
+      },
+      "qlearning": {
+        "alpha": 0.2,
+        "gamma": 0.98,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "speed_bins": [
+          3,
+          8,
+          14,
+          20,
+          26
+        ],
+        "psi_bins": [
+          -0.12,
+          0.12
+        ]
+      },
+      "train_layout_seed_offset": 0,
+      "evaluation_episodes": 30,
+      "validation_episodes": 10,
+      "validation_layout_seed_offset": 200000,
+      "evaluation_layout_seed_offset": 100000
+    },
+    "tracking": {
+      "experiment_name": "autonomous-rally-v5"
+    }
+  },
+  "selection": {
+    "criteria": {
+      "max_mean_mud_course_deg": 3.0,
+      "min_success_rate_rules": 0.8,
+      "n4_ppo_success_rate": 0.2,
+      "ppo_not_worse_than_n4_by": 0.05
+    },
+    "checks": {
+      "barro_sin_diagonal": true,
+      "reglas_conservan_exito": true,
+      "ppo_no_empeora_vs_n4": false
+    },
+    "accepted": false,
+    "rules_success_rate": 0.8666666666666667,
+    "rules_mud_course_deg": 2.7097400067509207,
+    "rules_mud_lateral_mps": 0.5316985541216993,
+    "ppo_success_rate": 0.09999999999999999,
+    "qlearning_success_rate": 0.05555555555555556,
+    "n4_reference": {
+      "rules_success_rate": 0.867,
+      "rules_mud_course_deg": 12.11,
+      "rules_mud_lateral_mps": 2.52,
+      "ppo_success_rate": 0.2,
+      "ppo_mud_course_deg": 5.51,
+      "qlearning_success_rate": 0.06
+    },
+    "recommended_run_id": "rally-v5-ppo-209e9daa618a4126b2f3bc2dd99cdd89",
+    "recommended_seed": 42,
+    "recommended_by": "validación",
+    "attempt": 2,
+    "previous_attempt": {
+      "date": "6 nov",
+      "commit": "9d3c8d1",
+      "report": "reports/rally-v5-132e21c5a8cd4e7f8e6df073eb8270bb.json",
+      "accepted": false,
+      "ppo_success_rate": 0.0,
+      "qlearning_success_rate": 0.022,
+      "rules_success_rate": 0.867,
+      "rules_mud_course_deg": 2.71,
+      "ppo_mean_accidents": 3.38,
+      "diagnosis": [
+        "PPO manejaba «todo o nada»: acelerador a fondo el 46 % del tiempo y volante a tope el 32 %",
+        "Con la física nueva eso hace derrapar y salirse de la pista (3,4 accidentes por vuelta)",
+        "Llegó a 20–40 % a mitad del entrenamiento y lo olvidó: se guardaba el modelo del final"
+      ]
+    }
+  },
+  "summary": {
+    "ppo": {
+      "normal": {
+        "success_rate": 0.09999999999999999,
+        "mean_return": 13.29473891430302,
+        "mean_time_s_success": 91.77499999999999,
+        "mean_accidents": 1.8888888888888886,
+        "mean_progress_pct": 47.203999999999986,
+        "mean_mud_slip_deg": 4.7797452856523925,
+        "mean_mud_course_deg": 2.5581109540455707,
+        "mean_mud_lateral_mps": 0.49379648894739675
+      },
+      "lluvia": {
+        "success_rate": 0.0,
+        "mean_return": -2.391509843168015,
+        "mean_time_s_success": null,
+        "mean_accidents": 1.9444444444444444,
+        "mean_progress_pct": 28.504555555555555,
+        "mean_mud_slip_deg": 6.194690925333123,
+        "mean_mud_course_deg": 2.251501659891681,
+        "mean_mud_lateral_mps": 0.36960808890630537
+      },
+      "sensor_ruidoso": {
+        "success_rate": 0.0,
+        "mean_return": -9.87010411773952,
+        "mean_time_s_success": null,
+        "mean_accidents": 4.166666666666667,
+        "mean_progress_pct": 26.674222222222223,
+        "mean_mud_slip_deg": 8.048894342514561,
+        "mean_mud_course_deg": 4.6225597501307805,
+        "mean_mud_lateral_mps": 0.6569896923444448
+      }
+    },
+    "qlearning": {
+      "normal": {
+        "success_rate": 0.05555555555555556,
+        "mean_return": 10.639125738929627,
+        "mean_time_s_success": 115.19444444444444,
+        "mean_accidents": 2.022222222222222,
+        "mean_progress_pct": 47.81166666666667,
+        "mean_mud_slip_deg": 3.197520754240687,
+        "mean_mud_course_deg": 1.6843102635046858,
+        "mean_mud_lateral_mps": 0.2994020739245835
+      },
+      "lluvia": {
+        "success_rate": 0.011111111111111112,
+        "mean_return": -3.070396501014539,
+        "mean_time_s_success": 148.0,
+        "mean_accidents": 3.0888888888888886,
+        "mean_progress_pct": 34.49044444444444,
+        "mean_mud_slip_deg": 6.75919641771609,
+        "mean_mud_course_deg": 1.7422466928013514,
+        "mean_mud_lateral_mps": 0.28677540193707224
+      },
+      "sensor_ruidoso": {
+        "success_rate": 0.05555555555555556,
+        "mean_return": 7.201128124517175,
+        "mean_time_s_success": 116.60416666666666,
+        "mean_accidents": 2.6555555555555554,
+        "mean_progress_pct": 45.73833333333334,
+        "mean_mud_slip_deg": 3.4228618991194657,
+        "mean_mud_course_deg": 2.236273969895935,
+        "mean_mud_lateral_mps": 0.3974057324389652
+      }
+    }
+  },
+  "between_seeds": {
+    "ppo": {
+      "success_rate": {
+        "mean": 0.09999999999999999,
+        "sample_std": 0.05773502691896257
+      },
+      "mean_return": {
+        "mean": 13.29473891430302,
+        "sample_std": 5.957979898927942
+      }
+    },
+    "qlearning": {
+      "success_rate": {
+        "mean": 0.05555555555555556,
+        "sample_std": 0.03849001794597505
+      },
+      "mean_return": {
+        "mean": 10.639125738929627,
+        "sample_std": 0.64569796621862
+      }
+    }
+  },
+  "baselines": {
+    "aleatoria": {
+      "success_rate": 0.0,
+      "mean_return": -15.096394804260676,
+      "mean_time_s_success": null,
+      "mean_accidents": 0.9666666666666667,
+      "mean_progress_pct": 3.662,
+      "mean_mud_slip_deg": 3.5381818181818177,
+      "mean_mud_course_deg": 2.260072101890932,
+      "mean_mud_lateral_mps": 0.15298189115795227
+    },
+    "reglas": {
+      "success_rate": 0.8666666666666667,
+      "mean_return": 84.81182764443324,
+      "mean_time_s_success": 68.76923076923077,
+      "mean_accidents": 0.7666666666666667,
+      "mean_progress_pct": 95.798,
+      "mean_mud_slip_deg": 1.6375739644970415,
+      "mean_mud_course_deg": 2.7097400067509207,
+      "mean_mud_lateral_mps": 0.5316985541216993
+    },
+    "reglas_lluvia": {
+      "success_rate": 0.8,
+      "mean_return": 72.92711899425011,
+      "mean_time_s_success": 77.25,
+      "mean_accidents": 1.8,
+      "mean_progress_pct": 93.42166666666667,
+      "mean_mud_slip_deg": 4.929331306990881,
+      "mean_mud_course_deg": 2.6744909687806095,
+      "mean_mud_lateral_mps": 0.48847542850071674
+    }
+  },
+  "slip_by_terrain": {
+    "reglas": {
+      "agua": {
+        "mean_deg": 1.254,
+        "p95_deg": 5.401,
+        "samples": 134
+      },
+      "asfalto": {
+        "mean_deg": 0.278,
+        "p95_deg": 1.08,
+        "samples": 7575
+      },
+      "lodo": {
+        "mean_deg": 1.638,
+        "p95_deg": 4.41,
+        "samples": 169
+      },
+      "pasto": {
+        "mean_deg": 1.132,
+        "p95_deg": 3.02,
+        "samples": 61
+      },
+      "rampa": {
+        "mean_deg": 0.195,
+        "p95_deg": 0.259,
+        "samples": 12
+      },
+      "valla": {
+        "mean_deg": 0.846,
+        "p95_deg": 3.542,
+        "samples": 49
+      }
+    },
+    "ppo_recomendado": {
+      "agua": {
+        "mean_deg": 9.674,
+        "p95_deg": 29.935,
+        "samples": 226
+      },
+      "asfalto": {
+        "mean_deg": 3.408,
+        "p95_deg": 12.15,
+        "samples": 4881
+      },
+      "lodo": {
+        "mean_deg": 5.127,
+        "p95_deg": 17.223,
+        "samples": 478
+      },
+      "pasto": {
+        "mean_deg": 6.019,
+        "p95_deg": 26.132,
+        "samples": 193
+      },
+      "rampa": {
+        "mean_deg": 3.158,
+        "p95_deg": 6.428,
+        "samples": 50
+      },
+      "valla": {
+        "mean_deg": 4.142,
+        "p95_deg": 10.828,
+        "samples": 147
+      }
+    }
+  },
+  "dvc_pointers": null,
+  "runs": [
+    {
+      "algorithm": "ppo",
+      "seed": 7,
+      "run_id": "rally-v5-ppo-68c6641fb331419a8bd0de27a7e71c5e",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-ppo-68c6641fb331419a8bd0de27a7e71c5e",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "ppo",
+        "git_commit": "f5ba4a8cb449e81594536de1236b74e10798d982",
+        "config_sha256": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+        "model_uri": "models/rally-v5-ppo-68c6641fb331419a8bd0de27a7e71c5e/model.zip",
+        "model_sha256": "bf1a496dd3fe3fc8142f4a1315273d089e8bc49e481a92c76e35ee290056cd40",
+        "normalization_uri": "models/rally-v5-ppo-68c6641fb331419a8bd0de27a7e71c5e/normalization.json",
+        "browser_model_uri": "models/rally-v5-ppo-68c6641fb331419a8bd0de27a7e71c5e/policy.onnx",
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 7,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1001472,
+          "train_seconds": 969.7
+        },
+        "chosen_checkpoint": {
+          "rule": "mejor_en_validacion",
+          "timesteps": 1000000,
+          "validation_layouts": 10,
+          "validation_layout_seed_offset": 200000
+        },
+        "optimizer_state": "incluido en model.zip (Adam), se puede continuar con PPO.load(...).learn()",
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          }
+        },
+        "files_sha256": {
+          "config.json": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+          "evaluation.json": "ea1740989cb4ea4d492068ef08132aad1e64bd7c090bb3f3dd9db105e062f322",
+          "model.zip": "bf1a496dd3fe3fc8142f4a1315273d089e8bc49e481a92c76e35ee290056cd40",
+          "normalization.json": "cd50e85b95d5827e8e45ff568f690eb45f8e2eef8e4d9a32b85da4a97097f8f9",
+          "policy.onnx": "b45c89a7be0cbf9abd8614b81bc8691e4ae981ef6075a6e3a8638ef15129834c",
+          "training_curves.json": "10ce0b246bc7f6ca7f55735a5685babeac3a2be362d308082e7057ac20e283fb",
+          "vecnormalize.pkl": "7c73cfeca8e43053b3ec7c0efedd8d052c2e59bdd5486e757d682dad57a04811"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "7448f67fd604427397be30a7db282f3298b593f856762d2ccaf9bdf36c943c8e",
+          "pipeline_v5.py": "dbc396804e1eb2e25980cc9615dd66935814db7045c946098023ff6c5872c989",
+          "configs/rally-v5.json": "e0059d8a6587e4c35962ab519da882c81e0804b3adbb598bd34d6dc5bc661b21"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.16666666666666666,
+          "mean_return": 20.02666899910142,
+          "mean_time_s_success": 89.95,
+          "mean_accidents": 2.1666666666666665,
+          "mean_progress_pct": 55.265333333333324,
+          "mean_mud_slip_deg": 4.571476635514019,
+          "mean_mud_course_deg": 2.6706171107466847,
+          "mean_mud_lateral_mps": 0.4812695097011573
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": 0.4154729399322875,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.0,
+          "mean_progress_pct": 38.566666666666656,
+          "mean_mud_slip_deg": 9.634236252545824,
+          "mean_mud_course_deg": 3.4829408101899544,
+          "mean_mud_lateral_mps": 0.6641052223490862
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": -12.093990964422947,
+          "mean_time_s_success": null,
+          "mean_accidents": 4.5,
+          "mean_progress_pct": 23.25433333333333,
+          "mean_mud_slip_deg": 9.826870415647921,
+          "mean_mud_course_deg": 5.509834316650739,
+          "mean_mud_lateral_mps": 0.7776236654876829
+        }
+      },
+      "chosen_checkpoint": {
+        "rule": "mejor_en_validacion",
+        "timesteps": 1000000,
+        "validation_layouts": 10,
+        "validation_layout_seed_offset": 200000
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 50000,
+            "mean_return": -11.304842460000001,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 100000,
+            "mean_return": -7.261475999999999,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 150000,
+            "mean_return": -2.2937532999999997,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 200000,
+            "mean_return": -2.46768714,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250000,
+            "mean_return": 3.7684189000000003,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 300000,
+            "mean_return": 3.9601987199999997,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 350000,
+            "mean_return": 11.468886499999998,
+            "success_rate": 0.12
+          },
+          {
+            "timesteps": 400000,
+            "mean_return": 12.359900399999999,
+            "success_rate": 0.14
+          },
+          {
+            "timesteps": 450000,
+            "mean_return": 13.62319736,
+            "success_rate": 0.16
+          },
+          {
+            "timesteps": 500000,
+            "mean_return": 6.3511836,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 550000,
+            "mean_return": 12.073366079999998,
+            "success_rate": 0.14
+          },
+          {
+            "timesteps": 600000,
+            "mean_return": 10.58424302,
+            "success_rate": 0.1
+          },
+          {
+            "timesteps": 650000,
+            "mean_return": 11.871290100000001,
+            "success_rate": 0.1
+          },
+          {
+            "timesteps": 700000,
+            "mean_return": 11.23395664,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 750000,
+            "mean_return": 9.78861092,
+            "success_rate": 0.1
+          },
+          {
+            "timesteps": 800000,
+            "mean_return": 12.78814066,
+            "success_rate": 0.12
+          },
+          {
+            "timesteps": 850000,
+            "mean_return": 15.24647888,
+            "success_rate": 0.2
+          },
+          {
+            "timesteps": 900000,
+            "mean_return": 9.34045944,
+            "success_rate": 0.12
+          },
+          {
+            "timesteps": 950000,
+            "mean_return": 18.3409427,
+            "success_rate": 0.14
+          },
+          {
+            "timesteps": 1000000,
+            "mean_return": 12.778740740000003,
+            "success_rate": 0.14
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 4,
+            "success_rate": 0.0,
+            "mean_return": -10.79595516481557,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 0.188,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 0.187
+          },
+          {
+            "timesteps": 50000,
+            "success_rate": 0.0,
+            "mean_return": -8.936262082460546,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 5.311999999999999,
+            "mean_mud_slip_deg": 0.74,
+            "mean_mud_course_deg": 0.06787049113446074,
+            "mean_mud_lateral_mps": 0.002386894965300964,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 5.103
+          },
+          {
+            "timesteps": 100000,
+            "success_rate": 0.0,
+            "mean_return": -8.123878673988589,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 14.16,
+            "mean_mud_slip_deg": 1.7477777777777779,
+            "mean_mud_course_deg": 2.9855411223595087,
+            "mean_mud_lateral_mps": 0.2433829853977166,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 16.669999999999998
+          },
+          {
+            "timesteps": 150000,
+            "success_rate": 0.0,
+            "mean_return": -3.850198454496611,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 14.004,
+            "mean_mud_slip_deg": 6.36125,
+            "mean_mud_course_deg": 2.4003328651346285,
+            "mean_mud_lateral_mps": 0.3264069119897517,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 26.731
+          },
+          {
+            "timesteps": 200000,
+            "success_rate": 0.0,
+            "mean_return": 9.107656175847334,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 51.876,
+            "mean_mud_slip_deg": 5.879883720930232,
+            "mean_mud_course_deg": 4.471157936164656,
+            "mean_mud_lateral_mps": 0.7228067145369137,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 37.20300000000001
+          },
+          {
+            "timesteps": 250000,
+            "success_rate": 0.0,
+            "mean_return": 4.630149827133704,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 42.93,
+            "mean_mud_slip_deg": 5.090322580645162,
+            "mean_mud_course_deg": 3.608267308820325,
+            "mean_mud_lateral_mps": 0.5189193765214907,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 39.43299999999999
+          },
+          {
+            "timesteps": 300000,
+            "success_rate": 0.0,
+            "mean_return": 15.022543147840242,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 51.92999999999999,
+            "mean_mud_slip_deg": 5.737361111111111,
+            "mean_mud_course_deg": 6.010932313804785,
+            "mean_mud_lateral_mps": 0.9277430921453854,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 43.906000000000006
+          },
+          {
+            "timesteps": 350000,
+            "success_rate": 0.0,
+            "mean_return": 5.600346424122725,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 43.577999999999996,
+            "mean_mud_slip_deg": 7.469047619047619,
+            "mean_mud_course_deg": 5.534807910077427,
+            "mean_mud_lateral_mps": 0.8995626303100769,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 35.34
+          },
+          {
+            "timesteps": 400000,
+            "success_rate": 0.2,
+            "mean_return": 24.757052619585703,
+            "mean_time_s_success": 101.0,
+            "mean_accidents": 0.8,
+            "mean_progress_pct": 53.136,
+            "mean_mud_slip_deg": 3.100441176470588,
+            "mean_mud_course_deg": 4.876289431683343,
+            "mean_mud_lateral_mps": 0.9595144488861753,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 38.218
+          },
+          {
+            "timesteps": 450000,
+            "success_rate": 0.0,
+            "mean_return": 7.536932579582789,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 46.63,
+            "mean_mud_slip_deg": 7.1654687500000005,
+            "mean_mud_course_deg": 4.527035548046978,
+            "mean_mud_lateral_mps": 0.823054214654976,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 44.160999999999994
+          },
+          {
+            "timesteps": 500000,
+            "success_rate": 0.2,
+            "mean_return": 15.711692881623549,
+            "mean_time_s_success": 98.0,
+            "mean_accidents": 2.4,
+            "mean_progress_pct": 47.89600000000001,
+            "mean_mud_slip_deg": 6.531818181818182,
+            "mean_mud_course_deg": 6.794120892469877,
+            "mean_mud_lateral_mps": 1.3826273044941588,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 42.823
+          },
+          {
+            "timesteps": 550000,
+            "success_rate": 0.2,
+            "mean_return": 12.556290744009528,
+            "mean_time_s_success": 93.75,
+            "mean_accidents": 2.4,
+            "mean_progress_pct": 38.406,
+            "mean_mud_slip_deg": 10.874761904761906,
+            "mean_mud_course_deg": 5.617271579954031,
+            "mean_mud_lateral_mps": 1.1850203965158825,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 41.821999999999996
+          },
+          {
+            "timesteps": 600000,
+            "success_rate": 0.2,
+            "mean_return": 28.187645210411073,
+            "mean_time_s_success": 91.75,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 61.79200000000001,
+            "mean_mud_slip_deg": 7.2120338983050845,
+            "mean_mud_course_deg": 5.725579708514081,
+            "mean_mud_lateral_mps": 1.232420018265255,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 41.485
+          },
+          {
+            "timesteps": 650000,
+            "success_rate": 0.2,
+            "mean_return": 22.244780940594655,
+            "mean_time_s_success": 95.5,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 60.374,
+            "mean_mud_slip_deg": 8.510196078431372,
+            "mean_mud_course_deg": 8.884770488142706,
+            "mean_mud_lateral_mps": 1.513309517343025,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 42.111
+          },
+          {
+            "timesteps": 700000,
+            "success_rate": 0.2,
+            "mean_return": 29.347653548715577,
+            "mean_time_s_success": 82.25,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 61.30400000000001,
+            "mean_mud_slip_deg": 9.72378787878788,
+            "mean_mud_course_deg": 5.561511834199706,
+            "mean_mud_lateral_mps": 1.2474799861998103,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 42.659000000000006
+          },
+          {
+            "timesteps": 750000,
+            "success_rate": 0.0,
+            "mean_return": 18.594772392718085,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 59.936,
+            "mean_mud_slip_deg": 6.214193548387097,
+            "mean_mud_course_deg": 4.561833893543094,
+            "mean_mud_lateral_mps": 1.0285724196521546,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 42.476
+          },
+          {
+            "timesteps": 800000,
+            "success_rate": 0.2,
+            "mean_return": 26.49104261416981,
+            "mean_time_s_success": 87.75,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 61.778,
+            "mean_mud_slip_deg": 13.131666666666668,
+            "mean_mud_course_deg": 5.159173018357475,
+            "mean_mud_lateral_mps": 1.097645634725013,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 41.090999999999994
+          },
+          {
+            "timesteps": 850000,
+            "success_rate": 0.2,
+            "mean_return": 26.979887743421898,
+            "mean_time_s_success": 89.75,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 61.065999999999995,
+            "mean_mud_slip_deg": 7.675166666666667,
+            "mean_mud_course_deg": 4.447783961818806,
+            "mean_mud_lateral_mps": 1.0137808880175538,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 42.333000000000006
+          },
+          {
+            "timesteps": 900000,
+            "success_rate": 0.4,
+            "mean_return": 38.23834833187794,
+            "mean_time_s_success": 84.25,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 62.65,
+            "mean_mud_slip_deg": 5.123048780487805,
+            "mean_mud_course_deg": 2.1189743200237854,
+            "mean_mud_lateral_mps": 0.46634049086859986,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 39.34
+          },
+          {
+            "timesteps": 950000,
+            "success_rate": 0.4,
+            "mean_return": 38.2016312805474,
+            "mean_time_s_success": 86.0,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 63.038,
+            "mean_mud_slip_deg": 7.104545454545454,
+            "mean_mud_course_deg": 3.4197841545859213,
+            "mean_mud_lateral_mps": 0.7205745543580372,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 44.247
+          },
+          {
+            "timesteps": 1000000,
+            "success_rate": 0.2,
+            "mean_return": 27.033734552878023,
+            "mean_time_s_success": 89.5,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 60.902,
+            "mean_mud_slip_deg": 2.584736842105263,
+            "mean_mud_course_deg": 2.5261084597341132,
+            "mean_mud_lateral_mps": 0.5711038941600208,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 44.4
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "qlearning",
+      "seed": 7,
+      "run_id": "rally-v5-qlearning-b00239c17edf42d9974fe9a4006e6503",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-qlearning-b00239c17edf42d9974fe9a4006e6503",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "qlearning",
+        "git_commit": "f5ba4a8cb449e81594536de1236b74e10798d982",
+        "config_sha256": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+        "model_uri": "models/rally-v5-qlearning-b00239c17edf42d9974fe9a4006e6503/q_table.npy",
+        "model_sha256": "ea0daf0ba30084442f07d4f920a4bc0d91de8f946df5bd2dada92b7c543e8910",
+        "normalization_uri": null,
+        "browser_model_uri": null,
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 7,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1000503,
+          "train_seconds": 600.7
+        },
+        "chosen_checkpoint": {
+          "rule": "mejor_en_validacion",
+          "timesteps": 999997,
+          "validation_layouts": 10,
+          "validation_layout_seed_offset": 200000
+        },
+        "optimizer_state": null,
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          },
+          "discretization": {
+            "states": 720,
+            "actions": 15,
+            "throttle": [
+              -1.0,
+              0.0,
+              1.0
+            ],
+            "steer": [
+              -0.3,
+              -0.08,
+              0.0,
+              0.08,
+              0.3
+            ],
+            "speed_bins_mps": [
+              3,
+              8,
+              14,
+              20,
+              26
+            ],
+            "psi_bins_rad": [
+              -0.12,
+              0.12
+            ],
+            "perdida_de_resolucion": "no ve la posición exacta en el carril, ni los otros carriles, ni la curvatura; el giro solo tiene 5 valores"
+          }
+        },
+        "files_sha256": {
+          "config.json": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+          "evaluation.json": "a5d5974e53e2557313bb6e5a800b2433ed3b472b0255f86e5fae5a09760491f4",
+          "q_table.npy": "ea0daf0ba30084442f07d4f920a4bc0d91de8f946df5bd2dada92b7c543e8910",
+          "training_curves.json": "d78ff7701fb2ea966643dc1c62898a47ffa66836fc99fb4750567ebb2c75ce5b"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "7448f67fd604427397be30a7db282f3298b593f856762d2ccaf9bdf36c943c8e",
+          "pipeline_v5.py": "dbc396804e1eb2e25980cc9615dd66935814db7045c946098023ff6c5872c989",
+          "configs/rally-v5.json": "e0059d8a6587e4c35962ab519da882c81e0804b3adbb598bd34d6dc5bc661b21"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.03333333333333333,
+          "mean_return": 10.78361912960075,
+          "mean_time_s_success": 110.75,
+          "mean_accidents": 1.1333333333333333,
+          "mean_progress_pct": 45.542666666666676,
+          "mean_mud_slip_deg": 2.133490813648294,
+          "mean_mud_course_deg": 1.5396768892033694,
+          "mean_mud_lateral_mps": 0.2152644390018368
+        },
+        "lluvia": {
+          "success_rate": 0.03333333333333333,
+          "mean_return": 2.3181011324159715,
+          "mean_time_s_success": 148.0,
+          "mean_accidents": 2.1,
+          "mean_progress_pct": 37.82933333333334,
+          "mean_mud_slip_deg": 4.761593533487298,
+          "mean_mud_course_deg": 1.4119298514871403,
+          "mean_mud_lateral_mps": 0.18822034383729203
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.06666666666666667,
+          "mean_return": 7.890733931266469,
+          "mean_time_s_success": 121.375,
+          "mean_accidents": 2.8666666666666667,
+          "mean_progress_pct": 47.23600000000001,
+          "mean_mud_slip_deg": 4.139508196721311,
+          "mean_mud_course_deg": 1.9035510794389083,
+          "mean_mud_lateral_mps": 0.4256436475902649
+        }
+      },
+      "chosen_checkpoint": {
+        "rule": "mejor_en_validacion",
+        "timesteps": 999997,
+        "validation_layouts": 10,
+        "validation_layout_seed_offset": 200000
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 83462,
+            "mean_return": -15.937186797531727,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 166710,
+            "mean_return": -15.78572270327576,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250198,
+            "mean_return": -14.025470676394717,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 333427,
+            "mean_return": -13.265472762410948,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 416999,
+            "mean_return": -12.829648038999443,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 500031,
+            "mean_return": -10.398175812634003,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 583334,
+            "mean_return": -8.892321185998805,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 666735,
+            "mean_return": -7.570380484398279,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 750297,
+            "mean_return": -3.8287358565708325,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 833442,
+            "mean_return": -2.091435752746446,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 916769,
+            "mean_return": -5.9203668968697345,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 999997,
+            "mean_return": 3.4660498971280056,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 1000503,
+            "mean_return": 2.9653950413081263,
+            "success_rate": 0.04
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 83462,
+            "success_rate": 0.0,
+            "mean_return": -9.198377259732258,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 16.086000000000002,
+            "mean_mud_slip_deg": 3.3871428571428575,
+            "mean_mud_course_deg": 1.3880425873082551,
+            "mean_mud_lateral_mps": 0.10742959205586596,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 7.614
+          },
+          {
+            "timesteps": 166710,
+            "success_rate": 0.0,
+            "mean_return": -9.589142620559487,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.4,
+            "mean_progress_pct": 6.186,
+            "mean_mud_slip_deg": 2.445,
+            "mean_mud_course_deg": 2.851994815984461,
+            "mean_mud_lateral_mps": 0.4293212683742919,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 8.609000000000002
+          },
+          {
+            "timesteps": 250198,
+            "success_rate": 0.0,
+            "mean_return": -3.6511038138094305,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 29.748,
+            "mean_mud_slip_deg": 1.5682051282051284,
+            "mean_mud_course_deg": 0.8206468175115884,
+            "mean_mud_lateral_mps": 0.054452692410968416,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 29.641
+          },
+          {
+            "timesteps": 333427,
+            "success_rate": 0.0,
+            "mean_return": -9.59069119610739,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 15.95,
+            "mean_mud_slip_deg": 3.5026315789473683,
+            "mean_mud_course_deg": 3.2002948539701674,
+            "mean_mud_lateral_mps": 0.6837247390107752,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 21.149
+          },
+          {
+            "timesteps": 416999,
+            "success_rate": 0.0,
+            "mean_return": -1.1950276005939326,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.4,
+            "mean_progress_pct": 35.17399999999999,
+            "mean_mud_slip_deg": 4.589775280898877,
+            "mean_mud_course_deg": 2.180184321109061,
+            "mean_mud_lateral_mps": 0.280594904761063,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 25.371000000000002
+          },
+          {
+            "timesteps": 500031,
+            "success_rate": 0.0,
+            "mean_return": -11.667805261159808,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.4,
+            "mean_progress_pct": 22.772,
+            "mean_mud_slip_deg": 1.205,
+            "mean_mud_course_deg": 0.5117838011678708,
+            "mean_mud_lateral_mps": 0.07901377800663925,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 19.295
+          },
+          {
+            "timesteps": 583334,
+            "success_rate": 0.0,
+            "mean_return": -10.655990425561988,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 6.888,
+            "mean_mud_slip_deg": 5.659166666666667,
+            "mean_mud_course_deg": 10.741014499645305,
+            "mean_mud_lateral_mps": 1.1258713768386857,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 9.219
+          },
+          {
+            "timesteps": 666735,
+            "success_rate": 0.0,
+            "mean_return": -5.949679521282272,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.2,
+            "mean_progress_pct": 11.082000000000003,
+            "mean_mud_slip_deg": 0.8643749999999999,
+            "mean_mud_course_deg": 0.973998363803167,
+            "mean_mud_lateral_mps": 0.1380826132084783,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 8.676000000000002
+          },
+          {
+            "timesteps": 750297,
+            "success_rate": 0.0,
+            "mean_return": 16.814064014806007,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.0,
+            "mean_progress_pct": 55.996,
+            "mean_mud_slip_deg": 0.998877551020408,
+            "mean_mud_course_deg": 0.6661820318917013,
+            "mean_mud_lateral_mps": 0.088221258083507,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 33.695
+          },
+          {
+            "timesteps": 833442,
+            "success_rate": 0.0,
+            "mean_return": -10.96449347197928,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 14.018,
+            "mean_mud_slip_deg": 1.112,
+            "mean_mud_course_deg": 3.7546635014783476,
+            "mean_mud_lateral_mps": 0.8273063012164477,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 10.867999999999999
+          },
+          {
+            "timesteps": 916769,
+            "success_rate": 0.0,
+            "mean_return": -7.716477816731356,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 20.34,
+            "mean_mud_slip_deg": 1.2913698630136985,
+            "mean_mud_course_deg": 1.3706844367400381,
+            "mean_mud_lateral_mps": 0.1159163474595706,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 20.441000000000003
+          },
+          {
+            "timesteps": 999997,
+            "success_rate": 0.0,
+            "mean_return": 13.87931531148023,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 56.088,
+            "mean_mud_slip_deg": 1.5053731343283583,
+            "mean_mud_course_deg": 1.3719674309131538,
+            "mean_mud_lateral_mps": 0.16269392606744457,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 40.336
+          },
+          {
+            "timesteps": 1000503,
+            "success_rate": 0.0,
+            "mean_return": 5.262485818161288,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 48.33,
+            "mean_mud_slip_deg": 1.9284444444444448,
+            "mean_mud_course_deg": 2.3979233870214154,
+            "mean_mud_lateral_mps": 0.28278933430784303,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 32.181
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "ppo",
+      "seed": 21,
+      "run_id": "rally-v5-ppo-6fa95ec1ab84446b8b52de255c450c50",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-ppo-6fa95ec1ab84446b8b52de255c450c50",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "ppo",
+        "git_commit": "f5ba4a8cb449e81594536de1236b74e10798d982",
+        "config_sha256": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+        "model_uri": "models/rally-v5-ppo-6fa95ec1ab84446b8b52de255c450c50/model.zip",
+        "model_sha256": "c4793917a90c1d8c95cbd2abe7e6435ecab1e806073697b5a6e116a64f29c898",
+        "normalization_uri": "models/rally-v5-ppo-6fa95ec1ab84446b8b52de255c450c50/normalization.json",
+        "browser_model_uri": "models/rally-v5-ppo-6fa95ec1ab84446b8b52de255c450c50/policy.onnx",
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 21,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1001472,
+          "train_seconds": 911.1
+        },
+        "chosen_checkpoint": {
+          "rule": "mejor_en_validacion",
+          "timesteps": 1000000,
+          "validation_layouts": 10,
+          "validation_layout_seed_offset": 200000
+        },
+        "optimizer_state": "incluido en model.zip (Adam), se puede continuar con PPO.load(...).learn()",
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          }
+        },
+        "files_sha256": {
+          "config.json": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+          "evaluation.json": "0a83a0706abb4cdae37ab2a08206c52c0d9898c634e2e8380e25d5958e274eae",
+          "model.zip": "c4793917a90c1d8c95cbd2abe7e6435ecab1e806073697b5a6e116a64f29c898",
+          "normalization.json": "f24a66d9b0da71837a30e418895df3b840d31d9327b110394ab34b29df707a17",
+          "policy.onnx": "e650ae8d6f22eed7dcb9dbfe0df7c5c2a019514c8810e9229c69d85c780a12e5",
+          "training_curves.json": "50c4422c42646fb5ca132241fe771b4464e796c9d850140db1f5314f86fccc91",
+          "vecnormalize.pkl": "09adf5397c773b97fa5efd2dc9fe29e54c1a3692eef07a3596eef65b1edae3d2"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "7448f67fd604427397be30a7db282f3298b593f856762d2ccaf9bdf36c943c8e",
+          "pipeline_v5.py": "dbc396804e1eb2e25980cc9615dd66935814db7045c946098023ff6c5872c989",
+          "configs/rally-v5.json": "e0059d8a6587e4c35962ab519da882c81e0804b3adbb598bd34d6dc5bc661b21"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.06666666666666667,
+          "mean_return": 11.156927964869789,
+          "mean_time_s_success": 86.875,
+          "mean_accidents": 1.0,
+          "mean_progress_pct": 39.408,
+          "mean_mud_slip_deg": 4.640750853242321,
+          "mean_mud_course_deg": 2.1703306665091824,
+          "mean_mud_lateral_mps": 0.430487067486217
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -3.6170569998165445,
+          "mean_time_s_success": null,
+          "mean_accidents": 0.9,
+          "mean_progress_pct": 20.396333333333338,
+          "mean_mud_slip_deg": 3.615945945945946,
+          "mean_mud_course_deg": 1.7356605202117985,
+          "mean_mud_lateral_mps": 0.2252978146838324
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": -6.583759885373431,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.6666666666666665,
+          "mean_progress_pct": 29.977,
+          "mean_mud_slip_deg": 7.396727272727273,
+          "mean_mud_course_deg": 3.4944942430169372,
+          "mean_mud_lateral_mps": 0.5121296287289809
+        }
+      },
+      "chosen_checkpoint": {
+        "rule": "mejor_en_validacion",
+        "timesteps": 1000000,
+        "validation_layouts": 10,
+        "validation_layout_seed_offset": 200000
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 50000,
+            "mean_return": -10.332642779999999,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 100000,
+            "mean_return": -5.359567940000002,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 150000,
+            "mean_return": -5.938523299999999,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 200000,
+            "mean_return": -3.0951997000000007,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 250000,
+            "mean_return": -0.8036719000000001,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 300000,
+            "mean_return": -1.4857887600000004,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 350000,
+            "mean_return": -4.27427702,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 400000,
+            "mean_return": 1.7870338200000004,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 450000,
+            "mean_return": -2.31274274,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 500000,
+            "mean_return": -2.4326748200000003,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 550000,
+            "mean_return": 1.5254433,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 600000,
+            "mean_return": 0.22833127999999994,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 650000,
+            "mean_return": 0.33246202000000014,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 700000,
+            "mean_return": 1.6293177400000003,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 750000,
+            "mean_return": 4.379202540000001,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 800000,
+            "mean_return": 3.9136844600000007,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 850000,
+            "mean_return": 3.452397080000001,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 900000,
+            "mean_return": 1.2292510799999994,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 950000,
+            "mean_return": 4.24085356,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 1000000,
+            "mean_return": 10.99986214,
+            "success_rate": 0.08
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 4,
+            "success_rate": 0.0,
+            "mean_return": -10.783286641377916,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 0.21200000000000002,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 0.20600000000000002
+          },
+          {
+            "timesteps": 50000,
+            "success_rate": 0.0,
+            "mean_return": -8.594820855211118,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 5.3420000000000005,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 10.350999999999999
+          },
+          {
+            "timesteps": 100000,
+            "success_rate": 0.0,
+            "mean_return": -2.724545651898307,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.2,
+            "mean_progress_pct": 16.96,
+            "mean_mud_slip_deg": 2.614736842105263,
+            "mean_mud_course_deg": 2.255873796929413,
+            "mean_mud_lateral_mps": 0.3933613397968546,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 17.268
+          },
+          {
+            "timesteps": 150000,
+            "success_rate": 0.0,
+            "mean_return": -2.2890582963972337,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.2,
+            "mean_progress_pct": 17.206,
+            "mean_mud_slip_deg": 3.717777777777778,
+            "mean_mud_course_deg": 2.01420578275887,
+            "mean_mud_lateral_mps": 0.25899856299524304,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 20.124000000000002
+          },
+          {
+            "timesteps": 200000,
+            "success_rate": 0.0,
+            "mean_return": 9.035286004116287,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 43.81,
+            "mean_mud_slip_deg": 2.126956521739131,
+            "mean_mud_course_deg": 2.1378022582007965,
+            "mean_mud_lateral_mps": 0.273604431416716,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 25.041
+          },
+          {
+            "timesteps": 250000,
+            "success_rate": 0.0,
+            "mean_return": -5.993165562532903,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 18.898,
+            "mean_mud_slip_deg": 4.594285714285713,
+            "mean_mud_course_deg": 3.137503600813364,
+            "mean_mud_lateral_mps": 0.3190771649435353,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 31.082
+          },
+          {
+            "timesteps": 300000,
+            "success_rate": 0.0,
+            "mean_return": -6.1229633257333855,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 18.624000000000002,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 37.229
+          },
+          {
+            "timesteps": 350000,
+            "success_rate": 0.0,
+            "mean_return": -2.5780951164216397,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 19.816,
+            "mean_mud_slip_deg": 1.9160000000000004,
+            "mean_mud_course_deg": 1.1103335953696363,
+            "mean_mud_lateral_mps": 0.3259520439194427,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 34.692
+          },
+          {
+            "timesteps": 400000,
+            "success_rate": 0.0,
+            "mean_return": -3.9121226522686117,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 18.843999999999998,
+            "mean_mud_slip_deg": 9.635,
+            "mean_mud_course_deg": 2.0634329126310944,
+            "mean_mud_lateral_mps": 0.6478731952653171,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 33.683
+          },
+          {
+            "timesteps": 450000,
+            "success_rate": 0.0,
+            "mean_return": -3.350785402491515,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 19.916,
+            "mean_mud_slip_deg": 2.5799999999999996,
+            "mean_mud_course_deg": 0.9571115197584191,
+            "mean_mud_lateral_mps": 0.2688254811150567,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 32.525999999999996
+          },
+          {
+            "timesteps": 500000,
+            "success_rate": 0.0,
+            "mean_return": -0.37141838805012634,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.2,
+            "mean_progress_pct": 19.892000000000003,
+            "mean_mud_slip_deg": 4.62625,
+            "mean_mud_course_deg": 0.6625876333946592,
+            "mean_mud_lateral_mps": 0.1804528176606109,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 26.746999999999996
+          },
+          {
+            "timesteps": 550000,
+            "success_rate": 0.0,
+            "mean_return": -3.154304387182077,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 19.064,
+            "mean_mud_slip_deg": 5.590909090909091,
+            "mean_mud_course_deg": 0.5486517146694437,
+            "mean_mud_lateral_mps": 0.16288392802423898,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 33.36
+          },
+          {
+            "timesteps": 600000,
+            "success_rate": 0.2,
+            "mean_return": 11.443372288556503,
+            "mean_time_s_success": 88.75,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 32.971999999999994,
+            "mean_mud_slip_deg": 5.531379310344828,
+            "mean_mud_course_deg": 0.8555753923683713,
+            "mean_mud_lateral_mps": 0.2118906030000639,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 31.294999999999998
+          },
+          {
+            "timesteps": 650000,
+            "success_rate": 0.2,
+            "mean_return": 10.643612772197901,
+            "mean_time_s_success": 87.0,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 32.988,
+            "mean_mud_slip_deg": 7.6812499999999995,
+            "mean_mud_course_deg": 1.9572776829888532,
+            "mean_mud_lateral_mps": 0.4926483275309705,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 33.882999999999996
+          },
+          {
+            "timesteps": 700000,
+            "success_rate": 0.0,
+            "mean_return": -1.7061982034883052,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 22.52,
+            "mean_mud_slip_deg": 1.591904761904762,
+            "mean_mud_course_deg": 1.8610456770825412,
+            "mean_mud_lateral_mps": 0.362339021134074,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 31.68
+          },
+          {
+            "timesteps": 750000,
+            "success_rate": 0.0,
+            "mean_return": -3.0864797797469,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 20.02,
+            "mean_mud_slip_deg": 17.191666666666666,
+            "mean_mud_course_deg": 2.225132474657413,
+            "mean_mud_lateral_mps": 0.7369157155671946,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 35.521
+          },
+          {
+            "timesteps": 800000,
+            "success_rate": 0.0,
+            "mean_return": 6.898703822826837,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.4,
+            "mean_progress_pct": 33.82,
+            "mean_mud_slip_deg": 3.4,
+            "mean_mud_course_deg": 2.5991043241155714,
+            "mean_mud_lateral_mps": 0.5316721704337992,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 35.064
+          },
+          {
+            "timesteps": 850000,
+            "success_rate": 0.2,
+            "mean_return": 15.922313657023048,
+            "mean_time_s_success": 84.75,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 43.754,
+            "mean_mud_slip_deg": 4.384444444444444,
+            "mean_mud_course_deg": 2.333671917561941,
+            "mean_mud_lateral_mps": 0.5285017833765351,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 36.477
+          },
+          {
+            "timesteps": 900000,
+            "success_rate": 0.2,
+            "mean_return": 20.171006857102014,
+            "mean_time_s_success": 82.0,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 43.839999999999996,
+            "mean_mud_slip_deg": 7.411428571428573,
+            "mean_mud_course_deg": 1.7203246914358006,
+            "mean_mud_lateral_mps": 0.3679669987283463,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 39.265
+          },
+          {
+            "timesteps": 950000,
+            "success_rate": 0.0,
+            "mean_return": 2.198774246201615,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 30.834000000000003,
+            "mean_mud_slip_deg": 2.4425,
+            "mean_mud_course_deg": 1.6168126429484164,
+            "mean_mud_lateral_mps": 0.2953944229135276,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 35.602999999999994
+          },
+          {
+            "timesteps": 1000000,
+            "success_rate": 0.2,
+            "mean_return": 16.019970600658176,
+            "mean_time_s_success": 86.75,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 43.586,
+            "mean_mud_slip_deg": 6.05391304347826,
+            "mean_mud_course_deg": 1.3765029723076052,
+            "mean_mud_lateral_mps": 0.3583327206786424,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 42.14
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "qlearning",
+      "seed": 21,
+      "run_id": "rally-v5-qlearning-2a2ea4713b8b45b7b656fe25ddd2268d",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-qlearning-2a2ea4713b8b45b7b656fe25ddd2268d",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "qlearning",
+        "git_commit": "f5ba4a8cb449e81594536de1236b74e10798d982",
+        "config_sha256": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+        "model_uri": "models/rally-v5-qlearning-2a2ea4713b8b45b7b656fe25ddd2268d/q_table.npy",
+        "model_sha256": "7b33edd654c316e4f82a0ef542e1c372bc7d9c07a2b8a7cbb93372c0d7f6d40d",
+        "normalization_uri": null,
+        "browser_model_uri": null,
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 21,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1000233,
+          "train_seconds": 618.0
+        },
+        "chosen_checkpoint": {
+          "rule": "mejor_en_validacion",
+          "timesteps": 1000233,
+          "validation_layouts": 10,
+          "validation_layout_seed_offset": 200000
+        },
+        "optimizer_state": null,
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          },
+          "discretization": {
+            "states": 720,
+            "actions": 15,
+            "throttle": [
+              -1.0,
+              0.0,
+              1.0
+            ],
+            "steer": [
+              -0.3,
+              -0.08,
+              0.0,
+              0.08,
+              0.3
+            ],
+            "speed_bins_mps": [
+              3,
+              8,
+              14,
+              20,
+              26
+            ],
+            "psi_bins_rad": [
+              -0.12,
+              0.12
+            ],
+            "perdida_de_resolucion": "no ve la posición exacta en el carril, ni los otros carriles, ni la curvatura; el giro solo tiene 5 valores"
+          }
+        },
+        "files_sha256": {
+          "config.json": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+          "evaluation.json": "3057bc54ef7d7cc2133f4542f5ab66254267d8c18d711d889e785aa335fb38f6",
+          "q_table.npy": "7b33edd654c316e4f82a0ef542e1c372bc7d9c07a2b8a7cbb93372c0d7f6d40d",
+          "training_curves.json": "5c7550098605427f259be145aff72bbd3ae0669a3e1a39d45ce7a52af12acc25"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "7448f67fd604427397be30a7db282f3298b593f856762d2ccaf9bdf36c943c8e",
+          "pipeline_v5.py": "dbc396804e1eb2e25980cc9615dd66935814db7045c946098023ff6c5872c989",
+          "configs/rally-v5.json": "e0059d8a6587e4c35962ab519da882c81e0804b3adbb598bd34d6dc5bc661b21"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.03333333333333333,
+          "mean_return": 9.933422566306056,
+          "mean_time_s_success": 133.5,
+          "mean_accidents": 1.9333333333333333,
+          "mean_progress_pct": 48.716333333333324,
+          "mean_mud_slip_deg": 3.8503080082135526,
+          "mean_mud_course_deg": 1.4714093827256935,
+          "mean_mud_lateral_mps": 0.2773215267756428
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -4.055003921293702,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.066666666666667,
+          "mean_progress_pct": 34.48066666666667,
+          "mean_mud_slip_deg": 6.768432267884323,
+          "mean_mud_course_deg": 1.2080799846644121,
+          "mean_mud_lateral_mps": 0.18958871195237337
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": 4.295620930343502,
+          "mean_time_s_success": null,
+          "mean_accidents": 2.3333333333333335,
+          "mean_progress_pct": 44.002333333333326,
+          "mean_mud_slip_deg": 3.39352435530086,
+          "mean_mud_course_deg": 2.1127108058365347,
+          "mean_mud_lateral_mps": 0.3720974071471182
+        }
+      },
+      "chosen_checkpoint": {
+        "rule": "mejor_en_validacion",
+        "timesteps": 1000233,
+        "validation_layouts": 10,
+        "validation_layout_seed_offset": 200000
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 83647,
+            "mean_return": -16.058792328113842,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 166875,
+            "mean_return": -16.64680621495469,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250132,
+            "mean_return": -14.917277295092903,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 333436,
+            "mean_return": -13.041660808797326,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 416772,
+            "mean_return": -11.916122515155491,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 500135,
+            "mean_return": -9.679492223886044,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 583477,
+            "mean_return": -9.699724754275271,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 666757,
+            "mean_return": -6.883141339857096,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 750067,
+            "mean_return": -1.7277569069968504,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 833467,
+            "mean_return": -4.688002339994311,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 916711,
+            "mean_return": -4.318797252217385,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 1000233,
+            "mean_return": 6.915255473826332,
+            "success_rate": 0.06
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 83647,
+            "success_rate": 0.0,
+            "mean_return": -20.09206720910312,
+            "mean_time_s_success": null,
+            "mean_accidents": 5.0,
+            "mean_progress_pct": 11.315999999999999,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 18.615999999999996
+          },
+          {
+            "timesteps": 166875,
+            "success_rate": 0.0,
+            "mean_return": -12.553454198652933,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 10.864,
+            "mean_mud_slip_deg": 4.505999999999999,
+            "mean_mud_course_deg": 0.8612440105097507,
+            "mean_mud_lateral_mps": 0.20418370485022935,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 10.827
+          },
+          {
+            "timesteps": 250132,
+            "success_rate": 0.0,
+            "mean_return": -9.926048859366295,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 22.692,
+            "mean_mud_slip_deg": 1.0206944444444446,
+            "mean_mud_course_deg": 1.2432273459804908,
+            "mean_mud_lateral_mps": 0.1395244006054088,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 28.707
+          },
+          {
+            "timesteps": 333436,
+            "success_rate": 0.0,
+            "mean_return": -15.122190383102275,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 13.09,
+            "mean_mud_slip_deg": 2.1075999999999997,
+            "mean_mud_course_deg": 2.6821742173481864,
+            "mean_mud_lateral_mps": 0.4552514221749796,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 21.579
+          },
+          {
+            "timesteps": 416772,
+            "success_rate": 0.0,
+            "mean_return": -14.761640447737161,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 13.212,
+            "mean_mud_slip_deg": 2.7184848484848483,
+            "mean_mud_course_deg": 1.9589541873411234,
+            "mean_mud_lateral_mps": 0.2856021979299145,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 21.294999999999998
+          },
+          {
+            "timesteps": 500135,
+            "success_rate": 0.0,
+            "mean_return": -16.57496657914401,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 8.376,
+            "mean_mud_slip_deg": 1.9566666666666666,
+            "mean_mud_course_deg": 1.2961304590818479,
+            "mean_mud_lateral_mps": 0.10028526392001474,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 8.581999999999999
+          },
+          {
+            "timesteps": 583477,
+            "success_rate": 0.0,
+            "mean_return": 0.0743990356392807,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.0,
+            "mean_progress_pct": 29.915999999999997,
+            "mean_mud_slip_deg": 2.804146341463415,
+            "mean_mud_course_deg": 0.9365820890235342,
+            "mean_mud_lateral_mps": 0.14478187015950367,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 32.539
+          },
+          {
+            "timesteps": 666757,
+            "success_rate": 0.0,
+            "mean_return": -16.11021120348867,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.4,
+            "mean_progress_pct": 13.867999999999999,
+            "mean_mud_slip_deg": 1.2186842105263158,
+            "mean_mud_course_deg": 1.5810922739836109,
+            "mean_mud_lateral_mps": 0.30666449471754575,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 11.924000000000001
+          },
+          {
+            "timesteps": 750067,
+            "success_rate": 0.0,
+            "mean_return": -0.6638240937669385,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.8,
+            "mean_progress_pct": 46.172000000000004,
+            "mean_mud_slip_deg": 3.257037037037037,
+            "mean_mud_course_deg": 2.481067223499806,
+            "mean_mud_lateral_mps": 0.30852882759412636,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 38.870999999999995
+          },
+          {
+            "timesteps": 833467,
+            "success_rate": 0.0,
+            "mean_return": -3.9646950277980175,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.8,
+            "mean_progress_pct": 21.294000000000004,
+            "mean_mud_slip_deg": 2.3858333333333333,
+            "mean_mud_course_deg": 1.176460944969868,
+            "mean_mud_lateral_mps": 0.2084368413444302,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 22.835
+          },
+          {
+            "timesteps": 916711,
+            "success_rate": 0.0,
+            "mean_return": -4.734210124084724,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 28.863999999999997,
+            "mean_mud_slip_deg": 1.9308333333333332,
+            "mean_mud_course_deg": 0.8669817342519464,
+            "mean_mud_lateral_mps": 0.1738452943673068,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 26.181
+          },
+          {
+            "timesteps": 1000233,
+            "success_rate": 0.2,
+            "mean_return": 18.677975635426343,
+            "mean_time_s_success": 133.5,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 48.808,
+            "mean_mud_slip_deg": 3.4308823529411767,
+            "mean_mud_course_deg": 2.7621224571746525,
+            "mean_mud_lateral_mps": 0.5754323307186486,
+            "validation_success_rate": 0.2,
+            "validation_progress_pct": 35.469
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "ppo",
+      "seed": 42,
+      "run_id": "rally-v5-ppo-209e9daa618a4126b2f3bc2dd99cdd89",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-ppo-209e9daa618a4126b2f3bc2dd99cdd89",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "ppo",
+        "git_commit": "f5ba4a8cb449e81594536de1236b74e10798d982",
+        "config_sha256": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+        "model_uri": "models/rally-v5-ppo-209e9daa618a4126b2f3bc2dd99cdd89/model.zip",
+        "model_sha256": "fe3b4a3e1b2716e65afb6b28cbde5d6af41a12369ec04fdda73a0ef217130896",
+        "normalization_uri": "models/rally-v5-ppo-209e9daa618a4126b2f3bc2dd99cdd89/normalization.json",
+        "browser_model_uri": "models/rally-v5-ppo-209e9daa618a4126b2f3bc2dd99cdd89/policy.onnx",
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 42,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1001472,
+          "train_seconds": 998.3
+        },
+        "chosen_checkpoint": {
+          "rule": "mejor_en_validacion",
+          "timesteps": 950000,
+          "validation_layouts": 10,
+          "validation_layout_seed_offset": 200000
+        },
+        "optimizer_state": "incluido en model.zip (Adam), se puede continuar con PPO.load(...).learn()",
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          }
+        },
+        "files_sha256": {
+          "config.json": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+          "evaluation.json": "938af44f29343641dc24971f5a4d64fa97c293d66894e9cfe1c571b82ea2e0ab",
+          "model.zip": "fe3b4a3e1b2716e65afb6b28cbde5d6af41a12369ec04fdda73a0ef217130896",
+          "normalization.json": "d22f9606a030cc8d292bbf68ba427b697591cc48a6fb9715a8ae8eb8a6fa472d",
+          "policy.onnx": "277f337431ec969da22981c5c660fb767bd563a5bee2cabc58926a85c5517414",
+          "training_curves.json": "816e65e57c0629017aa21a51b422ef9bab8c535e74556dc7d61b26b7568e2e9a",
+          "vecnormalize.pkl": "4752cce9886088aec42d3a06a0fc269c526c5d95a4a733fde13b0db459b5af79"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "7448f67fd604427397be30a7db282f3298b593f856762d2ccaf9bdf36c943c8e",
+          "pipeline_v5.py": "dbc396804e1eb2e25980cc9615dd66935814db7045c946098023ff6c5872c989",
+          "configs/rally-v5.json": "e0059d8a6587e4c35962ab519da882c81e0804b3adbb598bd34d6dc5bc661b21"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.06666666666666667,
+          "mean_return": 8.70061977893785,
+          "mean_time_s_success": 98.5,
+          "mean_accidents": 2.5,
+          "mean_progress_pct": 46.93866666666666,
+          "mean_mud_slip_deg": 5.127008368200837,
+          "mean_mud_course_deg": 2.8333850848808457,
+          "mean_mud_lateral_mps": 0.569632889654816
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -3.972945469619789,
+          "mean_time_s_success": null,
+          "mean_accidents": 1.9333333333333333,
+          "mean_progress_pct": 26.550666666666665,
+          "mean_mud_slip_deg": 5.333890577507599,
+          "mean_mud_course_deg": 1.5359036492732903,
+          "mean_mud_lateral_mps": 0.21942122968599762
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": -10.932561503422185,
+          "mean_time_s_success": null,
+          "mean_accidents": 4.333333333333333,
+          "mean_progress_pct": 26.791333333333334,
+          "mean_mud_slip_deg": 6.923085339168491,
+          "mean_mud_course_deg": 4.863350690724665,
+          "mean_mud_lateral_mps": 0.6812157828166708
+        }
+      },
+      "chosen_checkpoint": {
+        "rule": "mejor_en_validacion",
+        "timesteps": 950000,
+        "validation_layouts": 10,
+        "validation_layout_seed_offset": 200000
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 50000,
+            "mean_return": -13.428892279999998,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 100000,
+            "mean_return": -10.54348242,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 150000,
+            "mean_return": -8.307186979999999,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 200000,
+            "mean_return": -5.9598663599999995,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250000,
+            "mean_return": -2.9967150399999993,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 300000,
+            "mean_return": 2.07996526,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 350000,
+            "mean_return": -2.4989211799999995,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 400000,
+            "mean_return": -2.2513600600000006,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 450000,
+            "mean_return": 0.7014523399999998,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 500000,
+            "mean_return": -2.79115226,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 550000,
+            "mean_return": 1.5752121200000002,
+            "success_rate": 0.06
+          },
+          {
+            "timesteps": 600000,
+            "mean_return": 1.06927574,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 650000,
+            "mean_return": 1.8395749399999994,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 700000,
+            "mean_return": 7.205905859999999,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 750000,
+            "mean_return": 4.6847715,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 800000,
+            "mean_return": 3.136670420000001,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 850000,
+            "mean_return": 4.4702247999999996,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 900000,
+            "mean_return": 2.9678477799999996,
+            "success_rate": 0.06
+          },
+          {
+            "timesteps": 950000,
+            "mean_return": 3.6027302,
+            "success_rate": 0.06
+          },
+          {
+            "timesteps": 1000000,
+            "mean_return": 9.116965279999999,
+            "success_rate": 0.08
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 4,
+            "success_rate": 0.0,
+            "mean_return": -10.79428521957069,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 0.192,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 0.21200000000000002
+          },
+          {
+            "timesteps": 50000,
+            "success_rate": 0.0,
+            "mean_return": -9.630737324200712,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 3.992,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 5.529000000000001
+          },
+          {
+            "timesteps": 100000,
+            "success_rate": 0.0,
+            "mean_return": -8.723815816519167,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.0,
+            "mean_progress_pct": 11.016,
+            "mean_mud_slip_deg": 1.2990000000000002,
+            "mean_mud_course_deg": 3.9025065299639863,
+            "mean_mud_lateral_mps": 0.2464902314548324,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 8.875
+          },
+          {
+            "timesteps": 150000,
+            "success_rate": 0.0,
+            "mean_return": -5.148607201603627,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 19.42,
+            "mean_mud_slip_deg": 1.7785185185185186,
+            "mean_mud_course_deg": 2.3478444247906194,
+            "mean_mud_lateral_mps": 0.22135439366019238,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 18.165
+          },
+          {
+            "timesteps": 200000,
+            "success_rate": 0.0,
+            "mean_return": -4.442772508920986,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 19.566,
+            "mean_mud_slip_deg": 1.6357142857142857,
+            "mean_mud_course_deg": 2.0389089191149283,
+            "mean_mud_lateral_mps": 0.2826093099705683,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 21.639
+          },
+          {
+            "timesteps": 250000,
+            "success_rate": 0.0,
+            "mean_return": 4.78725118372361,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.4,
+            "mean_progress_pct": 43.666000000000004,
+            "mean_mud_slip_deg": 2.994273504273504,
+            "mean_mud_course_deg": 2.1823675179246735,
+            "mean_mud_lateral_mps": 0.28269041518723464,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 29.683
+          },
+          {
+            "timesteps": 300000,
+            "success_rate": 0.4,
+            "mean_return": 33.07804268236653,
+            "mean_time_s_success": 134.125,
+            "mean_accidents": 0.4,
+            "mean_progress_pct": 51.31,
+            "mean_mud_slip_deg": 2.484375,
+            "mean_mud_course_deg": 1.663868356315506,
+            "mean_mud_lateral_mps": 0.238043305754044,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 32.823
+          },
+          {
+            "timesteps": 350000,
+            "success_rate": 0.2,
+            "mean_return": 16.110825891114736,
+            "mean_time_s_success": 133.0,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 48.992000000000004,
+            "mean_mud_slip_deg": 2.84328947368421,
+            "mean_mud_course_deg": 1.8522385926547709,
+            "mean_mud_lateral_mps": 0.3080653118941325,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 34.972
+          },
+          {
+            "timesteps": 400000,
+            "success_rate": 0.2,
+            "mean_return": 19.984542829086813,
+            "mean_time_s_success": 116.5,
+            "mean_accidents": 0.8,
+            "mean_progress_pct": 46.002,
+            "mean_mud_slip_deg": 2.5528169014084505,
+            "mean_mud_course_deg": 2.433520815169813,
+            "mean_mud_lateral_mps": 0.4524760051822362,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 29.778
+          },
+          {
+            "timesteps": 450000,
+            "success_rate": 0.2,
+            "mean_return": 19.848241144404415,
+            "mean_time_s_success": 120.0,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 50.754000000000005,
+            "mean_mud_slip_deg": 3.5997222222222223,
+            "mean_mud_course_deg": 2.7324884166480774,
+            "mean_mud_lateral_mps": 0.5135361602758481,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 30.064
+          },
+          {
+            "timesteps": 500000,
+            "success_rate": 0.2,
+            "mean_return": 18.234214156051426,
+            "mean_time_s_success": 113.0,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 45.992,
+            "mean_mud_slip_deg": 6.744999999999999,
+            "mean_mud_course_deg": 3.902342710955951,
+            "mean_mud_lateral_mps": 0.8376554290505324,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 36.943
+          },
+          {
+            "timesteps": 550000,
+            "success_rate": 0.0,
+            "mean_return": 6.723745508980201,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 42.64399999999999,
+            "mean_mud_slip_deg": 2.1596721311475418,
+            "mean_mud_course_deg": 2.2240349665243975,
+            "mean_mud_lateral_mps": 0.4654704316779466,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 33.78699999999999
+          },
+          {
+            "timesteps": 600000,
+            "success_rate": 0.0,
+            "mean_return": 8.886648817647055,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 42.902,
+            "mean_mud_slip_deg": 2.5765555555555553,
+            "mean_mud_course_deg": 3.086891038096656,
+            "mean_mud_lateral_mps": 0.5115227683004214,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 36.011
+          },
+          {
+            "timesteps": 650000,
+            "success_rate": 0.2,
+            "mean_return": 18.378395510508682,
+            "mean_time_s_success": 109.5,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 46.05200000000001,
+            "mean_mud_slip_deg": 4.017906976744187,
+            "mean_mud_course_deg": 2.431493512539524,
+            "mean_mud_lateral_mps": 0.5098749985749578,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 39.025999999999996
+          },
+          {
+            "timesteps": 700000,
+            "success_rate": 0.2,
+            "mean_return": 18.749765968153845,
+            "mean_time_s_success": 108.75,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 44.827999999999996,
+            "mean_mud_slip_deg": 3.0023376623376627,
+            "mean_mud_course_deg": 2.8190466333622983,
+            "mean_mud_lateral_mps": 0.5494690845212179,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 41.435
+          },
+          {
+            "timesteps": 750000,
+            "success_rate": 0.0,
+            "mean_return": 8.315682736971052,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 43.598,
+            "mean_mud_slip_deg": 2.3816216216216217,
+            "mean_mud_course_deg": 2.485521884526868,
+            "mean_mud_lateral_mps": 0.5376696447698133,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 38.163
+          },
+          {
+            "timesteps": 800000,
+            "success_rate": 0.4,
+            "mean_return": 30.509339588647755,
+            "mean_time_s_success": 104.625,
+            "mean_accidents": 0.8,
+            "mean_progress_pct": 48.032,
+            "mean_mud_slip_deg": 3.424861111111111,
+            "mean_mud_course_deg": 2.927781463858795,
+            "mean_mud_lateral_mps": 0.5816399936992449,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 43.611
+          },
+          {
+            "timesteps": 850000,
+            "success_rate": 0.4,
+            "mean_return": 30.71307812359168,
+            "mean_time_s_success": 103.25,
+            "mean_accidents": 0.8,
+            "mean_progress_pct": 48.312,
+            "mean_mud_slip_deg": 2.8590277777777775,
+            "mean_mud_course_deg": 2.5193811790122598,
+            "mean_mud_lateral_mps": 0.4842370339403667,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 39.01299999999999
+          },
+          {
+            "timesteps": 900000,
+            "success_rate": 0.4,
+            "mean_return": 31.59456868623584,
+            "mean_time_s_success": 103.375,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 48.410000000000004,
+            "mean_mud_slip_deg": 2.8693548387096777,
+            "mean_mud_course_deg": 1.8605046845916322,
+            "mean_mud_lateral_mps": 0.3591252588306306,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 38.138999999999996
+          },
+          {
+            "timesteps": 950000,
+            "success_rate": 0.0,
+            "mean_return": 9.206609371372954,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 46.95,
+            "mean_mud_slip_deg": 3.2740259740259736,
+            "mean_mud_course_deg": 1.4007185499211727,
+            "mean_mud_lateral_mps": 0.2633873732775044,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 46.501999999999995
+          },
+          {
+            "timesteps": 1000000,
+            "success_rate": 0.4,
+            "mean_return": 30.906574011750685,
+            "mean_time_s_success": 100.25,
+            "mean_accidents": 0.8,
+            "mean_progress_pct": 48.416000000000004,
+            "mean_mud_slip_deg": 3.7627027027027027,
+            "mean_mud_course_deg": 2.8512184027900345,
+            "mean_mud_lateral_mps": 0.5973947870167838,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 43.553
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "qlearning",
+      "seed": 42,
+      "run_id": "rally-v5-qlearning-bd53bb88787b4ccb9b145b19293eaec2",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-qlearning-bd53bb88787b4ccb9b145b19293eaec2",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "qlearning",
+        "git_commit": "f5ba4a8cb449e81594536de1236b74e10798d982",
+        "config_sha256": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+        "model_uri": "models/rally-v5-qlearning-bd53bb88787b4ccb9b145b19293eaec2/q_table.npy",
+        "model_sha256": "b24e2e7e71557426eb2df48fb9608982feedbb246491f98f2c6d137d5fbf25fc",
+        "normalization_uri": null,
+        "browser_model_uri": null,
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 42,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1000269,
+          "train_seconds": 609.1
+        },
+        "chosen_checkpoint": {
+          "rule": "mejor_en_validacion",
+          "timesteps": 750164,
+          "validation_layouts": 10,
+          "validation_layout_seed_offset": 200000
+        },
+        "optimizer_state": null,
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          },
+          "discretization": {
+            "states": 720,
+            "actions": 15,
+            "throttle": [
+              -1.0,
+              0.0,
+              1.0
+            ],
+            "steer": [
+              -0.3,
+              -0.08,
+              0.0,
+              0.08,
+              0.3
+            ],
+            "speed_bins_mps": [
+              3,
+              8,
+              14,
+              20,
+              26
+            ],
+            "psi_bins_rad": [
+              -0.12,
+              0.12
+            ],
+            "perdida_de_resolucion": "no ve la posición exacta en el carril, ni los otros carriles, ni la curvatura; el giro solo tiene 5 valores"
+          }
+        },
+        "files_sha256": {
+          "config.json": "fb94aec4a05bc02d7a1db33df1a913249fbcf4e7e380b6ec870afd859dc99002",
+          "evaluation.json": "8d158a0e0f51b69e19893c1f1b438386e77b054f98ef8655a4410a0a2dff1830",
+          "q_table.npy": "b24e2e7e71557426eb2df48fb9608982feedbb246491f98f2c6d137d5fbf25fc",
+          "training_curves.json": "24c9f57c45ac5d9a7281c96cbb19559200002e20ec6b62a73ef784cd31f40581"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "7448f67fd604427397be30a7db282f3298b593f856762d2ccaf9bdf36c943c8e",
+          "pipeline_v5.py": "dbc396804e1eb2e25980cc9615dd66935814db7045c946098023ff6c5872c989",
+          "configs/rally-v5.json": "e0059d8a6587e4c35962ab519da882c81e0804b3adbb598bd34d6dc5bc661b21"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.1,
+          "mean_return": 11.200335520882074,
+          "mean_time_s_success": 101.33333333333333,
+          "mean_accidents": 3.0,
+          "mean_progress_pct": 49.17600000000001,
+          "mean_mud_slip_deg": 3.6087634408602156,
+          "mean_mud_course_deg": 2.0418445185849943,
+          "mean_mud_lateral_mps": 0.405620255996271
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -7.474286714165887,
+          "mean_time_s_success": null,
+          "mean_accidents": 4.1,
+          "mean_progress_pct": 31.161333333333335,
+          "mean_mud_slip_deg": 8.74756345177665,
+          "mean_mud_course_deg": 2.606730242252502,
+          "mean_mud_lateral_mps": 0.48251715002155127
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.1,
+          "mean_return": 9.417029511941553,
+          "mean_time_s_success": 111.83333333333333,
+          "mean_accidents": 2.7666666666666666,
+          "mean_progress_pct": 45.97666666666667,
+          "mean_mud_slip_deg": 2.735553145336226,
+          "mean_mud_course_deg": 2.6925600244123613,
+          "mean_mud_lateral_mps": 0.39447614257951247
+        }
+      },
+      "chosen_checkpoint": {
+        "rule": "mejor_en_validacion",
+        "timesteps": 750164,
+        "validation_layouts": 10,
+        "validation_layout_seed_offset": 200000
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 83472,
+            "mean_return": -14.724695564590382,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 166709,
+            "mean_return": -16.291891245113675,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250169,
+            "mean_return": -13.705903013660667,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 333360,
+            "mean_return": -12.978418902469064,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 416897,
+            "mean_return": -13.225796960766042,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 500225,
+            "mean_return": -10.752798026140901,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 583368,
+            "mean_return": -7.9027735300703545,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 666877,
+            "mean_return": -6.786091311625455,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 750164,
+            "mean_return": -5.579045447807569,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 833356,
+            "mean_return": 4.684282581044611,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 916679,
+            "mean_return": 2.1711434585732627,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 1000269,
+            "mean_return": -5.850840287089209,
+            "success_rate": 0.0
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 83472,
+            "success_rate": 0.0,
+            "mean_return": -5.348665033401611,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 31.76,
+            "mean_mud_slip_deg": 1.1683333333333332,
+            "mean_mud_course_deg": 1.258736945602705,
+            "mean_mud_lateral_mps": 0.12429609913611858,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 21.612
+          },
+          {
+            "timesteps": 166709,
+            "success_rate": 0.0,
+            "mean_return": -8.041483246614906,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 22.724,
+            "mean_mud_slip_deg": 0.8854999999999998,
+            "mean_mud_course_deg": 2.129527284005061,
+            "mean_mud_lateral_mps": 0.2971024664964056,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 20.405
+          },
+          {
+            "timesteps": 250169,
+            "success_rate": 0.0,
+            "mean_return": -11.855972401097569,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 15.382,
+            "mean_mud_slip_deg": 3.466818181818182,
+            "mean_mud_course_deg": 1.5330022619280266,
+            "mean_mud_lateral_mps": 0.23040663708928222,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 18.324
+          },
+          {
+            "timesteps": 333360,
+            "success_rate": 0.0,
+            "mean_return": -6.812218255259475,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 13.565999999999999,
+            "mean_mud_slip_deg": 0.8033333333333332,
+            "mean_mud_course_deg": 0.09812026433916184,
+            "mean_mud_lateral_mps": 0.013074150659616373,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 12.257
+          },
+          {
+            "timesteps": 416897,
+            "success_rate": 0.0,
+            "mean_return": -15.359036109620542,
+            "mean_time_s_success": null,
+            "mean_accidents": 5.0,
+            "mean_progress_pct": 18.438,
+            "mean_mud_slip_deg": 0.24562499999999998,
+            "mean_mud_course_deg": 0.24461201345881065,
+            "mean_mud_lateral_mps": 0.05913310486449228,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 16.345
+          },
+          {
+            "timesteps": 500225,
+            "success_rate": 0.0,
+            "mean_return": -10.101141943256668,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 20.238,
+            "mean_mud_slip_deg": 3.2792452830188683,
+            "mean_mud_course_deg": 1.630011899844475,
+            "mean_mud_lateral_mps": 0.23890581562004126,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 27.089000000000006
+          },
+          {
+            "timesteps": 583368,
+            "success_rate": 0.0,
+            "mean_return": -5.981801181850743,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 14.081999999999999,
+            "mean_mud_slip_deg": 5.093999999999999,
+            "mean_mud_course_deg": 3.361361579126394,
+            "mean_mud_lateral_mps": 0.7323921367758529,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 15.104
+          },
+          {
+            "timesteps": 666877,
+            "success_rate": 0.2,
+            "mean_return": 9.019596323530157,
+            "mean_time_s_success": 149.25,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 39.97,
+            "mean_mud_slip_deg": 2.308653846153846,
+            "mean_mud_course_deg": 1.4800210060137426,
+            "mean_mud_lateral_mps": 0.17343467801486925,
+            "validation_success_rate": 0.1,
+            "validation_progress_pct": 45.963
+          },
+          {
+            "timesteps": 750164,
+            "success_rate": 0.2,
+            "mean_return": 13.569207768939714,
+            "mean_time_s_success": 103.0,
+            "mean_accidents": 3.8,
+            "mean_progress_pct": 52.432,
+            "mean_mud_slip_deg": 1.929576271186441,
+            "mean_mud_course_deg": 1.7398820718913666,
+            "mean_mud_lateral_mps": 0.31549397230031034,
+            "validation_success_rate": 0.1,
+            "validation_progress_pct": 48.849000000000004
+          },
+          {
+            "timesteps": 833356,
+            "success_rate": 0.0,
+            "mean_return": -14.214256464165663,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.8,
+            "mean_progress_pct": 19.55,
+            "mean_mud_slip_deg": 18.831666666666663,
+            "mean_mud_course_deg": 7.171497198506428,
+            "mean_mud_lateral_mps": 0.772265874108188,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 25.471
+          },
+          {
+            "timesteps": 916679,
+            "success_rate": 0.0,
+            "mean_return": -7.527554983807218,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 18.310000000000002,
+            "mean_mud_slip_deg": 2.1661111111111113,
+            "mean_mud_course_deg": 1.3610080108198432,
+            "mean_mud_lateral_mps": 0.2181593401767159,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 31.259999999999998
+          },
+          {
+            "timesteps": 1000269,
+            "success_rate": 0.0,
+            "mean_return": -2.4038066786587313,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 39.284,
+            "mean_mud_slip_deg": 4.080816326530613,
+            "mean_mud_course_deg": 3.094754985459383,
+            "mean_mud_lateral_mps": 0.3778925227179574,
+            "validation_success_rate": 0.0,
+            "validation_progress_pct": 31.193
+          }
+        ]
+      }
+    }
+  ]
+}

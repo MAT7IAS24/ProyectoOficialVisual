@@ -1,0 +1,379 @@
+{
+  "entrenamiento_con_exploracion": [
+    {
+      "timesteps": 50000,
+      "mean_return": -13.428892279999998,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 100000,
+      "mean_return": -10.54348242,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 150000,
+      "mean_return": -8.307186979999999,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 200000,
+      "mean_return": -5.9598663599999995,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 250000,
+      "mean_return": -2.9967150399999993,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 300000,
+      "mean_return": 2.07996526,
+      "success_rate": 0.04
+    },
+    {
+      "timesteps": 350000,
+      "mean_return": -2.4989211799999995,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 400000,
+      "mean_return": -2.2513600600000006,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 450000,
+      "mean_return": 0.7014523399999998,
+      "success_rate": 0.04
+    },
+    {
+      "timesteps": 500000,
+      "mean_return": -2.79115226,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 550000,
+      "mean_return": 1.5752121200000002,
+      "success_rate": 0.06
+    },
+    {
+      "timesteps": 600000,
+      "mean_return": 1.06927574,
+      "success_rate": 0.02
+    },
+    {
+      "timesteps": 650000,
+      "mean_return": 1.8395749399999994,
+      "success_rate": 0.02
+    },
+    {
+      "timesteps": 700000,
+      "mean_return": 7.205905859999999,
+      "success_rate": 0.08
+    },
+    {
+      "timesteps": 750000,
+      "mean_return": 4.6847715,
+      "success_rate": 0.08
+    },
+    {
+      "timesteps": 800000,
+      "mean_return": 3.136670420000001,
+      "success_rate": 0.02
+    },
+    {
+      "timesteps": 850000,
+      "mean_return": 4.4702247999999996,
+      "success_rate": 0.04
+    },
+    {
+      "timesteps": 900000,
+      "mean_return": 2.9678477799999996,
+      "success_rate": 0.06
+    },
+    {
+      "timesteps": 950000,
+      "mean_return": 3.6027302,
+      "success_rate": 0.06
+    },
+    {
+      "timesteps": 1000000,
+      "mean_return": 9.116965279999999,
+      "success_rate": 0.08
+    }
+  ],
+  "evaluacion_sin_exploracion": [
+    {
+      "timesteps": 4,
+      "success_rate": 0.0,
+      "mean_return": -10.79428521957069,
+      "mean_time_s_success": null,
+      "mean_accidents": 0.0,
+      "mean_progress_pct": 0.192,
+      "mean_mud_slip_deg": null,
+      "mean_mud_course_deg": null,
+      "mean_mud_lateral_mps": null,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 0.21200000000000002
+    },
+    {
+      "timesteps": 50000,
+      "success_rate": 0.0,
+      "mean_return": -9.630737324200712,
+      "mean_time_s_success": null,
+      "mean_accidents": 0.0,
+      "mean_progress_pct": 3.992,
+      "mean_mud_slip_deg": null,
+      "mean_mud_course_deg": null,
+      "mean_mud_lateral_mps": null,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 5.529000000000001
+    },
+    {
+      "timesteps": 100000,
+      "success_rate": 0.0,
+      "mean_return": -8.723815816519167,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.0,
+      "mean_progress_pct": 11.016,
+      "mean_mud_slip_deg": 1.2990000000000002,
+      "mean_mud_course_deg": 3.9025065299639863,
+      "mean_mud_lateral_mps": 0.2464902314548324,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 8.875
+    },
+    {
+      "timesteps": 150000,
+      "success_rate": 0.0,
+      "mean_return": -5.148607201603627,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.2,
+      "mean_progress_pct": 19.42,
+      "mean_mud_slip_deg": 1.7785185185185186,
+      "mean_mud_course_deg": 2.3478444247906194,
+      "mean_mud_lateral_mps": 0.22135439366019238,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 18.165
+    },
+    {
+      "timesteps": 200000,
+      "success_rate": 0.0,
+      "mean_return": -4.442772508920986,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.2,
+      "mean_progress_pct": 19.566,
+      "mean_mud_slip_deg": 1.6357142857142857,
+      "mean_mud_course_deg": 2.0389089191149283,
+      "mean_mud_lateral_mps": 0.2826093099705683,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 21.639
+    },
+    {
+      "timesteps": 250000,
+      "success_rate": 0.0,
+      "mean_return": 4.78725118372361,
+      "mean_time_s_success": null,
+      "mean_accidents": 2.4,
+      "mean_progress_pct": 43.666000000000004,
+      "mean_mud_slip_deg": 2.994273504273504,
+      "mean_mud_course_deg": 2.1823675179246735,
+      "mean_mud_lateral_mps": 0.28269041518723464,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 29.683
+    },
+    {
+      "timesteps": 300000,
+      "success_rate": 0.4,
+      "mean_return": 33.07804268236653,
+      "mean_time_s_success": 134.125,
+      "mean_accidents": 0.4,
+      "mean_progress_pct": 51.31,
+      "mean_mud_slip_deg": 2.484375,
+      "mean_mud_course_deg": 1.663868356315506,
+      "mean_mud_lateral_mps": 0.238043305754044,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 32.823
+    },
+    {
+      "timesteps": 350000,
+      "success_rate": 0.2,
+      "mean_return": 16.110825891114736,
+      "mean_time_s_success": 133.0,
+      "mean_accidents": 2.6,
+      "mean_progress_pct": 48.992000000000004,
+      "mean_mud_slip_deg": 2.84328947368421,
+      "mean_mud_course_deg": 1.8522385926547709,
+      "mean_mud_lateral_mps": 0.3080653118941325,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 34.972
+    },
+    {
+      "timesteps": 400000,
+      "success_rate": 0.2,
+      "mean_return": 19.984542829086813,
+      "mean_time_s_success": 116.5,
+      "mean_accidents": 0.8,
+      "mean_progress_pct": 46.002,
+      "mean_mud_slip_deg": 2.5528169014084505,
+      "mean_mud_course_deg": 2.433520815169813,
+      "mean_mud_lateral_mps": 0.4524760051822362,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 29.778
+    },
+    {
+      "timesteps": 450000,
+      "success_rate": 0.2,
+      "mean_return": 19.848241144404415,
+      "mean_time_s_success": 120.0,
+      "mean_accidents": 1.8,
+      "mean_progress_pct": 50.754000000000005,
+      "mean_mud_slip_deg": 3.5997222222222223,
+      "mean_mud_course_deg": 2.7324884166480774,
+      "mean_mud_lateral_mps": 0.5135361602758481,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 30.064
+    },
+    {
+      "timesteps": 500000,
+      "success_rate": 0.2,
+      "mean_return": 18.234214156051426,
+      "mean_time_s_success": 113.0,
+      "mean_accidents": 1.2,
+      "mean_progress_pct": 45.992,
+      "mean_mud_slip_deg": 6.744999999999999,
+      "mean_mud_course_deg": 3.902342710955951,
+      "mean_mud_lateral_mps": 0.8376554290505324,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 36.943
+    },
+    {
+      "timesteps": 550000,
+      "success_rate": 0.0,
+      "mean_return": 6.723745508980201,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.8,
+      "mean_progress_pct": 42.64399999999999,
+      "mean_mud_slip_deg": 2.1596721311475418,
+      "mean_mud_course_deg": 2.2240349665243975,
+      "mean_mud_lateral_mps": 0.4654704316779466,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 33.78699999999999
+    },
+    {
+      "timesteps": 600000,
+      "success_rate": 0.0,
+      "mean_return": 8.886648817647055,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.4,
+      "mean_progress_pct": 42.902,
+      "mean_mud_slip_deg": 2.5765555555555553,
+      "mean_mud_course_deg": 3.086891038096656,
+      "mean_mud_lateral_mps": 0.5115227683004214,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 36.011
+    },
+    {
+      "timesteps": 650000,
+      "success_rate": 0.2,
+      "mean_return": 18.378395510508682,
+      "mean_time_s_success": 109.5,
+      "mean_accidents": 1.2,
+      "mean_progress_pct": 46.05200000000001,
+      "mean_mud_slip_deg": 4.017906976744187,
+      "mean_mud_course_deg": 2.431493512539524,
+      "mean_mud_lateral_mps": 0.5098749985749578,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 39.025999999999996
+    },
+    {
+      "timesteps": 700000,
+      "success_rate": 0.2,
+      "mean_return": 18.749765968153845,
+      "mean_time_s_success": 108.75,
+      "mean_accidents": 1.4,
+      "mean_progress_pct": 44.827999999999996,
+      "mean_mud_slip_deg": 3.0023376623376627,
+      "mean_mud_course_deg": 2.8190466333622983,
+      "mean_mud_lateral_mps": 0.5494690845212179,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 41.435
+    },
+    {
+      "timesteps": 750000,
+      "success_rate": 0.0,
+      "mean_return": 8.315682736971052,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.6,
+      "mean_progress_pct": 43.598,
+      "mean_mud_slip_deg": 2.3816216216216217,
+      "mean_mud_course_deg": 2.485521884526868,
+      "mean_mud_lateral_mps": 0.5376696447698133,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 38.163
+    },
+    {
+      "timesteps": 800000,
+      "success_rate": 0.4,
+      "mean_return": 30.509339588647755,
+      "mean_time_s_success": 104.625,
+      "mean_accidents": 0.8,
+      "mean_progress_pct": 48.032,
+      "mean_mud_slip_deg": 3.424861111111111,
+      "mean_mud_course_deg": 2.927781463858795,
+      "mean_mud_lateral_mps": 0.5816399936992449,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 43.611
+    },
+    {
+      "timesteps": 850000,
+      "success_rate": 0.4,
+      "mean_return": 30.71307812359168,
+      "mean_time_s_success": 103.25,
+      "mean_accidents": 0.8,
+      "mean_progress_pct": 48.312,
+      "mean_mud_slip_deg": 2.8590277777777775,
+      "mean_mud_course_deg": 2.5193811790122598,
+      "mean_mud_lateral_mps": 0.4842370339403667,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 39.01299999999999
+    },
+    {
+      "timesteps": 900000,
+      "success_rate": 0.4,
+      "mean_return": 31.59456868623584,
+      "mean_time_s_success": 103.375,
+      "mean_accidents": 0.6,
+      "mean_progress_pct": 48.410000000000004,
+      "mean_mud_slip_deg": 2.8693548387096777,
+      "mean_mud_course_deg": 1.8605046845916322,
+      "mean_mud_lateral_mps": 0.3591252588306306,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 38.138999999999996
+    },
+    {
+      "timesteps": 950000,
+      "success_rate": 0.0,
+      "mean_return": 9.206609371372954,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.8,
+      "mean_progress_pct": 46.95,
+      "mean_mud_slip_deg": 3.2740259740259736,
+      "mean_mud_course_deg": 1.4007185499211727,
+      "mean_mud_lateral_mps": 0.2633873732775044,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 46.501999999999995
+    },
+    {
+      "timesteps": 1000000,
+      "success_rate": 0.4,
+      "mean_return": 30.906574011750685,
+      "mean_time_s_success": 100.25,
+      "mean_accidents": 0.8,
+      "mean_progress_pct": 48.416000000000004,
+      "mean_mud_slip_deg": 3.7627027027027027,
+      "mean_mud_course_deg": 2.8512184027900345,
+      "mean_mud_lateral_mps": 0.5973947870167838,
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 43.553
+    }
+  ]
+}

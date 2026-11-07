@@ -1,0 +1,1221 @@
+{
+  "suite": "rally-v5-suite-1",
+  "normal": {
+    "summary": {
+      "success_rate": 0.1,
+      "mean_return": 11.200335520882074,
+      "mean_time_s_success": 101.33333333333333,
+      "mean_accidents": 3.0,
+      "mean_progress_pct": 49.17600000000001,
+      "mean_mud_slip_deg": 3.6087634408602156,
+      "mean_mud_course_deg": 2.0418445185849943,
+      "mean_mud_lateral_mps": 0.405620255996271
+    },
+    "slip_by_terrain": {
+      "agua": {
+        "mean_deg": 3.913,
+        "p95_deg": 15.746,
+        "samples": 189
+      },
+      "asfalto": {
+        "mean_deg": 1.203,
+        "p95_deg": 3.47,
+        "samples": 5202
+      },
+      "lodo": {
+        "mean_deg": 3.609,
+        "p95_deg": 11.897,
+        "samples": 558
+      },
+      "pasto": {
+        "mean_deg": 2.188,
+        "p95_deg": 7.158,
+        "samples": 153
+      },
+      "rampa": {
+        "mean_deg": 1.48,
+        "p95_deg": 3.54,
+        "samples": 84
+      },
+      "valla": {
+        "mean_deg": 2.194,
+        "p95_deg": 3.55,
+        "samples": 132
+      }
+    },
+    "cases": [
+      {
+        "layout_seed": 100000,
+        "success": true,
+        "return": 71.26474122871812,
+        "steps": 412,
+        "time_s": 103.0,
+        "accidents": 4,
+        "checkpoints": 22,
+        "progress_pct": 100.0,
+        "fuel_l": 17.36,
+        "termination_cause": "vuelta_completada"
+      },
+      {
+        "layout_seed": 100001,
+        "success": false,
+        "return": 5.271989179720606,
+        "steps": 239,
+        "time_s": 59.75,
+        "accidents": 2,
+        "checkpoints": 10,
+        "progress_pct": 45.25,
+        "fuel_l": 28.71,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100002,
+        "success": false,
+        "return": -10.888747680705434,
+        "steps": 146,
+        "time_s": 36.5,
+        "accidents": 3,
+        "checkpoints": 5,
+        "progress_pct": 23.49,
+        "fuel_l": 32.96,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100003,
+        "success": false,
+        "return": 2.103452980127356,
+        "steps": 263,
+        "time_s": 65.75,
+        "accidents": 5,
+        "checkpoints": 10,
+        "progress_pct": 49.44,
+        "fuel_l": 26.12,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100004,
+        "success": false,
+        "return": 0.09460313683791988,
+        "steps": 188,
+        "time_s": 47.0,
+        "accidents": 5,
+        "checkpoints": 9,
+        "progress_pct": 43.98,
+        "fuel_l": 31.38,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100005,
+        "success": false,
+        "return": 3.1524663382273506,
+        "steps": 186,
+        "time_s": 46.5,
+        "accidents": 1,
+        "checkpoints": 7,
+        "progress_pct": 33.51,
+        "fuel_l": 31.32,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100006,
+        "success": false,
+        "return": 25.28076872963315,
+        "steps": 399,
+        "time_s": 99.75,
+        "accidents": 5,
+        "checkpoints": 19,
+        "progress_pct": 88.4,
+        "fuel_l": 19.65,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100007,
+        "success": false,
+        "return": -10.046331734088287,
+        "steps": 132,
+        "time_s": 33.0,
+        "accidents": 2,
+        "checkpoints": 4,
+        "progress_pct": 14.42,
+        "fuel_l": 33.88,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100008,
+        "success": false,
+        "return": -0.8990218145551259,
+        "steps": 260,
+        "time_s": 65.0,
+        "accidents": 5,
+        "checkpoints": 9,
+        "progress_pct": 44.81,
+        "fuel_l": 24.13,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100009,
+        "success": false,
+        "return": -23.345327253945655,
+        "steps": 146,
+        "time_s": 36.5,
+        "accidents": 4,
+        "checkpoints": 3,
+        "progress_pct": 7.5,
+        "fuel_l": 31.5,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100010,
+        "success": false,
+        "return": 19.98425645829882,
+        "steps": 254,
+        "time_s": 63.5,
+        "accidents": 0,
+        "checkpoints": 11,
+        "progress_pct": 53.42,
+        "fuel_l": 27.4,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100011,
+        "success": true,
+        "return": 70.3427412287181,
+        "steps": 443,
+        "time_s": 110.75,
+        "accidents": 4,
+        "checkpoints": 22,
+        "progress_pct": 100.0,
+        "fuel_l": 15.85,
+        "termination_cause": "vuelta_completada"
+      },
+      {
+        "layout_seed": 100012,
+        "success": false,
+        "return": -12.834509171480619,
+        "steps": 62,
+        "time_s": 15.5,
+        "accidents": 1,
+        "checkpoints": 1,
+        "progress_pct": 5.35,
+        "fuel_l": 37.62,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100013,
+        "success": true,
+        "return": 88.16874122871825,
+        "steps": 361,
+        "time_s": 90.25,
+        "accidents": 1,
+        "checkpoints": 22,
+        "progress_pct": 100.0,
+        "fuel_l": 21.78,
+        "termination_cause": "vuelta_completada"
+      },
+      {
+        "layout_seed": 100014,
+        "success": false,
+        "return": 10.149213404317411,
+        "steps": 290,
+        "time_s": 72.5,
+        "accidents": 5,
+        "checkpoints": 13,
+        "progress_pct": 62.49,
+        "fuel_l": 23.1,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100015,
+        "success": false,
+        "return": 27.784381558863405,
+        "steps": 438,
+        "time_s": 109.5,
+        "accidents": 3,
+        "checkpoints": 20,
+        "progress_pct": 93.32,
+        "fuel_l": 17.66,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100016,
+        "success": false,
+        "return": -3.0344937838163872,
+        "steps": 121,
+        "time_s": 30.25,
+        "accidents": 1,
+        "checkpoints": 4,
+        "progress_pct": 22.58,
+        "fuel_l": 35.04,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100017,
+        "success": false,
+        "return": 4.326947216773952,
+        "steps": 160,
+        "time_s": 40.0,
+        "accidents": 1,
+        "checkpoints": 7,
+        "progress_pct": 34.55,
+        "fuel_l": 32.77,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100018,
+        "success": false,
+        "return": 15.438595161198158,
+        "steps": 331,
+        "time_s": 82.75,
+        "accidents": 5,
+        "checkpoints": 15,
+        "progress_pct": 71.63,
+        "fuel_l": 21.32,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100019,
+        "success": false,
+        "return": 23.89026512929978,
+        "steps": 367,
+        "time_s": 91.75,
+        "accidents": 5,
+        "checkpoints": 18,
+        "progress_pct": 85.52,
+        "fuel_l": 19.78,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100020,
+        "success": false,
+        "return": 5.193030260569195,
+        "steps": 199,
+        "time_s": 49.75,
+        "accidents": 2,
+        "checkpoints": 9,
+        "progress_pct": 42.96,
+        "fuel_l": 30.01,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100021,
+        "success": false,
+        "return": 4.158485702891403,
+        "steps": 174,
+        "time_s": 43.5,
+        "accidents": 1,
+        "checkpoints": 7,
+        "progress_pct": 34.89,
+        "fuel_l": 32.1,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100022,
+        "success": false,
+        "return": -0.4882662827336599,
+        "steps": 228,
+        "time_s": 57.0,
+        "accidents": 3,
+        "checkpoints": 9,
+        "progress_pct": 44.35,
+        "fuel_l": 29.34,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100023,
+        "success": false,
+        "return": -4.191229147124766,
+        "steps": 175,
+        "time_s": 43.75,
+        "accidents": 5,
+        "checkpoints": 8,
+        "progress_pct": 36.64,
+        "fuel_l": 31.99,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100024,
+        "success": false,
+        "return": -5.255690719582249,
+        "steps": 112,
+        "time_s": 28.0,
+        "accidents": 1,
+        "checkpoints": 4,
+        "progress_pct": 18.14,
+        "fuel_l": 34.99,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100025,
+        "success": false,
+        "return": 17.790625103936758,
+        "steps": 338,
+        "time_s": 84.5,
+        "accidents": 5,
+        "checkpoints": 16,
+        "progress_pct": 75.17,
+        "fuel_l": 20.86,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100026,
+        "success": false,
+        "return": -9.153452182242361,
+        "steps": 84,
+        "time_s": 21.0,
+        "accidents": 1,
+        "checkpoints": 2,
+        "progress_pct": 11.7,
+        "fuel_l": 36.94,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100027,
+        "success": false,
+        "return": 3.620063573909654,
+        "steps": 268,
+        "time_s": 67.0,
+        "accidents": 5,
+        "checkpoints": 11,
+        "progress_pct": 51.6,
+        "fuel_l": 23.99,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100028,
+        "success": false,
+        "return": 13.98864513678058,
+        "steps": 201,
+        "time_s": 50.25,
+        "accidents": 0,
+        "checkpoints": 9,
+        "progress_pct": 42.53,
+        "fuel_l": 31.74,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100029,
+        "success": false,
+        "return": 4.1431226391968075,
+        "steps": 267,
+        "time_s": 66.75,
+        "accidents": 5,
+        "checkpoints": 11,
+        "progress_pct": 37.64,
+        "fuel_l": 24.98,
+        "termination_cause": "demasiados_accidentes"
+      }
+    ]
+  },
+  "lluvia": {
+    "summary": {
+      "success_rate": 0.0,
+      "mean_return": -7.474286714165887,
+      "mean_time_s_success": null,
+      "mean_accidents": 4.1,
+      "mean_progress_pct": 31.161333333333335,
+      "mean_mud_slip_deg": 8.74756345177665,
+      "mean_mud_course_deg": 2.606730242252502,
+      "mean_mud_lateral_mps": 0.48251715002155127
+    },
+    "slip_by_terrain": {
+      "agua": {
+        "mean_deg": 6.458,
+        "p95_deg": 36.828,
+        "samples": 206
+      },
+      "asfalto": {
+        "mean_deg": 5.521,
+        "p95_deg": 31.716,
+        "samples": 3785
+      },
+      "lodo": {
+        "mean_deg": 8.748,
+        "p95_deg": 37.771,
+        "samples": 394
+      },
+      "pasto": {
+        "mean_deg": 6.748,
+        "p95_deg": 44.758,
+        "samples": 147
+      },
+      "rampa": {
+        "mean_deg": 8.995,
+        "p95_deg": 46.681,
+        "samples": 59
+      },
+      "valla": {
+        "mean_deg": 4.133,
+        "p95_deg": 12.664,
+        "samples": 59
+      }
+    },
+    "cases": [
+      {
+        "layout_seed": 100000,
+        "success": false,
+        "return": -16.744331138272756,
+        "steps": 136,
+        "time_s": 34.0,
+        "accidents": 3,
+        "checkpoints": 3,
+        "progress_pct": 17.23,
+        "fuel_l": 29.23,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100001,
+        "success": false,
+        "return": 3.7209612219965873,
+        "steps": 261,
+        "time_s": 65.25,
+        "accidents": 5,
+        "checkpoints": 11,
+        "progress_pct": 51.34,
+        "fuel_l": 23.29,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100002,
+        "success": false,
+        "return": -2.12605584824429,
+        "steps": 174,
+        "time_s": 43.5,
+        "accidents": 5,
+        "checkpoints": 8,
+        "progress_pct": 40.43,
+        "fuel_l": 30.16,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100003,
+        "success": false,
+        "return": -13.107654833251974,
+        "steps": 208,
+        "time_s": 52.0,
+        "accidents": 4,
+        "checkpoints": 7,
+        "progress_pct": 31.89,
+        "fuel_l": 28.43,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100004,
+        "success": false,
+        "return": -12.186842227542963,
+        "steps": 170,
+        "time_s": 42.5,
+        "accidents": 4,
+        "checkpoints": 7,
+        "progress_pct": 32.31,
+        "fuel_l": 30.05,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100005,
+        "success": false,
+        "return": -4.871236196893749,
+        "steps": 203,
+        "time_s": 50.75,
+        "accidents": 5,
+        "checkpoints": 8,
+        "progress_pct": 36.62,
+        "fuel_l": 27.38,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100006,
+        "success": false,
+        "return": -9.372821291564595,
+        "steps": 256,
+        "time_s": 64.0,
+        "accidents": 4,
+        "checkpoints": 8,
+        "progress_pct": 39.63,
+        "fuel_l": 27.7,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100007,
+        "success": false,
+        "return": -18.156821202273225,
+        "steps": 135,
+        "time_s": 33.75,
+        "accidents": 3,
+        "checkpoints": 3,
+        "progress_pct": 13.01,
+        "fuel_l": 30.84,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100008,
+        "success": false,
+        "return": -12.061126496615621,
+        "steps": 180,
+        "time_s": 45.0,
+        "accidents": 4,
+        "checkpoints": 7,
+        "progress_pct": 32.63,
+        "fuel_l": 28.47,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100009,
+        "success": false,
+        "return": -22.51007618248859,
+        "steps": 111,
+        "time_s": 27.75,
+        "accidents": 4,
+        "checkpoints": 3,
+        "progress_pct": 9.1,
+        "fuel_l": 32.22,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100010,
+        "success": false,
+        "return": -9.869640958493871,
+        "steps": 178,
+        "time_s": 44.5,
+        "accidents": 5,
+        "checkpoints": 6,
+        "progress_pct": 28.2,
+        "fuel_l": 28.8,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100011,
+        "success": false,
+        "return": -2.672245535706825,
+        "steps": 235,
+        "time_s": 58.75,
+        "accidents": 5,
+        "checkpoints": 9,
+        "progress_pct": 40.62,
+        "fuel_l": 26.52,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100012,
+        "success": false,
+        "return": -7.813351317710037,
+        "steps": 68,
+        "time_s": 17.0,
+        "accidents": 0,
+        "checkpoints": 1,
+        "progress_pct": 5.35,
+        "fuel_l": 36.78,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100013,
+        "success": false,
+        "return": -2.8300385539978943,
+        "steps": 237,
+        "time_s": 59.25,
+        "accidents": 5,
+        "checkpoints": 9,
+        "progress_pct": 40.6,
+        "fuel_l": 24.33,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100014,
+        "success": false,
+        "return": -4.540675187232137,
+        "steps": 216,
+        "time_s": 54.0,
+        "accidents": 5,
+        "checkpoints": 8,
+        "progress_pct": 37.45,
+        "fuel_l": 26.12,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100015,
+        "success": false,
+        "return": -3.8114751061273626,
+        "steps": 192,
+        "time_s": 48.0,
+        "accidents": 5,
+        "checkpoints": 8,
+        "progress_pct": 37.9,
+        "fuel_l": 27.47,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100016,
+        "success": false,
+        "return": -13.219409006493752,
+        "steps": 161,
+        "time_s": 40.25,
+        "accidents": 3,
+        "checkpoints": 5,
+        "progress_pct": 22.71,
+        "fuel_l": 31.77,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100017,
+        "success": false,
+        "return": -7.003682270036901,
+        "steps": 176,
+        "time_s": 44.0,
+        "accidents": 5,
+        "checkpoints": 7,
+        "progress_pct": 32.45,
+        "fuel_l": 28.92,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100018,
+        "success": false,
+        "return": -14.215338616600237,
+        "steps": 61,
+        "time_s": 15.25,
+        "accidents": 1,
+        "checkpoints": 0,
+        "progress_pct": 3.54,
+        "fuel_l": 37.98,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100019,
+        "success": false,
+        "return": 0.7145354009048219,
+        "steps": 211,
+        "time_s": 52.75,
+        "accidents": 5,
+        "checkpoints": 10,
+        "progress_pct": 44.97,
+        "fuel_l": 26.96,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100020,
+        "success": false,
+        "return": 0.09785211238663116,
+        "steps": 205,
+        "time_s": 51.25,
+        "accidents": 5,
+        "checkpoints": 9,
+        "progress_pct": 39.45,
+        "fuel_l": 27.09,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100021,
+        "success": false,
+        "return": -9.015645378702905,
+        "steps": 156,
+        "time_s": 39.0,
+        "accidents": 3,
+        "checkpoints": 6,
+        "progress_pct": 28.11,
+        "fuel_l": 31.27,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100022,
+        "success": false,
+        "return": -14.710735622848329,
+        "steps": 137,
+        "time_s": 34.25,
+        "accidents": 3,
+        "checkpoints": 4,
+        "progress_pct": 20.07,
+        "fuel_l": 33.13,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100023,
+        "success": false,
+        "return": -7.13956499127951,
+        "steps": 212,
+        "time_s": 53.0,
+        "accidents": 5,
+        "checkpoints": 7,
+        "progress_pct": 33.49,
+        "fuel_l": 25.85,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100024,
+        "success": false,
+        "return": -10.550015349276041,
+        "steps": 125,
+        "time_s": 31.25,
+        "accidents": 2,
+        "checkpoints": 4,
+        "progress_pct": 18.1,
+        "fuel_l": 33.62,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100025,
+        "success": false,
+        "return": 11.774360510149048,
+        "steps": 313,
+        "time_s": 78.25,
+        "accidents": 5,
+        "checkpoints": 14,
+        "progress_pct": 58.86,
+        "fuel_l": 21.06,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100026,
+        "success": false,
+        "return": -15.675475136013139,
+        "steps": 151,
+        "time_s": 37.75,
+        "accidents": 5,
+        "checkpoints": 4,
+        "progress_pct": 18.86,
+        "fuel_l": 29.8,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100027,
+        "success": false,
+        "return": -6.74623175122737,
+        "steps": 195,
+        "time_s": 48.75,
+        "accidents": 5,
+        "checkpoints": 7,
+        "progress_pct": 33.59,
+        "fuel_l": 27.47,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100028,
+        "success": false,
+        "return": 1.251705198660198,
+        "steps": 287,
+        "time_s": 71.75,
+        "accidents": 5,
+        "checkpoints": 10,
+        "progress_pct": 48.69,
+        "fuel_l": 20.48,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100029,
+        "success": false,
+        "return": -0.8375256701798417,
+        "steps": 209,
+        "time_s": 52.25,
+        "accidents": 5,
+        "checkpoints": 9,
+        "progress_pct": 37.64,
+        "fuel_l": 27.4,
+        "termination_cause": "demasiados_accidentes"
+      }
+    ]
+  },
+  "sensor_ruidoso": {
+    "summary": {
+      "success_rate": 0.1,
+      "mean_return": 9.417029511941553,
+      "mean_time_s_success": 111.83333333333333,
+      "mean_accidents": 2.7666666666666666,
+      "mean_progress_pct": 45.97666666666667,
+      "mean_mud_slip_deg": 2.735553145336226,
+      "mean_mud_course_deg": 2.6925600244123613,
+      "mean_mud_lateral_mps": 0.39447614257951247
+    },
+    "slip_by_terrain": {
+      "agua": {
+        "mean_deg": 5.043,
+        "p95_deg": 22.113,
+        "samples": 116
+      },
+      "asfalto": {
+        "mean_deg": 1.236,
+        "p95_deg": 3.455,
+        "samples": 4871
+      },
+      "lodo": {
+        "mean_deg": 2.736,
+        "p95_deg": 8.12,
+        "samples": 461
+      },
+      "pasto": {
+        "mean_deg": 2.448,
+        "p95_deg": 8.311,
+        "samples": 207
+      },
+      "rampa": {
+        "mean_deg": 2.091,
+        "p95_deg": 3.69,
+        "samples": 66
+      },
+      "valla": {
+        "mean_deg": 3.079,
+        "p95_deg": 3.57,
+        "samples": 119
+      }
+    },
+    "cases": [
+      {
+        "layout_seed": 100000,
+        "success": false,
+        "return": -7.430397685725035,
+        "steps": 169,
+        "time_s": 42.25,
+        "accidents": 5,
+        "checkpoints": 7,
+        "progress_pct": 31.2,
+        "fuel_l": 30.86,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100001,
+        "success": false,
+        "return": 12.747914572434711,
+        "steps": 262,
+        "time_s": 65.5,
+        "accidents": 0,
+        "checkpoints": 9,
+        "progress_pct": 42.78,
+        "fuel_l": 28.84,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100002,
+        "success": false,
+        "return": -1.912424733641906,
+        "steps": 124,
+        "time_s": 31.0,
+        "accidents": 1,
+        "checkpoints": 5,
+        "progress_pct": 23.5,
+        "fuel_l": 33.12,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100003,
+        "success": false,
+        "return": -11.146146932381615,
+        "steps": 111,
+        "time_s": 27.75,
+        "accidents": 1,
+        "checkpoints": 2,
+        "progress_pct": 9.17,
+        "fuel_l": 34.12,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100004,
+        "success": false,
+        "return": -13.869519128746365,
+        "steps": 94,
+        "time_s": 23.5,
+        "accidents": 2,
+        "checkpoints": 2,
+        "progress_pct": 10.23,
+        "fuel_l": 34.34,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100005,
+        "success": false,
+        "return": 8.850662953916729,
+        "steps": 167,
+        "time_s": 41.75,
+        "accidents": 0,
+        "checkpoints": 7,
+        "progress_pct": 34.08,
+        "fuel_l": 32.68,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100006,
+        "success": false,
+        "return": 25.13156647483793,
+        "steps": 393,
+        "time_s": 98.25,
+        "accidents": 5,
+        "checkpoints": 19,
+        "progress_pct": 86.78,
+        "fuel_l": 16.53,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100007,
+        "success": false,
+        "return": -7.454845027437626,
+        "steps": 101,
+        "time_s": 25.25,
+        "accidents": 1,
+        "checkpoints": 3,
+        "progress_pct": 14.72,
+        "fuel_l": 35.62,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100008,
+        "success": true,
+        "return": 69.12674122871826,
+        "steps": 479,
+        "time_s": 119.75,
+        "accidents": 4,
+        "checkpoints": 22,
+        "progress_pct": 100.0,
+        "fuel_l": 13.37,
+        "termination_cause": "vuelta_completada"
+      },
+      {
+        "layout_seed": 100009,
+        "success": false,
+        "return": -13.96085643789568,
+        "steps": 87,
+        "time_s": 21.75,
+        "accidents": 2,
+        "checkpoints": 2,
+        "progress_pct": 11.7,
+        "fuel_l": 34.92,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100010,
+        "success": false,
+        "return": 3.1254615751732153,
+        "steps": 166,
+        "time_s": 41.5,
+        "accidents": 1,
+        "checkpoints": 7,
+        "progress_pct": 32.73,
+        "fuel_l": 32.22,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100011,
+        "success": false,
+        "return": 25.03303769818421,
+        "steps": 394,
+        "time_s": 98.5,
+        "accidents": 5,
+        "checkpoints": 19,
+        "progress_pct": 87.88,
+        "fuel_l": 18.68,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100012,
+        "success": false,
+        "return": -8.314768182928681,
+        "steps": 94,
+        "time_s": 23.5,
+        "accidents": 0,
+        "checkpoints": 1,
+        "progress_pct": 5.38,
+        "fuel_l": 36.1,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100013,
+        "success": false,
+        "return": -22.960700657780734,
+        "steps": 96,
+        "time_s": 24.0,
+        "accidents": 4,
+        "checkpoints": 3,
+        "progress_pct": 13.6,
+        "fuel_l": 34.13,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100014,
+        "success": false,
+        "return": 31.155246303509184,
+        "steps": 354,
+        "time_s": 88.5,
+        "accidents": 2,
+        "checkpoints": 19,
+        "progress_pct": 88.04,
+        "fuel_l": 21.96,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100015,
+        "success": false,
+        "return": 28.639888388588968,
+        "steps": 437,
+        "time_s": 109.25,
+        "accidents": 5,
+        "checkpoints": 20,
+        "progress_pct": 94.77,
+        "fuel_l": 16.25,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100016,
+        "success": false,
+        "return": -2.431698235532947,
+        "steps": 125,
+        "time_s": 31.25,
+        "accidents": 1,
+        "checkpoints": 5,
+        "progress_pct": 22.82,
+        "fuel_l": 33.88,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100017,
+        "success": false,
+        "return": 4.6662372212194505,
+        "steps": 170,
+        "time_s": 42.5,
+        "accidents": 1,
+        "checkpoints": 7,
+        "progress_pct": 35.48,
+        "fuel_l": 31.94,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100018,
+        "success": true,
+        "return": 70.51874122871823,
+        "steps": 437,
+        "time_s": 109.25,
+        "accidents": 4,
+        "checkpoints": 22,
+        "progress_pct": 100.0,
+        "fuel_l": 16.13,
+        "termination_cause": "vuelta_completada"
+      },
+      {
+        "layout_seed": 100019,
+        "success": true,
+        "return": 70.74874122871825,
+        "steps": 426,
+        "time_s": 106.5,
+        "accidents": 4,
+        "checkpoints": 22,
+        "progress_pct": 100.0,
+        "fuel_l": 16.18,
+        "termination_cause": "vuelta_completada"
+      },
+      {
+        "layout_seed": 100020,
+        "success": false,
+        "return": -6.703749056489964,
+        "steps": 146,
+        "time_s": 36.5,
+        "accidents": 3,
+        "checkpoints": 7,
+        "progress_pct": 28.22,
+        "fuel_l": 32.04,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100021,
+        "success": false,
+        "return": 1.5821771638585247,
+        "steps": 214,
+        "time_s": 53.5,
+        "accidents": 2,
+        "checkpoints": 8,
+        "progress_pct": 34.26,
+        "fuel_l": 29.45,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100022,
+        "success": false,
+        "return": -10.274730148555472,
+        "steps": 167,
+        "time_s": 41.75,
+        "accidents": 2,
+        "checkpoints": 4,
+        "progress_pct": 19.92,
+        "fuel_l": 32.27,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100023,
+        "success": false,
+        "return": 12.322054693566617,
+        "steps": 289,
+        "time_s": 72.25,
+        "accidents": 5,
+        "checkpoints": 14,
+        "progress_pct": 65.52,
+        "fuel_l": 23.59,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100024,
+        "success": false,
+        "return": 22.14722476123855,
+        "steps": 369,
+        "time_s": 92.25,
+        "accidents": 5,
+        "checkpoints": 18,
+        "progress_pct": 82.34,
+        "fuel_l": 20.45,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100025,
+        "success": false,
+        "return": -4.2572826683370355,
+        "steps": 177,
+        "time_s": 44.25,
+        "accidents": 5,
+        "checkpoints": 8,
+        "progress_pct": 36.55,
+        "fuel_l": 30.05,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100026,
+        "success": false,
+        "return": -7.605058669011793,
+        "steps": 139,
+        "time_s": 34.75,
+        "accidents": 5,
+        "checkpoints": 6,
+        "progress_pct": 30.96,
+        "fuel_l": 32.75,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100027,
+        "success": false,
+        "return": 5.674805543278012,
+        "steps": 207,
+        "time_s": 51.75,
+        "accidents": 1,
+        "checkpoints": 8,
+        "progress_pct": 37.94,
+        "fuel_l": 29.98,
+        "termination_cause": "atascado"
+      },
+      {
+        "layout_seed": 100028,
+        "success": false,
+        "return": 5.781105410885498,
+        "steps": 287,
+        "time_s": 71.75,
+        "accidents": 5,
+        "checkpoints": 12,
+        "progress_pct": 55.23,
+        "fuel_l": 24.2,
+        "termination_cause": "demasiados_accidentes"
+      },
+      {
+        "layout_seed": 100029,
+        "success": false,
+        "return": 3.5814564758651457,
+        "steps": 244,
+        "time_s": 61.0,
+        "accidents": 2,
+        "checkpoints": 9,
+        "progress_pct": 43.5,
+        "fuel_l": 27.22,
+        "termination_cause": "atascado"
+      }
+    ]
+  }
+}

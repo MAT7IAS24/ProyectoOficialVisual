@@ -1,0 +1,255 @@
+{
+  "environment_version": "rally-v5",
+  "reward_version": "v5",
+  "level_id": "N5",
+  "experiment": {
+    "title": "Un coche que se comporta como coche",
+    "hypothesis": "Con llantas realistas (fórmula de Pacejka y círculo de agarre), volante y pedal que reaccionan de forma gradual y un barro con surcos que frena y no deja ir de lado, (1) el coche deja de cruzar el barro en diagonal: su ángulo de avance respecto a la pista dentro del barro baja de 12° (reglas en el N4) a menos de 3°, y (2) las reglas conservan al menos el 80% de vueltas completas y PPO no empeora más de 5 puntos frente al N4 (20%) en las mismas 30 pistas nuevas.",
+    "change_vs_previous": "v4 -> v5: el coche pasa de un modelo cinemático (va siempre hacia donde apunta) a uno dinámico de dos ejes: velocidad hacia adelante y de lado, giro con inercia, fuerza de cada eje según la fórmula mágica de Pacejka, y círculo de agarre (acelerar y girar comparten el agarre). Volante y pedal con velocidad máxima de cambio. El barro frena con resistencia a la rodadura y sus surcos se oponen a moverse de lado respecto a la pista y enderezan el coche. La pista base pasa de tierra a asfalto. Hacer un trompo (deslizar más de 70°) cuenta como accidente. La observación agrega 6 datos (velocidad lateral, giro, volante y pedal reales, deslizamiento y agarre bajo las ruedas): familia de modelos nueva.",
+    "selection_criteria": {
+      "max_mean_mud_course_deg": 3.0,
+      "min_success_rate_rules": 0.8,
+      "n4_ppo_success_rate": 0.2,
+      "ppo_not_worse_than_n4_by": 0.05
+    },
+    "attempt": 2,
+    "previous_attempt": {
+      "date": "6 nov",
+      "commit": "9d3c8d1",
+      "report": "reports/rally-v5-132e21c5a8cd4e7f8e6df073eb8270bb.json",
+      "accepted": false,
+      "ppo_success_rate": 0.0,
+      "qlearning_success_rate": 0.022,
+      "rules_success_rate": 0.867,
+      "rules_mud_course_deg": 2.71,
+      "ppo_mean_accidents": 3.38,
+      "diagnosis": [
+        "PPO manejaba «todo o nada»: acelerador a fondo el 46 % del tiempo y volante a tope el 32 %",
+        "Con la física nueva eso hace derrapar y salirse de la pista (3,4 accidentes por vuelta)",
+        "Llegó a 20–40 % a mitad del entrenamiento y lo olvidó: se guardaba el modelo del final"
+      ]
+    },
+    "changes_vs_attempt_1": [
+      "Se guarda el mejor punto del entrenamiento, elegido en 10 pistas de VALIDACIÓN (no en las 30 del examen)",
+      "La tasa de aprendizaje baja en línea recta hasta 0 para no olvidar al final",
+      "El modelo recomendado también se elige por validación",
+      "Se probó exploración suave (gSDE) y se descartó: aprendía más lento"
+    ],
+    "n4_reference": {
+      "rules_success_rate": 0.867,
+      "rules_mud_course_deg": 12.11,
+      "rules_mud_lateral_mps": 2.52,
+      "ppo_success_rate": 0.2,
+      "ppo_mud_course_deg": 5.51,
+      "qlearning_success_rate": 0.06
+    }
+  },
+  "track": {
+    "straight_m": 300,
+    "radius_m": 80,
+    "lanes": 4,
+    "lane_width_m": 4.0,
+    "cell_m": 10,
+    "checkpoint_every_m": 50,
+    "start_clear_m": 40,
+    "finish_clear_m": 30
+  },
+  "physics": {
+    "dt_s": 0.25,
+    "substeps": 10,
+    "gravity_mps2": 9.81,
+    "max_speed_mps": 35,
+    "max_accel_mps2": 6.0,
+    "max_brake_mps2": 9.0,
+    "drag_per_v2": 0.0008,
+    "wheelbase_m": 2.7,
+    "cg_to_front_m": 1.25,
+    "cg_to_rear_m": 1.45,
+    "mass_kg": 1250,
+    "yaw_inertia_kgm2": 1900,
+    "max_steer_rad": 0.4,
+    "steer_rate_rad_s": 1.2,
+    "pedal_rate_per_s": 5.0,
+    "drive_front_share": 0.5,
+    "brake_front_share": 0.6,
+    "tire_B_front": 9.0,
+    "tire_B_rear": 11.0,
+    "tire_C": 1.8,
+    "tire_E": 0.95,
+    "kinematic_below_mps": 1.5,
+    "slide_event_deg": 6.0,
+    "spin_deg": 70.0,
+    "ramp_angle_deg": 20,
+    "ramp_height_m": 1.2,
+    "deck_height_m": 3.0,
+    "landing_lip_m": 0.6,
+    "hard_landing_vz_mps": 12.0,
+    "barrier_length_m": 2.0,
+    "barrier_crash_speed_mps": 6.0,
+    "fall_accident_drop_m": 2.0,
+    "initial_fuel_l": 40,
+    "fuel_idle_l_per_s": 0.08,
+    "fuel_throttle_l_per_s": 0.32
+  },
+  "terrains": {
+    "asfalto": {
+      "code": ".",
+      "grip": 1.0,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#3b3f45"
+    },
+    "lodo": {
+      "code": "L",
+      "grip": 0.45,
+      "rolling": 0.22,
+      "plow": 0.55,
+      "color": "#5a3b24"
+    },
+    "agua": {
+      "code": "A",
+      "grip": 0.35,
+      "rolling": 0.04,
+      "plow": 0.0,
+      "color": "#2f86d6"
+    },
+    "pasto": {
+      "code": "S",
+      "grip": 0.55,
+      "rolling": 0.08,
+      "plow": 0.1,
+      "color": "#6f9a2e"
+    },
+    "foso": {
+      "code": "F",
+      "grip": 0.0,
+      "rolling": 0.0,
+      "plow": 0.0,
+      "color": "#17110e"
+    },
+    "rampa": {
+      "code": "R",
+      "grip": 0.9,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#b9622f"
+    },
+    "valla": {
+      "code": "B",
+      "grip": 1.0,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#d8332a"
+    }
+  },
+  "generator": {
+    "section_m": 100,
+    "min_free_lanes_per_section": 1,
+    "patch_probabilities": {
+      "lodo": 0.22,
+      "agua": 0.18,
+      "pasto": 0.15,
+      "valla": 0.16,
+      "rampa_foso": 0.1,
+      "nada": 0.19
+    },
+    "patch_length_cells": [
+      1,
+      3
+    ],
+    "bridge_probability": 0.6,
+    "bridge_length_cells": [
+      6,
+      9
+    ],
+    "bridge_gap_m": 6
+  },
+  "sensors": {
+    "lookahead_cells": 6,
+    "features_per_cell": [
+      "peligro",
+      "rampa",
+      "frena",
+      "agarre",
+      "puente"
+    ]
+  },
+  "perturbations": {
+    "lluvia": {
+      "descripcion": "Lluvia: todo el agarre baja un 30% y el lodo frena un 30% más.",
+      "grip_factor": 0.7,
+      "rolling_factor": 1.3
+    },
+    "sensor_ruidoso": {
+      "descripcion": "Sensores con ruido gaussiano (desviación 0,1) en cada lectura. Desde el N5 también afecta a Q-learning.",
+      "obs_noise_std": 0.1
+    }
+  },
+  "reward": {
+    "per_meter": 0.05,
+    "checkpoint": 0.5,
+    "step": -0.02,
+    "accident": -5.0,
+    "stalled": -10.0,
+    "finish": 30.0,
+    "remaining_fuel_per_l": 0.2
+  },
+  "episode": {
+    "max_steps": 600,
+    "max_accidents": 5,
+    "stall_steps": 40
+  },
+  "training": {
+    "seeds": [
+      7,
+      21,
+      42
+    ],
+    "ppo": {
+      "total_timesteps": 1000000,
+      "n_envs": 4,
+      "n_steps": 512,
+      "batch_size": 256,
+      "n_epochs": 10,
+      "learning_rate": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_range": 0.2,
+      "ent_coef": 0.005,
+      "log_std_init": -0.5,
+      "lr_schedule": "linear",
+      "use_sde": false,
+      "net_arch": [
+        64,
+        64
+      ],
+      "eval_every_steps": 50000,
+      "eval_layouts_during_training": 5
+    },
+    "qlearning": {
+      "alpha": 0.2,
+      "gamma": 0.98,
+      "epsilon_start": 1.0,
+      "epsilon_end": 0.05,
+      "speed_bins": [
+        3,
+        8,
+        14,
+        20,
+        26
+      ],
+      "psi_bins": [
+        -0.12,
+        0.12
+      ]
+    },
+    "train_layout_seed_offset": 0,
+    "evaluation_episodes": 30,
+    "validation_episodes": 10,
+    "validation_layout_seed_offset": 200000,
+    "evaluation_layout_seed_offset": 100000
+  },
+  "tracking": {
+    "experiment_name": "autonomous-rally-v5"
+  }
+}

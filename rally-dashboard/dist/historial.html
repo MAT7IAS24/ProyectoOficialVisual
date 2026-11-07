@@ -185,12 +185,44 @@
       </div>
     </article>
 
-    <article class="card next">
-      <div class="side"><div class="num">N5</div><div class="tag">rally-v5-n5</div><div class="date">próximo</div></div>
+    <article class="card">
+      <div class="side"><div class="num">N5</div><div class="tag">rally-v5-n5</div><div class="date">7 nov 2026</div></div>
       <div>
-        <span class="eyebrow">Experimento 5 · en diseño</span>
-        <h2>Aprender mejor y verse mejor</h2>
-        <p>Propuesta: más presupuesto de entrenamiento o empezar imitando las reglas, y una pista más estética (asfalto en toda la pista y público en las tribunas).</p>
+        <span class="eyebrow">Experimento 5 · física de llantas real · 2 intentos</span>
+        <h2>Un coche que se comporta como coche</h2>
+        <p>En el N4 el coche cruzaba el barro en diagonal y nunca derrapaba. Ahora tiene velocidad hacia adelante y de lado, giro con inercia, llantas con la fórmula de Pacejka, círculo de agarre, volante y pedal graduales y barro con surcos que frena sin empujar de lado. La pista se ve con asfalto, líneas pintadas, conos y meta a cuadros.</p>
+        <dl class="kv">
+          <dt>Ambiente</dt><dd>140 sensores (6 nuevos: velocidad lateral, giro, volante y pedal reales, deslizamiento, agarre); física cada 0,025 s; el trompo cuenta como accidente</dd>
+          <dt>Hipótesis</dt><dd>Barro de 12° a menos de 3°, reglas ≥ 80 % y PPO no peor que el N4 por más de 5 puntos (≥ 15 %)</dd>
+          <dt>Intento 1</dt><dd>PPO 0 %: manejaba «todo o nada» y olvidaba lo aprendido. Rechazado y guardado</dd>
+          <dt>Intento 2</dt><dd>Mejor punto elegido en 10 pistas de validación y tasa de aprendizaje decreciente; misma física y recompensa</dd>
+        </dl>
+        <div class="result">
+          <div class="stat"><b>2,7°</b><span>Barro (antes 12°)</span></div>
+          <div class="stat"><b>87 %</b><span>Reglas a mano</span></div>
+          <div class="stat"><b>10 %</b><span>PPO (intento 1: 0 %)</span></div>
+          <div class="stat"><b>6 %</b><span>Q-learning</span></div>
+          <div class="stat"><b class="bad">No</b><span>Hipótesis confirmada</span></div>
+        </div>
+        <p class="note">Aprendizaje: la física quedó como queríamos, pero con llantas reales aprender desde cero es mucho más difícil. PPO mejoró de 0 % a 10 % y bajó los accidentes casi a la mitad; no alcanza el 15 %. Siguiente paso: sensores tipo Sophy (N7) e imitar primero a las reglas (N8).</p>
+        <div class="links">
+          <a class="btn" href="v5.html">▶ Antes y ahora en el barro</a>
+          <a class="btn" href="v5.html?escenario=ppo-vs-q-0">▶ PPO vs Q-learning</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v5-n5">Código de esta versión</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v5-n5/docs/rally-v5.md">Documentación</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v5-n5/reports/rally-v5-e7e8a036393943de956ca4e29152784e.json">Informe intento 2</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v5-n5/reports/rally-v5-132e21c5a8cd4e7f8e6df073eb8270bb.json">Informe intento 1</a>
+          <a class="btn" href="modelos/n5/ppo-recomendado/manifest.json">Modelo recomendado</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="card next">
+      <div class="side"><div class="num">N6</div><div class="tag">rally-v6-n6</div><div class="date">próximo</div></div>
+      <div>
+        <span class="eyebrow">Experimento 6 · en diseño</span>
+        <h2>Peso, suspensión y coche nuevo</h2>
+        <p>El peso se pasa adelante al frenar y hacia afuera en las curvas, aterrizajes con suspensión, un coche tipo rally nuevo con ruedas que giran y viran, y cámara de persecución suave.</p>
       </div>
     </article>
   </div>
@@ -198,16 +230,16 @@
   <section>
     <h2>Cómo creció el problema</h2>
     <div class="table-wrap"><table>
-      <thead><tr><th></th><th>N1</th><th>N2</th><th>N3</th><th>N4</th></tr></thead>
+      <thead><tr><th></th><th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th></tr></thead>
       <tbody>
-        <tr><td>Largo de la pista</td><td>1 km</td><td>1 km</td><td>3 km</td><td>1,1 km (óvalo)</td></tr>
-        <tr><td>Carriles</td><td>1</td><td>1</td><td>4</td><td>4 (posición continua)</td></tr>
-        <tr><td>Acciones</td><td>2</td><td>3</td><td>5</td><td>2 continuas</td></tr>
-        <tr><td>Estados posibles</td><td>11</td><td>528</td><td>43.648</td><td>continuo (134 sensores)</td></tr>
-        <tr><td>Obstáculos</td><td>—</td><td>2 curvas</td><td>lodo, agua, pasto, fosos, barriles, rampas, puente</td><td>al azar en cada carrera, con física</td></tr>
-        <tr><td>Episodios × semillas</td><td>25 × 1</td><td>3.000 × 3</td><td>4.000 × 3 (+ 2 intervenciones)</td><td>1 M pasos × 3 × 2 algoritmos</td></tr>
-        <tr><td>Comparación con referencias</td><td>—</td><td>—</td><td>reglas y azar</td><td>reglas, azar y Q-learning</td></tr>
-        <tr><td>Incidente controlado</td><td>—</td><td>—</td><td>lluvia</td><td>lluvia y sensores con ruido</td></tr>
+        <tr><td>Largo de la pista</td><td>1 km</td><td>1 km</td><td>3 km</td><td>1,1 km (óvalo)</td><td>1,1 km, asfalto</td></tr>
+        <tr><td>Carriles</td><td>1</td><td>1</td><td>4</td><td>4 (posición continua)</td><td>4 (posición continua)</td></tr>
+        <tr><td>Acciones</td><td>2</td><td>3</td><td>5</td><td>2 continuas</td><td>2 continuas, con volante y pedal graduales</td></tr>
+        <tr><td>Estados posibles</td><td>11</td><td>528</td><td>43.648</td><td>continuo (134 sensores)</td><td>continuo (140 sensores)</td></tr>
+        <tr><td>Obstáculos</td><td>—</td><td>2 curvas</td><td>lodo, agua, pasto, fosos, barriles, rampas, puente</td><td>al azar en cada carrera, con física</td><td>los mismos, con llantas reales: derrapes, trompos y surcos en el barro</td></tr>
+        <tr><td>Episodios × semillas</td><td>25 × 1</td><td>3.000 × 3</td><td>4.000 × 3 (+ 2 intervenciones)</td><td>1 M pasos × 3 × 2 algoritmos</td><td>1 M pasos × 3 × 2 algoritmos × 2 intentos</td></tr>
+        <tr><td>Comparación con referencias</td><td>—</td><td>—</td><td>reglas y azar</td><td>reglas, azar y Q-learning</td><td>lo mismo + el N4 en las mismas 30 pistas</td></tr>
+        <tr><td>Incidente controlado</td><td>—</td><td>—</td><td>lluvia</td><td>lluvia y sensores con ruido</td><td>lluvia y sensores con ruido (ahora también afecta a Q-learning)</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -217,11 +249,11 @@
     <div class="table-wrap"><table>
       <thead><tr><th>Componente</th><th>Dónde</th><th>Cómo verlo</th></tr></thead>
       <tbody>
-        <tr><td>Código, configuración y pipeline de cada versión</td><td>GitHub, una etiqueta por experimento (<code>rally-v1-n1</code> … <code>rally-v4-n4</code>); <code>main</code> contiene los cuatro</td><td><a href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tags">Lista de versiones</a></td></tr>
+        <tr><td>Código, configuración y pipeline de cada versión</td><td>GitHub, una etiqueta por experimento (<code>rally-v1-n1</code> … <code>rally-v5-n5</code>); <code>main</code> contiene los cinco</td><td><a href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tags">Lista de versiones</a></td></tr>
         <tr><td>Esta web</td><td>Vercel, publicada desde <code>rally-dashboard/dist</code></td><td><a href="https://autonomous-rally-lake.vercel.app">autonomous-rally-lake.vercel.app</a></td></tr>
         <tr><td>Datos de entrenamiento</td><td>DVC: los punteros <code>.dvc</code> están en Git; los CSV en la caché local de quien entrenó</td><td><code>data/experiments/</code> en cada versión</td></tr>
-        <tr><td>Corridas, métricas y artefactos</td><td>MLflow local (<code>autonomous-rally</code>, <code>-v2</code>, <code>-v3</code>)</td><td>Resumen en el informe JSON de cada versión</td></tr>
-        <tr><td>Modelos</td><td>N2 en Hugging Face (privado); N4 publicado en esta web (<code>modelos/n4/</code>); N1 y N3 como artefactos de MLflow</td><td>Enlace en cada tarjeta</td></tr>
+        <tr><td>Corridas, métricas y artefactos</td><td>MLflow local (<code>autonomous-rally</code>, <code>-v2</code> … <code>-v5</code>)</td><td>Resumen en el informe JSON de cada versión</td></tr>
+        <tr><td>Modelos</td><td>N2 en Hugging Face (privado); N4 y N5 publicados en esta web (<code>modelos/n4/</code>, <code>modelos/n5/</code>); N1 y N3 como artefactos de MLflow</td><td>Enlace en cada tarjeta</td></tr>
       </tbody>
     </table></div>
     <p class="note">Pendiente: almacenamiento remoto compartido para DVC y MLflow, para que cualquier persona pueda recuperar los datos y el historial completo con <code>dvc pull</code>.</p>
