@@ -1,9 +1,10 @@
 {
   "cleanUrls": false,
-  "rewrites": [
+  "redirects": [
     {
       "source": "/",
-      "destination": "/historial.html"
+      "destination": "/historial.html",
+      "permanent": false
     }
   ]
 }

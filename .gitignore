@@ -9,3 +9,5 @@ models/
 .dvc-storage/
 rally-dashboard/.openai/
 .prueba-sin-tracking/
+.vercel/
+.env*.local
