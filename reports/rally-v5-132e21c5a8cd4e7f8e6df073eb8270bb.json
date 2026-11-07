@@ -1,0 +1,3613 @@
+{
+  "suite_id": "rally-v5-132e21c5a8cd4e7f8e6df073eb8270bb",
+  "environment_version": "rally-v5",
+  "reward_version": "v5",
+  "level_id": "N5",
+  "tracking": "omitido (--skip-tracking): sin DVC ni MLflow, no es corrida oficial",
+  "config": {
+    "environment_version": "rally-v5",
+    "reward_version": "v5",
+    "level_id": "N5",
+    "experiment": {
+      "title": "Un coche que se comporta como coche",
+      "hypothesis": "Con llantas realistas (fórmula de Pacejka y círculo de agarre), volante y pedal que reaccionan de forma gradual y un barro con surcos que frena y no deja ir de lado, (1) el coche deja de cruzar el barro en diagonal: su ángulo de avance respecto a la pista dentro del barro baja de 12° (reglas en el N4) a menos de 3°, y (2) las reglas conservan al menos el 80% de vueltas completas y PPO no empeora más de 5 puntos frente al N4 (20%) en las mismas 30 pistas nuevas.",
+      "change_vs_previous": "v4 -> v5: el coche pasa de un modelo cinemático (va siempre hacia donde apunta) a uno dinámico de dos ejes: velocidad hacia adelante y de lado, giro con inercia, fuerza de cada eje según la fórmula mágica de Pacejka, y círculo de agarre (acelerar y girar comparten el agarre). Volante y pedal con velocidad máxima de cambio. El barro frena con resistencia a la rodadura y sus surcos se oponen a moverse de lado respecto a la pista y enderezan el coche. La pista base pasa de tierra a asfalto. Hacer un trompo (deslizar más de 70°) cuenta como accidente. La observación agrega 6 datos (velocidad lateral, giro, volante y pedal reales, deslizamiento y agarre bajo las ruedas): familia de modelos nueva.",
+      "selection_criteria": {
+        "max_mean_mud_course_deg": 3.0,
+        "min_success_rate_rules": 0.8,
+        "n4_ppo_success_rate": 0.2,
+        "ppo_not_worse_than_n4_by": 0.05
+      },
+      "n4_reference": {
+        "rules_success_rate": 0.867,
+        "rules_mud_course_deg": 12.11,
+        "rules_mud_lateral_mps": 2.52,
+        "ppo_success_rate": 0.2,
+        "ppo_mud_course_deg": 5.51,
+        "qlearning_success_rate": 0.06
+      }
+    },
+    "track": {
+      "straight_m": 300,
+      "radius_m": 80,
+      "lanes": 4,
+      "lane_width_m": 4.0,
+      "cell_m": 10,
+      "checkpoint_every_m": 50,
+      "start_clear_m": 40,
+      "finish_clear_m": 30
+    },
+    "physics": {
+      "dt_s": 0.25,
+      "substeps": 10,
+      "gravity_mps2": 9.81,
+      "max_speed_mps": 35,
+      "max_accel_mps2": 6.0,
+      "max_brake_mps2": 9.0,
+      "drag_per_v2": 0.0008,
+      "wheelbase_m": 2.7,
+      "cg_to_front_m": 1.25,
+      "cg_to_rear_m": 1.45,
+      "mass_kg": 1250,
+      "yaw_inertia_kgm2": 1900,
+      "max_steer_rad": 0.4,
+      "steer_rate_rad_s": 1.2,
+      "pedal_rate_per_s": 5.0,
+      "drive_front_share": 0.5,
+      "brake_front_share": 0.6,
+      "tire_B_front": 9.0,
+      "tire_B_rear": 11.0,
+      "tire_C": 1.8,
+      "tire_E": 0.95,
+      "kinematic_below_mps": 1.5,
+      "slide_event_deg": 6.0,
+      "spin_deg": 70.0,
+      "ramp_angle_deg": 20,
+      "ramp_height_m": 1.2,
+      "deck_height_m": 3.0,
+      "landing_lip_m": 0.6,
+      "hard_landing_vz_mps": 12.0,
+      "barrier_length_m": 2.0,
+      "barrier_crash_speed_mps": 6.0,
+      "fall_accident_drop_m": 2.0,
+      "initial_fuel_l": 40,
+      "fuel_idle_l_per_s": 0.08,
+      "fuel_throttle_l_per_s": 0.32
+    },
+    "terrains": {
+      "asfalto": {
+        "code": ".",
+        "grip": 1.0,
+        "rolling": 0.015,
+        "plow": 0.0,
+        "color": "#3b3f45"
+      },
+      "lodo": {
+        "code": "L",
+        "grip": 0.45,
+        "rolling": 0.22,
+        "plow": 0.55,
+        "color": "#5a3b24"
+      },
+      "agua": {
+        "code": "A",
+        "grip": 0.35,
+        "rolling": 0.04,
+        "plow": 0.0,
+        "color": "#2f86d6"
+      },
+      "pasto": {
+        "code": "S",
+        "grip": 0.55,
+        "rolling": 0.08,
+        "plow": 0.1,
+        "color": "#6f9a2e"
+      },
+      "foso": {
+        "code": "F",
+        "grip": 0.0,
+        "rolling": 0.0,
+        "plow": 0.0,
+        "color": "#17110e"
+      },
+      "rampa": {
+        "code": "R",
+        "grip": 0.9,
+        "rolling": 0.015,
+        "plow": 0.0,
+        "color": "#b9622f"
+      },
+      "valla": {
+        "code": "B",
+        "grip": 1.0,
+        "rolling": 0.015,
+        "plow": 0.0,
+        "color": "#d8332a"
+      }
+    },
+    "generator": {
+      "section_m": 100,
+      "min_free_lanes_per_section": 1,
+      "patch_probabilities": {
+        "lodo": 0.22,
+        "agua": 0.18,
+        "pasto": 0.15,
+        "valla": 0.16,
+        "rampa_foso": 0.1,
+        "nada": 0.19
+      },
+      "patch_length_cells": [
+        1,
+        3
+      ],
+      "bridge_probability": 0.6,
+      "bridge_length_cells": [
+        6,
+        9
+      ],
+      "bridge_gap_m": 6
+    },
+    "sensors": {
+      "lookahead_cells": 6,
+      "features_per_cell": [
+        "peligro",
+        "rampa",
+        "frena",
+        "agarre",
+        "puente"
+      ]
+    },
+    "perturbations": {
+      "lluvia": {
+        "descripcion": "Lluvia: todo el agarre baja un 30% y el lodo frena un 30% más.",
+        "grip_factor": 0.7,
+        "rolling_factor": 1.3
+      },
+      "sensor_ruidoso": {
+        "descripcion": "Sensores con ruido gaussiano (desviación 0,1) en cada lectura. Desde el N5 también afecta a Q-learning.",
+        "obs_noise_std": 0.1
+      }
+    },
+    "reward": {
+      "per_meter": 0.05,
+      "checkpoint": 0.5,
+      "step": -0.02,
+      "accident": -5.0,
+      "stalled": -10.0,
+      "finish": 30.0,
+      "remaining_fuel_per_l": 0.2
+    },
+    "episode": {
+      "max_steps": 600,
+      "max_accidents": 5,
+      "stall_steps": 40
+    },
+    "training": {
+      "seeds": [
+        7,
+        21,
+        42
+      ],
+      "ppo": {
+        "total_timesteps": 1000000,
+        "n_envs": 4,
+        "n_steps": 512,
+        "batch_size": 256,
+        "n_epochs": 10,
+        "learning_rate": 0.0003,
+        "gamma": 0.99,
+        "gae_lambda": 0.95,
+        "clip_range": 0.2,
+        "ent_coef": 0.005,
+        "log_std_init": -0.5,
+        "net_arch": [
+          64,
+          64
+        ],
+        "eval_every_steps": 50000,
+        "eval_layouts_during_training": 5
+      },
+      "qlearning": {
+        "alpha": 0.2,
+        "gamma": 0.98,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "speed_bins": [
+          3,
+          8,
+          14,
+          20,
+          26
+        ],
+        "psi_bins": [
+          -0.12,
+          0.12
+        ]
+      },
+      "train_layout_seed_offset": 0,
+      "evaluation_episodes": 30,
+      "evaluation_layout_seed_offset": 100000
+    },
+    "tracking": {
+      "experiment_name": "autonomous-rally-v5"
+    }
+  },
+  "selection": {
+    "criteria": {
+      "max_mean_mud_course_deg": 3.0,
+      "min_success_rate_rules": 0.8,
+      "n4_ppo_success_rate": 0.2,
+      "ppo_not_worse_than_n4_by": 0.05
+    },
+    "checks": {
+      "barro_sin_diagonal": true,
+      "reglas_conservan_exito": true,
+      "ppo_no_empeora_vs_n4": false
+    },
+    "accepted": false,
+    "rules_success_rate": 0.8666666666666667,
+    "rules_mud_course_deg": 2.7097400067509207,
+    "rules_mud_lateral_mps": 0.5316985541216993,
+    "ppo_success_rate": 0.0,
+    "qlearning_success_rate": 0.022222222222222223,
+    "n4_reference": {
+      "rules_success_rate": 0.867,
+      "rules_mud_course_deg": 12.11,
+      "rules_mud_lateral_mps": 2.52,
+      "ppo_success_rate": 0.2,
+      "ppo_mud_course_deg": 5.51,
+      "qlearning_success_rate": 0.06
+    },
+    "recommended_run_id": "rally-v5-ppo-12b75821632c48469da3424760d011bc",
+    "recommended_seed": 42
+  },
+  "summary": {
+    "ppo": {
+      "normal": {
+        "success_rate": 0.0,
+        "mean_return": -0.15705483593170713,
+        "mean_time_s_success": null,
+        "mean_accidents": 3.3777777777777778,
+        "mean_progress_pct": 37.962,
+        "mean_mud_slip_deg": 8.66200092652937,
+        "mean_mud_course_deg": 5.047542006686059,
+        "mean_mud_lateral_mps": 1.0096071891676701
+      },
+      "lluvia": {
+        "success_rate": 0.0,
+        "mean_return": -5.565911994122994,
+        "mean_time_s_success": null,
+        "mean_accidents": 3.211111111111111,
+        "mean_progress_pct": 28.78577777777777,
+        "mean_mud_slip_deg": 10.270475179366946,
+        "mean_mud_course_deg": 3.023205577262446,
+        "mean_mud_lateral_mps": 0.568073635074183
+      },
+      "sensor_ruidoso": {
+        "success_rate": 0.0,
+        "mean_return": -15.135520330618677,
+        "mean_time_s_success": null,
+        "mean_accidents": 4.4111111111111105,
+        "mean_progress_pct": 17.89455555555556,
+        "mean_mud_slip_deg": 8.561505301662166,
+        "mean_mud_course_deg": 5.276225148708671,
+        "mean_mud_lateral_mps": 0.8651058314992239
+      }
+    },
+    "qlearning": {
+      "normal": {
+        "success_rate": 0.022222222222222223,
+        "mean_return": 3.396862163838659,
+        "mean_time_s_success": 126.875,
+        "mean_accidents": 2.0555555555555554,
+        "mean_progress_pct": 39.643,
+        "mean_mud_slip_deg": 3.4260492112574696,
+        "mean_mud_course_deg": 2.228772129135064,
+        "mean_mud_lateral_mps": 0.2947209782040097
+      },
+      "lluvia": {
+        "success_rate": 0.011111111111111112,
+        "mean_return": -6.942768231480902,
+        "mean_time_s_success": 123.0,
+        "mean_accidents": 3.5444444444444443,
+        "mean_progress_pct": 29.62588888888889,
+        "mean_mud_slip_deg": 5.745701275218239,
+        "mean_mud_course_deg": 1.7417886551540287,
+        "mean_mud_lateral_mps": 0.28297836197409526
+      },
+      "sensor_ruidoso": {
+        "success_rate": 0.011111111111111112,
+        "mean_return": 0.37377092491785885,
+        "mean_time_s_success": 140.25,
+        "mean_accidents": 2.966666666666667,
+        "mean_progress_pct": 40.199999999999996,
+        "mean_mud_slip_deg": 2.9919546926547684,
+        "mean_mud_course_deg": 1.8908204259061012,
+        "mean_mud_lateral_mps": 0.30338714697451835
+      }
+    }
+  },
+  "between_seeds": {
+    "ppo": {
+      "success_rate": {
+        "mean": 0.0,
+        "sample_std": 0.0
+      },
+      "mean_return": {
+        "mean": -0.15705483593170713,
+        "sample_std": 4.849394233101938
+      }
+    },
+    "qlearning": {
+      "success_rate": {
+        "mean": 0.022222222222222223,
+        "sample_std": 0.019245008972987525
+      },
+      "mean_return": {
+        "mean": 3.396862163838659,
+        "sample_std": 5.9667051317299356
+      }
+    }
+  },
+  "baselines": {
+    "aleatoria": {
+      "success_rate": 0.0,
+      "mean_return": -15.096394804260676,
+      "mean_time_s_success": null,
+      "mean_accidents": 0.9666666666666667,
+      "mean_progress_pct": 3.662,
+      "mean_mud_slip_deg": 3.5381818181818177,
+      "mean_mud_course_deg": 2.260072101890932,
+      "mean_mud_lateral_mps": 0.15298189115795227
+    },
+    "reglas": {
+      "success_rate": 0.8666666666666667,
+      "mean_return": 84.81182764443324,
+      "mean_time_s_success": 68.76923076923077,
+      "mean_accidents": 0.7666666666666667,
+      "mean_progress_pct": 95.798,
+      "mean_mud_slip_deg": 1.6375739644970415,
+      "mean_mud_course_deg": 2.7097400067509207,
+      "mean_mud_lateral_mps": 0.5316985541216993
+    },
+    "reglas_lluvia": {
+      "success_rate": 0.8,
+      "mean_return": 72.92711899425011,
+      "mean_time_s_success": 77.25,
+      "mean_accidents": 1.8,
+      "mean_progress_pct": 93.42166666666667,
+      "mean_mud_slip_deg": 4.929331306990881,
+      "mean_mud_course_deg": 2.6744909687806095,
+      "mean_mud_lateral_mps": 0.48847542850071674
+    }
+  },
+  "slip_by_terrain": {
+    "reglas": {
+      "agua": {
+        "mean_deg": 1.254,
+        "p95_deg": 5.401,
+        "samples": 134
+      },
+      "asfalto": {
+        "mean_deg": 0.278,
+        "p95_deg": 1.08,
+        "samples": 7575
+      },
+      "lodo": {
+        "mean_deg": 1.638,
+        "p95_deg": 4.41,
+        "samples": 169
+      },
+      "pasto": {
+        "mean_deg": 1.132,
+        "p95_deg": 3.02,
+        "samples": 61
+      },
+      "rampa": {
+        "mean_deg": 0.195,
+        "p95_deg": 0.259,
+        "samples": 12
+      },
+      "valla": {
+        "mean_deg": 0.846,
+        "p95_deg": 3.542,
+        "samples": 49
+      }
+    },
+    "ppo_recomendado": {
+      "agua": {
+        "mean_deg": 10.626,
+        "p95_deg": 34.108,
+        "samples": 203
+      },
+      "asfalto": {
+        "mean_deg": 5.052,
+        "p95_deg": 21.365,
+        "samples": 3906
+      },
+      "lodo": {
+        "mean_deg": 7.701,
+        "p95_deg": 35.504,
+        "samples": 365
+      },
+      "pasto": {
+        "mean_deg": 11.507,
+        "p95_deg": 41.777,
+        "samples": 183
+      },
+      "rampa": {
+        "mean_deg": 10.607,
+        "p95_deg": 47.977,
+        "samples": 26
+      },
+      "valla": {
+        "mean_deg": 3.481,
+        "p95_deg": 6.67,
+        "samples": 96
+      }
+    }
+  },
+  "dvc_pointers": null,
+  "runs": [
+    {
+      "algorithm": "ppo",
+      "seed": 7,
+      "run_id": "rally-v5-ppo-c8cabdb0843f42379a34f188701483cd",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-ppo-c8cabdb0843f42379a34f188701483cd",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "ppo",
+        "git_commit": "9d3c8d1941b39b628f4d32290ca815e76f100d53",
+        "config_sha256": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+        "model_uri": "models/rally-v5-ppo-c8cabdb0843f42379a34f188701483cd/model.zip",
+        "model_sha256": "0886ac5292021c5586803a21eff0779b9db332235fe243f2d77dc695e43e2224",
+        "normalization_uri": "models/rally-v5-ppo-c8cabdb0843f42379a34f188701483cd/normalization.json",
+        "browser_model_uri": "models/rally-v5-ppo-c8cabdb0843f42379a34f188701483cd/policy.onnx",
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 7,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1001472,
+          "train_seconds": 978.5
+        },
+        "optimizer_state": "incluido en model.zip (Adam), se puede continuar con PPO.load(...).learn()",
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          }
+        },
+        "files_sha256": {
+          "config.json": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+          "evaluation.json": "fe5085d334677aa36b13ee1ffac7f2e03cd5b5c0f0c6b12dc7165496509f6137",
+          "model.zip": "0886ac5292021c5586803a21eff0779b9db332235fe243f2d77dc695e43e2224",
+          "normalization.json": "d7a1265ea3fae4e18263808310c291ab29c01281efef5585833f3cfc107eb183",
+          "policy.onnx": "6e059c2cc77df58ca7d1210b9496e373efb5264b85f2e481fd47034e888f0213",
+          "training_curves.json": "74ddc409a7e57c5b7d025966f23f094422699f81545280356c86f6326fd98abc",
+          "vecnormalize.pkl": "0074e3d0422fccf34227a55854e167f8096409fcc6871543b1f2fec77f56c11a"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "eed086bca514d5a1324a6a44d5c1d020ab2f52e084dc7624cbffa5ba34f17971",
+          "pipeline_v5.py": "c65cb9bc98e5dcdae266cb5be81d6b92f10725acc5592b0344997a542622d1a1",
+          "configs/rally-v5.json": "92d00dfd07c53842d45ade5b6863e9cecf946f0965637c97de00feb84b49f523"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.0,
+          "mean_return": -4.410664319835377,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.1,
+          "mean_progress_pct": 30.375666666666667,
+          "mean_mud_slip_deg": 6.986045197740114,
+          "mean_mud_course_deg": 6.355508920601975,
+          "mean_mud_lateral_mps": 1.2002572220149699
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -7.0410143428195475,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.2333333333333334,
+          "mean_progress_pct": 27.406333333333336,
+          "mean_mud_slip_deg": 9.866776556776557,
+          "mean_mud_course_deg": 2.8725332098553182,
+          "mean_mud_lateral_mps": 0.5432101897355897
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": -15.711027861075022,
+          "mean_time_s_success": null,
+          "mean_accidents": 4.366666666666666,
+          "mean_progress_pct": 17.684000000000005,
+          "mean_mud_slip_deg": 7.804560439560439,
+          "mean_mud_course_deg": 7.6138235610959315,
+          "mean_mud_lateral_mps": 1.292046886492221
+        }
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 50000,
+            "mean_return": -10.08181308,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 100000,
+            "mean_return": -3.4010554599999994,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 150000,
+            "mean_return": -3.3003814,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 200000,
+            "mean_return": -2.7780062400000003,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250000,
+            "mean_return": -1.1854171600000003,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 300000,
+            "mean_return": -0.7028977800000001,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 350000,
+            "mean_return": -1.0130982999999998,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 400000,
+            "mean_return": 1.3079743800000003,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 450000,
+            "mean_return": -2.3891679200000007,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 500000,
+            "mean_return": -1.8639375000000005,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 550000,
+            "mean_return": -4.33234258,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 600000,
+            "mean_return": -0.4976127800000003,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 650000,
+            "mean_return": -1.2758449400000003,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 700000,
+            "mean_return": -5.926451060000001,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 750000,
+            "mean_return": -2.97915664,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 800000,
+            "mean_return": 6.855804680000001,
+            "success_rate": 0.1
+          },
+          {
+            "timesteps": 850000,
+            "mean_return": -1.8769808399999999,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 900000,
+            "mean_return": -5.229836620000001,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 950000,
+            "mean_return": -4.126996439999999,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 1000000,
+            "mean_return": -3.75231588,
+            "success_rate": 0.0
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 4,
+            "success_rate": 0.0,
+            "mean_return": -10.79595516481557,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 0.188,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null
+          },
+          {
+            "timesteps": 50000,
+            "success_rate": 0.0,
+            "mean_return": -7.343688808213869,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 8.802000000000001,
+            "mean_mud_slip_deg": 1.1185714285714288,
+            "mean_mud_course_deg": 1.8515092906354271,
+            "mean_mud_lateral_mps": 0.1812345869316855
+          },
+          {
+            "timesteps": 100000,
+            "success_rate": 0.0,
+            "mean_return": -4.099226561060665,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.2,
+            "mean_progress_pct": 14.718,
+            "mean_mud_slip_deg": 1.2959999999999998,
+            "mean_mud_course_deg": 1.0692406755716786,
+            "mean_mud_lateral_mps": 0.1482164367100173
+          },
+          {
+            "timesteps": 150000,
+            "success_rate": 0.0,
+            "mean_return": 2.8137676390707553,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 30.355999999999995,
+            "mean_mud_slip_deg": 2.7083333333333335,
+            "mean_mud_course_deg": 2.219376950987023,
+            "mean_mud_lateral_mps": 0.3489751431598962
+          },
+          {
+            "timesteps": 200000,
+            "success_rate": 0.0,
+            "mean_return": 4.899086214344111,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.0,
+            "mean_progress_pct": 37.05,
+            "mean_mud_slip_deg": 2.839512195121951,
+            "mean_mud_course_deg": 1.7118857516963857,
+            "mean_mud_lateral_mps": 0.3334623968749819
+          },
+          {
+            "timesteps": 250000,
+            "success_rate": 0.2,
+            "mean_return": 20.30819589237498,
+            "mean_time_s_success": 116.25,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 53.39,
+            "mean_mud_slip_deg": 2.6362790697674425,
+            "mean_mud_course_deg": 2.8460577501100057,
+            "mean_mud_lateral_mps": 0.26592691273419267
+          },
+          {
+            "timesteps": 300000,
+            "success_rate": 0.2,
+            "mean_return": 18.838745175524142,
+            "mean_time_s_success": 104.75,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 53.448,
+            "mean_mud_slip_deg": 4.254117647058823,
+            "mean_mud_course_deg": 3.642566147995597,
+            "mean_mud_lateral_mps": 0.5328098586284433
+          },
+          {
+            "timesteps": 350000,
+            "success_rate": 0.2,
+            "mean_return": 17.648552994839118,
+            "mean_time_s_success": 102.25,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 53.501999999999995,
+            "mean_mud_slip_deg": 5.918333333333334,
+            "mean_mud_course_deg": 2.670714508711503,
+            "mean_mud_lateral_mps": 0.5096861389199095
+          },
+          {
+            "timesteps": 400000,
+            "success_rate": 0.2,
+            "mean_return": 13.03005687133091,
+            "mean_time_s_success": 92.0,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 37.714,
+            "mean_mud_slip_deg": 6.686052631578948,
+            "mean_mud_course_deg": 3.762077711519357,
+            "mean_mud_lateral_mps": 0.5834661250595735
+          },
+          {
+            "timesteps": 450000,
+            "success_rate": 0.2,
+            "mean_return": 16.252585459426406,
+            "mean_time_s_success": 100.0,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 48.834,
+            "mean_mud_slip_deg": 10.80298245614035,
+            "mean_mud_course_deg": 4.088279292043293,
+            "mean_mud_lateral_mps": 0.6988697247746282
+          },
+          {
+            "timesteps": 500000,
+            "success_rate": 0.2,
+            "mean_return": 10.723525205456477,
+            "mean_time_s_success": 84.25,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 37.036,
+            "mean_mud_slip_deg": 6.929117647058824,
+            "mean_mud_course_deg": 3.9379056647840294,
+            "mean_mud_lateral_mps": 0.9288151174842049
+          },
+          {
+            "timesteps": 550000,
+            "success_rate": 0.2,
+            "mean_return": 8.661199867647328,
+            "mean_time_s_success": 92.0,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 39.727999999999994,
+            "mean_mud_slip_deg": 11.188611111111108,
+            "mean_mud_course_deg": 0.9274458866323333,
+            "mean_mud_lateral_mps": 0.1740049463570754
+          },
+          {
+            "timesteps": 600000,
+            "success_rate": 0.2,
+            "mean_return": 8.510839221288055,
+            "mean_time_s_success": 93.5,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 32.245999999999995,
+            "mean_mud_slip_deg": 9.551428571428572,
+            "mean_mud_course_deg": 7.782825909781562,
+            "mean_mud_lateral_mps": 1.7780411345130107
+          },
+          {
+            "timesteps": 650000,
+            "success_rate": 0.2,
+            "mean_return": 8.501960866666215,
+            "mean_time_s_success": 87.5,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 31.978,
+            "mean_mud_slip_deg": 15.345416666666667,
+            "mean_mud_course_deg": 5.29683018306381,
+            "mean_mud_lateral_mps": 1.0832947383408118
+          },
+          {
+            "timesteps": 700000,
+            "success_rate": 0.0,
+            "mean_return": 0.5666338265054776,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.4,
+            "mean_progress_pct": 33.346000000000004,
+            "mean_mud_slip_deg": 11.445675675675677,
+            "mean_mud_course_deg": 5.200786040237348,
+            "mean_mud_lateral_mps": 1.1308648827241485
+          },
+          {
+            "timesteps": 750000,
+            "success_rate": 0.0,
+            "mean_return": 0.2855547076638242,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 35.83,
+            "mean_mud_slip_deg": 8.42181818181818,
+            "mean_mud_course_deg": 5.308096783964138,
+            "mean_mud_lateral_mps": 1.2040832473825078
+          },
+          {
+            "timesteps": 800000,
+            "success_rate": 0.0,
+            "mean_return": -6.455258199243369,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 19.008,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null
+          },
+          {
+            "timesteps": 850000,
+            "success_rate": 0.0,
+            "mean_return": -3.765590752971856,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 27.368000000000002,
+            "mean_mud_slip_deg": 9.533939393939395,
+            "mean_mud_course_deg": 0.9304271955230335,
+            "mean_mud_lateral_mps": 0.24252847667754018
+          },
+          {
+            "timesteps": 900000,
+            "success_rate": 0.0,
+            "mean_return": -2.6782027361060825,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 31.757999999999992,
+            "mean_mud_slip_deg": 10.417083333333332,
+            "mean_mud_course_deg": 6.374167929748499,
+            "mean_mud_lateral_mps": 1.2378980759752845
+          },
+          {
+            "timesteps": 950000,
+            "success_rate": 0.2,
+            "mean_return": 7.833808296632509,
+            "mean_time_s_success": 89.0,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 32.882,
+            "mean_mud_slip_deg": 18.607333333333333,
+            "mean_mud_course_deg": 1.6681449965503887,
+            "mean_mud_lateral_mps": 0.3926533387611522
+          },
+          {
+            "timesteps": 1000000,
+            "success_rate": 0.0,
+            "mean_return": -0.7688432048947582,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.6,
+            "mean_progress_pct": 35.23,
+            "mean_mud_slip_deg": 9.913214285714284,
+            "mean_mud_course_deg": 7.313374961688311,
+            "mean_mud_lateral_mps": 1.5718041828012617
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "qlearning",
+      "seed": 7,
+      "run_id": "rally-v5-qlearning-07d8f9e643b744e49d3cb1a3a001b395",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-qlearning-07d8f9e643b744e49d3cb1a3a001b395",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "qlearning",
+        "git_commit": "9d3c8d1941b39b628f4d32290ca815e76f100d53",
+        "config_sha256": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+        "model_uri": "models/rally-v5-qlearning-07d8f9e643b744e49d3cb1a3a001b395/q_table.npy",
+        "model_sha256": "e60bf9caf79dc55376b1eb1b7f31938beb7a8a8215145b115e8e56c989d612f8",
+        "normalization_uri": null,
+        "browser_model_uri": null,
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 7,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1000503,
+          "train_seconds": 629.5
+        },
+        "optimizer_state": null,
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          },
+          "discretization": {
+            "states": 720,
+            "actions": 15,
+            "throttle": [
+              -1.0,
+              0.0,
+              1.0
+            ],
+            "steer": [
+              -0.3,
+              -0.08,
+              0.0,
+              0.08,
+              0.3
+            ],
+            "speed_bins_mps": [
+              3,
+              8,
+              14,
+              20,
+              26
+            ],
+            "psi_bins_rad": [
+              -0.12,
+              0.12
+            ],
+            "perdida_de_resolucion": "no ve la posición exacta en el carril, ni los otros carriles, ni la curvatura; el giro solo tiene 5 valores"
+          }
+        },
+        "files_sha256": {
+          "config.json": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+          "evaluation.json": "35d47131a3c6f2a7271f5c78921053228cd822c03a1b434a1221fd917b3bd018",
+          "q_table.npy": "e60bf9caf79dc55376b1eb1b7f31938beb7a8a8215145b115e8e56c989d612f8",
+          "training_curves.json": "1a20f54959c95f4ce443332eca7bb3d3c030ebcb8d882b9ab2ad8160a63f149c"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "eed086bca514d5a1324a6a44d5c1d020ab2f52e084dc7624cbffa5ba34f17971",
+          "pipeline_v5.py": "c65cb9bc98e5dcdae266cb5be81d6b92f10725acc5592b0344997a542622d1a1",
+          "configs/rally-v5.json": "92d00dfd07c53842d45ade5b6863e9cecf946f0965637c97de00feb84b49f523"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.03333333333333333,
+          "mean_return": 2.0144779585930204,
+          "mean_time_s_success": 120.25,
+          "mean_accidents": 2.1333333333333333,
+          "mean_progress_pct": 37.050000000000004,
+          "mean_mud_slip_deg": 3.0929817444219063,
+          "mean_mud_course_deg": 2.054606195013735,
+          "mean_mud_lateral_mps": 0.21854137590541944
+        },
+        "lluvia": {
+          "success_rate": 0.03333333333333333,
+          "mean_return": -3.174695194317649,
+          "mean_time_s_success": 123.0,
+          "mean_accidents": 3.2333333333333334,
+          "mean_progress_pct": 33.778999999999996,
+          "mean_mud_slip_deg": 3.7838501291989663,
+          "mean_mud_course_deg": 1.3387943077913818,
+          "mean_mud_lateral_mps": 0.2165297336235052
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.03333333333333333,
+          "mean_return": 0.9711231626594906,
+          "mean_time_s_success": 140.25,
+          "mean_accidents": 3.966666666666667,
+          "mean_progress_pct": 43.81233333333333,
+          "mean_mud_slip_deg": 3.084641148325359,
+          "mean_mud_course_deg": 1.5361753486806669,
+          "mean_mud_lateral_mps": 0.23679486760287202
+        }
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 83462,
+            "mean_return": -15.937186797531727,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 166710,
+            "mean_return": -15.78572270327576,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250198,
+            "mean_return": -14.025470676394717,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 333427,
+            "mean_return": -13.265472762410948,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 416999,
+            "mean_return": -12.829648038999443,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 500031,
+            "mean_return": -10.398175812634003,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 583334,
+            "mean_return": -8.892321185998805,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 666735,
+            "mean_return": -7.570380484398279,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 750297,
+            "mean_return": -3.8287358565708325,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 833442,
+            "mean_return": -2.091435752746446,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 916769,
+            "mean_return": -5.9203668968697345,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 999997,
+            "mean_return": 3.4660498971280056,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 1000503,
+            "mean_return": 2.9653950413081263,
+            "success_rate": 0.04
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 83462,
+            "success_rate": 0.0,
+            "mean_return": -9.198377259732258,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 16.086000000000002,
+            "mean_mud_slip_deg": 3.3871428571428575,
+            "mean_mud_course_deg": 1.3880425873082551,
+            "mean_mud_lateral_mps": 0.10742959205586596
+          },
+          {
+            "timesteps": 166710,
+            "success_rate": 0.0,
+            "mean_return": -9.589142620559487,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.4,
+            "mean_progress_pct": 6.186,
+            "mean_mud_slip_deg": 2.445,
+            "mean_mud_course_deg": 2.851994815984461,
+            "mean_mud_lateral_mps": 0.4293212683742919
+          },
+          {
+            "timesteps": 250198,
+            "success_rate": 0.0,
+            "mean_return": -3.6511038138094305,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 29.748,
+            "mean_mud_slip_deg": 1.5682051282051284,
+            "mean_mud_course_deg": 0.8206468175115884,
+            "mean_mud_lateral_mps": 0.054452692410968416
+          },
+          {
+            "timesteps": 333427,
+            "success_rate": 0.0,
+            "mean_return": -9.59069119610739,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 15.95,
+            "mean_mud_slip_deg": 3.5026315789473683,
+            "mean_mud_course_deg": 3.2002948539701674,
+            "mean_mud_lateral_mps": 0.6837247390107752
+          },
+          {
+            "timesteps": 416999,
+            "success_rate": 0.0,
+            "mean_return": -1.1950276005939326,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.4,
+            "mean_progress_pct": 35.17399999999999,
+            "mean_mud_slip_deg": 4.589775280898877,
+            "mean_mud_course_deg": 2.180184321109061,
+            "mean_mud_lateral_mps": 0.280594904761063
+          },
+          {
+            "timesteps": 500031,
+            "success_rate": 0.0,
+            "mean_return": -11.667805261159808,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.4,
+            "mean_progress_pct": 22.772,
+            "mean_mud_slip_deg": 1.205,
+            "mean_mud_course_deg": 0.5117838011678708,
+            "mean_mud_lateral_mps": 0.07901377800663925
+          },
+          {
+            "timesteps": 583334,
+            "success_rate": 0.0,
+            "mean_return": -10.655990425561988,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 6.888,
+            "mean_mud_slip_deg": 5.659166666666667,
+            "mean_mud_course_deg": 10.741014499645305,
+            "mean_mud_lateral_mps": 1.1258713768386857
+          },
+          {
+            "timesteps": 666735,
+            "success_rate": 0.0,
+            "mean_return": -5.949679521282272,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.2,
+            "mean_progress_pct": 11.082000000000003,
+            "mean_mud_slip_deg": 0.8643749999999999,
+            "mean_mud_course_deg": 0.973998363803167,
+            "mean_mud_lateral_mps": 0.1380826132084783
+          },
+          {
+            "timesteps": 750297,
+            "success_rate": 0.0,
+            "mean_return": 16.814064014806007,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.0,
+            "mean_progress_pct": 55.996,
+            "mean_mud_slip_deg": 0.998877551020408,
+            "mean_mud_course_deg": 0.6661820318917013,
+            "mean_mud_lateral_mps": 0.088221258083507
+          },
+          {
+            "timesteps": 833442,
+            "success_rate": 0.0,
+            "mean_return": -10.96449347197928,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 14.018,
+            "mean_mud_slip_deg": 1.112,
+            "mean_mud_course_deg": 3.7546635014783476,
+            "mean_mud_lateral_mps": 0.8273063012164477
+          },
+          {
+            "timesteps": 916769,
+            "success_rate": 0.0,
+            "mean_return": -7.716477816731356,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.0,
+            "mean_progress_pct": 20.34,
+            "mean_mud_slip_deg": 1.2913698630136985,
+            "mean_mud_course_deg": 1.3706844367400381,
+            "mean_mud_lateral_mps": 0.1159163474595706
+          },
+          {
+            "timesteps": 999997,
+            "success_rate": 0.0,
+            "mean_return": 13.87931531148023,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 56.088,
+            "mean_mud_slip_deg": 1.5053731343283583,
+            "mean_mud_course_deg": 1.3719674309131538,
+            "mean_mud_lateral_mps": 0.16269392606744457
+          },
+          {
+            "timesteps": 1000503,
+            "success_rate": 0.0,
+            "mean_return": 5.262485818161288,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 48.33,
+            "mean_mud_slip_deg": 1.9284444444444448,
+            "mean_mud_course_deg": 2.3979233870214154,
+            "mean_mud_lateral_mps": 0.28278933430784303
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "ppo",
+      "seed": 21,
+      "run_id": "rally-v5-ppo-f35edd35b58342fab5ccd57a7077f416",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-ppo-f35edd35b58342fab5ccd57a7077f416",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "ppo",
+        "git_commit": "9d3c8d1941b39b628f4d32290ca815e76f100d53",
+        "config_sha256": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+        "model_uri": "models/rally-v5-ppo-f35edd35b58342fab5ccd57a7077f416/model.zip",
+        "model_sha256": "70b52460e6ae5efa408685fd79adaa07ddebb167286b9b77b97f7e1f605f043c",
+        "normalization_uri": "models/rally-v5-ppo-f35edd35b58342fab5ccd57a7077f416/normalization.json",
+        "browser_model_uri": "models/rally-v5-ppo-f35edd35b58342fab5ccd57a7077f416/policy.onnx",
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 21,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1001472,
+          "train_seconds": 986.7
+        },
+        "optimizer_state": "incluido en model.zip (Adam), se puede continuar con PPO.load(...).learn()",
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          }
+        },
+        "files_sha256": {
+          "config.json": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+          "evaluation.json": "f70eef975143a2020fd10493509afcebafb231aa1e3bf417709ecdba51c1df31",
+          "model.zip": "70b52460e6ae5efa408685fd79adaa07ddebb167286b9b77b97f7e1f605f043c",
+          "normalization.json": "8be0e639854bd4576fb9912ee36120ce048c0dbb1903ee47b9e6819f1afc6d37",
+          "policy.onnx": "3b8380876bada71e88c035b5e66e0c8eb900d43f9700717d081023092ec8fc25",
+          "training_curves.json": "ba268b74eb2a9f2366fbfccf3cf446e6b0601f86fea1a5e5fdce9cc23381a812",
+          "vecnormalize.pkl": "5d7fe87da5f512c6066473f90b1d8a6aefb3bd3700b4021fa7ef9db06075fb76"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "eed086bca514d5a1324a6a44d5c1d020ab2f52e084dc7624cbffa5ba34f17971",
+          "pipeline_v5.py": "c65cb9bc98e5dcdae266cb5be81d6b92f10725acc5592b0344997a542622d1a1",
+          "configs/rally-v5.json": "92d00dfd07c53842d45ade5b6863e9cecf946f0965637c97de00feb84b49f523"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.0,
+          "mean_return": -1.1840936533334268,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.8,
+          "mean_progress_pct": 37.66133333333333,
+          "mean_mud_slip_deg": 11.29938223938224,
+          "mean_mud_course_deg": 6.111862453570911,
+          "mean_mud_lateral_mps": 1.2759051681595952
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -7.779483629760187,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.966666666666667,
+          "mean_progress_pct": 27.53533333333333,
+          "mean_mud_slip_deg": 12.212701612903226,
+          "mean_mud_course_deg": 4.186335215252367,
+          "mean_mud_lateral_mps": 0.8279284210144593
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": -15.268554392251243,
+          "mean_time_s_success": null,
+          "mean_accidents": 4.466666666666667,
+          "mean_progress_pct": 17.94633333333333,
+          "mean_mud_slip_deg": 7.536787148594377,
+          "mean_mud_course_deg": 4.173395299690196,
+          "mean_mud_lateral_mps": 0.6566020863293883
+        }
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 50000,
+            "mean_return": -10.973841400000001,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 100000,
+            "mean_return": -7.50548046,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 150000,
+            "mean_return": -3.99198096,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 200000,
+            "mean_return": 0.6614281999999996,
+            "success_rate": 0.06
+          },
+          {
+            "timesteps": 250000,
+            "mean_return": 5.371714079999999,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 300000,
+            "mean_return": 8.440668579999999,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 350000,
+            "mean_return": 8.70861326,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 400000,
+            "mean_return": 6.87883364,
+            "success_rate": 0.06
+          },
+          {
+            "timesteps": 450000,
+            "mean_return": 10.855026200000003,
+            "success_rate": 0.1
+          },
+          {
+            "timesteps": 500000,
+            "mean_return": 5.7021606,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 550000,
+            "mean_return": 1.4777792800000003,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 600000,
+            "mean_return": -0.008686919999999923,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 650000,
+            "mean_return": 1.02913846,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 700000,
+            "mean_return": 7.200614839999999,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 750000,
+            "mean_return": 6.551827500000001,
+            "success_rate": 0.06
+          },
+          {
+            "timesteps": 800000,
+            "mean_return": 3.9610019400000005,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 850000,
+            "mean_return": -1.64330268,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 900000,
+            "mean_return": -0.45227586000000014,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 950000,
+            "mean_return": 2.2389321,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 1000000,
+            "mean_return": -0.10440079999999984,
+            "success_rate": 0.0
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 4,
+            "success_rate": 0.0,
+            "mean_return": -10.783286641377916,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 0.21200000000000002,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null
+          },
+          {
+            "timesteps": 50000,
+            "success_rate": 0.0,
+            "mean_return": -7.3246266955007,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 8.008,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null
+          },
+          {
+            "timesteps": 100000,
+            "success_rate": 0.0,
+            "mean_return": -4.250809171316341,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 13.701999999999998,
+            "mean_mud_slip_deg": 1.217857142857143,
+            "mean_mud_course_deg": 2.7700441794862525,
+            "mean_mud_lateral_mps": 0.2695889788776472
+          },
+          {
+            "timesteps": 150000,
+            "success_rate": 0.0,
+            "mean_return": -6.099035653532472,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 14.728,
+            "mean_mud_slip_deg": 1.5306250000000001,
+            "mean_mud_course_deg": 1.830467827881992,
+            "mean_mud_lateral_mps": 0.26050734801185316
+          },
+          {
+            "timesteps": 200000,
+            "success_rate": 0.0,
+            "mean_return": -5.1468071541500064,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 15.984,
+            "mean_mud_slip_deg": 1.1016666666666668,
+            "mean_mud_course_deg": 2.1697486139330677,
+            "mean_mud_lateral_mps": 0.380422607538997
+          },
+          {
+            "timesteps": 250000,
+            "success_rate": 0.0,
+            "mean_return": 5.495275380230976,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.2,
+            "mean_progress_pct": 31.016000000000002,
+            "mean_mud_slip_deg": 3.7765384615384616,
+            "mean_mud_course_deg": 1.6883448693679373,
+            "mean_mud_lateral_mps": 0.21498704779277802
+          },
+          {
+            "timesteps": 300000,
+            "success_rate": 0.2,
+            "mean_return": 14.515291034057373,
+            "mean_time_s_success": 102.75,
+            "mean_accidents": 0.8,
+            "mean_progress_pct": 36.02400000000001,
+            "mean_mud_slip_deg": 3.666938775510204,
+            "mean_mud_course_deg": 3.1854317132763095,
+            "mean_mud_lateral_mps": 0.529441870060677
+          },
+          {
+            "timesteps": 350000,
+            "success_rate": 0.2,
+            "mean_return": 18.56481263041439,
+            "mean_time_s_success": 99.25,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 47.596000000000004,
+            "mean_mud_slip_deg": 9.005555555555556,
+            "mean_mud_course_deg": 3.910329945477917,
+            "mean_mud_lateral_mps": 0.7811009388788278
+          },
+          {
+            "timesteps": 400000,
+            "success_rate": 0.0,
+            "mean_return": 1.7917396611496301,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.0,
+            "mean_progress_pct": 30.456,
+            "mean_mud_slip_deg": 12.028947368421052,
+            "mean_mud_course_deg": 3.441674352092034,
+            "mean_mud_lateral_mps": 0.714313807431301
+          },
+          {
+            "timesteps": 450000,
+            "success_rate": 0.4,
+            "mean_return": 27.19820445393274,
+            "mean_time_s_success": 95.375,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 48.654,
+            "mean_mud_slip_deg": 6.252954545454545,
+            "mean_mud_course_deg": 3.3969187356232307,
+            "mean_mud_lateral_mps": 0.7182166258673051
+          },
+          {
+            "timesteps": 500000,
+            "success_rate": 0.2,
+            "mean_return": 18.47007475989064,
+            "mean_time_s_success": 93.0,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 46.77,
+            "mean_mud_slip_deg": 8.81578947368421,
+            "mean_mud_course_deg": 3.682847789105558,
+            "mean_mud_lateral_mps": 0.7104598774544648
+          },
+          {
+            "timesteps": 550000,
+            "success_rate": 0.4,
+            "mean_return": 27.34965125408862,
+            "mean_time_s_success": 92.0,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 48.654,
+            "mean_mud_slip_deg": 6.240576923076924,
+            "mean_mud_course_deg": 2.4012540547397254,
+            "mean_mud_lateral_mps": 0.5445465830553134
+          },
+          {
+            "timesteps": 600000,
+            "success_rate": 0.0,
+            "mean_return": 3.658652886556709,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 36.668,
+            "mean_mud_slip_deg": 6.786792452830188,
+            "mean_mud_course_deg": 2.9680484554366386,
+            "mean_mud_lateral_mps": 0.5707309067533839
+          },
+          {
+            "timesteps": 650000,
+            "success_rate": 0.0,
+            "mean_return": 1.9106418606352498,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.4,
+            "mean_progress_pct": 35.376,
+            "mean_mud_slip_deg": 4.905142857142857,
+            "mean_mud_course_deg": 3.484430956969931,
+            "mean_mud_lateral_mps": 0.6505121333319573
+          },
+          {
+            "timesteps": 700000,
+            "success_rate": 0.0,
+            "mean_return": -3.9316620937618865,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 30.671999999999997,
+            "mean_mud_slip_deg": 10.794545454545455,
+            "mean_mud_course_deg": 7.041011213410902,
+            "mean_mud_lateral_mps": 1.618314202730634
+          },
+          {
+            "timesteps": 750000,
+            "success_rate": 0.0,
+            "mean_return": -2.5555188868672722,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 32.916,
+            "mean_mud_slip_deg": 10.22264705882353,
+            "mean_mud_course_deg": 12.226677970371819,
+            "mean_mud_lateral_mps": 1.61233078351491
+          },
+          {
+            "timesteps": 800000,
+            "success_rate": 0.0,
+            "mean_return": -3.3945867902586366,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 29.309999999999995,
+            "mean_mud_slip_deg": 11.222272727272726,
+            "mean_mud_course_deg": 4.356973232286308,
+            "mean_mud_lateral_mps": 1.047869722017201
+          },
+          {
+            "timesteps": 850000,
+            "success_rate": 0.0,
+            "mean_return": 1.6588456419241218,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.8,
+            "mean_progress_pct": 42.816,
+            "mean_mud_slip_deg": 7.9645652173913035,
+            "mean_mud_course_deg": 2.0049899214147415,
+            "mean_mud_lateral_mps": 0.47069964867384584
+          },
+          {
+            "timesteps": 900000,
+            "success_rate": 0.0,
+            "mean_return": -1.57336586572358,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 32.95,
+            "mean_mud_slip_deg": 6.393947368421052,
+            "mean_mud_course_deg": 1.3942630485400633,
+            "mean_mud_lateral_mps": 0.3217327335315868
+          },
+          {
+            "timesteps": 950000,
+            "success_rate": 0.0,
+            "mean_return": -2.4195703271496436,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.4,
+            "mean_progress_pct": 28.022,
+            "mean_mud_slip_deg": 7.398048780487806,
+            "mean_mud_course_deg": 4.71910907980164,
+            "mean_mud_lateral_mps": 0.8124079177447885
+          },
+          {
+            "timesteps": 1000000,
+            "success_rate": 0.0,
+            "mean_return": -2.627168234524711,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 32.45,
+            "mean_mud_slip_deg": 12.489999999999998,
+            "mean_mud_course_deg": 7.196857773670663,
+            "mean_mud_lateral_mps": 1.9725901207548175
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "qlearning",
+      "seed": 21,
+      "run_id": "rally-v5-qlearning-db43bbde52514086a16d365473220258",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-qlearning-db43bbde52514086a16d365473220258",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "qlearning",
+        "git_commit": "9d3c8d1941b39b628f4d32290ca815e76f100d53",
+        "config_sha256": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+        "model_uri": "models/rally-v5-qlearning-db43bbde52514086a16d365473220258/q_table.npy",
+        "model_sha256": "7b33edd654c316e4f82a0ef542e1c372bc7d9c07a2b8a7cbb93372c0d7f6d40d",
+        "normalization_uri": null,
+        "browser_model_uri": null,
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 21,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1000233,
+          "train_seconds": 643.6
+        },
+        "optimizer_state": null,
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          },
+          "discretization": {
+            "states": 720,
+            "actions": 15,
+            "throttle": [
+              -1.0,
+              0.0,
+              1.0
+            ],
+            "steer": [
+              -0.3,
+              -0.08,
+              0.0,
+              0.08,
+              0.3
+            ],
+            "speed_bins_mps": [
+              3,
+              8,
+              14,
+              20,
+              26
+            ],
+            "psi_bins_rad": [
+              -0.12,
+              0.12
+            ],
+            "perdida_de_resolucion": "no ve la posición exacta en el carril, ni los otros carriles, ni la curvatura; el giro solo tiene 5 valores"
+          }
+        },
+        "files_sha256": {
+          "config.json": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+          "evaluation.json": "3057bc54ef7d7cc2133f4542f5ab66254267d8c18d711d889e785aa335fb38f6",
+          "q_table.npy": "7b33edd654c316e4f82a0ef542e1c372bc7d9c07a2b8a7cbb93372c0d7f6d40d",
+          "training_curves.json": "eb0537675229f513cd5ffc18a0028a499a0654f44e8a5b898c10c267da9fa702"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "eed086bca514d5a1324a6a44d5c1d020ab2f52e084dc7624cbffa5ba34f17971",
+          "pipeline_v5.py": "c65cb9bc98e5dcdae266cb5be81d6b92f10725acc5592b0344997a542622d1a1",
+          "configs/rally-v5.json": "92d00dfd07c53842d45ade5b6863e9cecf946f0965637c97de00feb84b49f523"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.03333333333333333,
+          "mean_return": 9.933422566306056,
+          "mean_time_s_success": 133.5,
+          "mean_accidents": 1.9333333333333333,
+          "mean_progress_pct": 48.716333333333324,
+          "mean_mud_slip_deg": 3.8503080082135526,
+          "mean_mud_course_deg": 1.4714093827256935,
+          "mean_mud_lateral_mps": 0.2773215267756428
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -4.055003921293702,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.066666666666667,
+          "mean_progress_pct": 34.48066666666667,
+          "mean_mud_slip_deg": 6.768432267884323,
+          "mean_mud_course_deg": 1.2080799846644121,
+          "mean_mud_lateral_mps": 0.18958871195237337
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": 4.295620930343502,
+          "mean_time_s_success": null,
+          "mean_accidents": 2.3333333333333335,
+          "mean_progress_pct": 44.002333333333326,
+          "mean_mud_slip_deg": 3.39352435530086,
+          "mean_mud_course_deg": 2.1127108058365347,
+          "mean_mud_lateral_mps": 0.3720974071471182
+        }
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 83647,
+            "mean_return": -16.058792328113842,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 166875,
+            "mean_return": -16.64680621495469,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250132,
+            "mean_return": -14.917277295092903,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 333436,
+            "mean_return": -13.041660808797326,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 416772,
+            "mean_return": -11.916122515155491,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 500135,
+            "mean_return": -9.679492223886044,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 583477,
+            "mean_return": -9.699724754275271,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 666757,
+            "mean_return": -6.883141339857096,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 750067,
+            "mean_return": -1.7277569069968504,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 833467,
+            "mean_return": -4.688002339994311,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 916711,
+            "mean_return": -4.318797252217385,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 1000233,
+            "mean_return": 6.915255473826332,
+            "success_rate": 0.06
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 83647,
+            "success_rate": 0.0,
+            "mean_return": -20.09206720910312,
+            "mean_time_s_success": null,
+            "mean_accidents": 5.0,
+            "mean_progress_pct": 11.315999999999999,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null
+          },
+          {
+            "timesteps": 166875,
+            "success_rate": 0.0,
+            "mean_return": -12.553454198652933,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 10.864,
+            "mean_mud_slip_deg": 4.505999999999999,
+            "mean_mud_course_deg": 0.8612440105097507,
+            "mean_mud_lateral_mps": 0.20418370485022935
+          },
+          {
+            "timesteps": 250132,
+            "success_rate": 0.0,
+            "mean_return": -9.926048859366295,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 22.692,
+            "mean_mud_slip_deg": 1.0206944444444446,
+            "mean_mud_course_deg": 1.2432273459804908,
+            "mean_mud_lateral_mps": 0.1395244006054088
+          },
+          {
+            "timesteps": 333436,
+            "success_rate": 0.0,
+            "mean_return": -15.122190383102275,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 13.09,
+            "mean_mud_slip_deg": 2.1075999999999997,
+            "mean_mud_course_deg": 2.6821742173481864,
+            "mean_mud_lateral_mps": 0.4552514221749796
+          },
+          {
+            "timesteps": 416772,
+            "success_rate": 0.0,
+            "mean_return": -14.761640447737161,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 13.212,
+            "mean_mud_slip_deg": 2.7184848484848483,
+            "mean_mud_course_deg": 1.9589541873411234,
+            "mean_mud_lateral_mps": 0.2856021979299145
+          },
+          {
+            "timesteps": 500135,
+            "success_rate": 0.0,
+            "mean_return": -16.57496657914401,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 8.376,
+            "mean_mud_slip_deg": 1.9566666666666666,
+            "mean_mud_course_deg": 1.2961304590818479,
+            "mean_mud_lateral_mps": 0.10028526392001474
+          },
+          {
+            "timesteps": 583477,
+            "success_rate": 0.0,
+            "mean_return": 0.0743990356392807,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.0,
+            "mean_progress_pct": 29.915999999999997,
+            "mean_mud_slip_deg": 2.804146341463415,
+            "mean_mud_course_deg": 0.9365820890235342,
+            "mean_mud_lateral_mps": 0.14478187015950367
+          },
+          {
+            "timesteps": 666757,
+            "success_rate": 0.0,
+            "mean_return": -16.11021120348867,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.4,
+            "mean_progress_pct": 13.867999999999999,
+            "mean_mud_slip_deg": 1.2186842105263158,
+            "mean_mud_course_deg": 1.5810922739836109,
+            "mean_mud_lateral_mps": 0.30666449471754575
+          },
+          {
+            "timesteps": 750067,
+            "success_rate": 0.0,
+            "mean_return": -0.6638240937669385,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.8,
+            "mean_progress_pct": 46.172000000000004,
+            "mean_mud_slip_deg": 3.257037037037037,
+            "mean_mud_course_deg": 2.481067223499806,
+            "mean_mud_lateral_mps": 0.30852882759412636
+          },
+          {
+            "timesteps": 833467,
+            "success_rate": 0.0,
+            "mean_return": -3.9646950277980175,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.8,
+            "mean_progress_pct": 21.294000000000004,
+            "mean_mud_slip_deg": 2.3858333333333333,
+            "mean_mud_course_deg": 1.176460944969868,
+            "mean_mud_lateral_mps": 0.2084368413444302
+          },
+          {
+            "timesteps": 916711,
+            "success_rate": 0.0,
+            "mean_return": -4.734210124084724,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 28.863999999999997,
+            "mean_mud_slip_deg": 1.9308333333333332,
+            "mean_mud_course_deg": 0.8669817342519464,
+            "mean_mud_lateral_mps": 0.1738452943673068
+          },
+          {
+            "timesteps": 1000233,
+            "success_rate": 0.2,
+            "mean_return": 18.677975635426343,
+            "mean_time_s_success": 133.5,
+            "mean_accidents": 1.2,
+            "mean_progress_pct": 48.808,
+            "mean_mud_slip_deg": 3.4308823529411767,
+            "mean_mud_course_deg": 2.7621224571746525,
+            "mean_mud_lateral_mps": 0.5754323307186486
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "ppo",
+      "seed": 42,
+      "run_id": "rally-v5-ppo-12b75821632c48469da3424760d011bc",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-ppo-12b75821632c48469da3424760d011bc",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "ppo",
+        "git_commit": "9d3c8d1941b39b628f4d32290ca815e76f100d53",
+        "config_sha256": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+        "model_uri": "models/rally-v5-ppo-12b75821632c48469da3424760d011bc/model.zip",
+        "model_sha256": "a8db30c9188c13c25896f93e61064f02616da9b16fc23de26b43ebb29bbcf21f",
+        "normalization_uri": "models/rally-v5-ppo-12b75821632c48469da3424760d011bc/normalization.json",
+        "browser_model_uri": "models/rally-v5-ppo-12b75821632c48469da3424760d011bc/policy.onnx",
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 42,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1001472,
+          "train_seconds": 1025.4
+        },
+        "optimizer_state": "incluido en model.zip (Adam), se puede continuar con PPO.load(...).learn()",
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          }
+        },
+        "files_sha256": {
+          "config.json": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+          "evaluation.json": "d9c1d3c517daffe35f8c6e98a65dc208c60c05cc2df5d91f5474c04fcbf2b599",
+          "model.zip": "a8db30c9188c13c25896f93e61064f02616da9b16fc23de26b43ebb29bbcf21f",
+          "normalization.json": "fe9121ec6bf606241fe20babcede84daecf6cbe3845c40a70b365f98655ecc7d",
+          "policy.onnx": "0bd3a0824390c96eb8fc9f24cf66b8e304907856ee477879d00cd2d0a293075c",
+          "training_curves.json": "26892eea684dcfa18a4ac0a601e03b2e3ae8531f06fc044bbd241a8407d8ff92",
+          "vecnormalize.pkl": "2f14b9b96c2a640e38e882212cbc703711d951f1a8f5a02c6cd1144eb372b21c"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "eed086bca514d5a1324a6a44d5c1d020ab2f52e084dc7624cbffa5ba34f17971",
+          "pipeline_v5.py": "c65cb9bc98e5dcdae266cb5be81d6b92f10725acc5592b0344997a542622d1a1",
+          "configs/rally-v5.json": "92d00dfd07c53842d45ade5b6863e9cecf946f0965637c97de00feb84b49f523"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.0,
+          "mean_return": 5.123593465373682,
+          "mean_time_s_success": null,
+          "mean_accidents": 3.2333333333333334,
+          "mean_progress_pct": 45.849000000000004,
+          "mean_mud_slip_deg": 7.700575342465753,
+          "mean_mud_course_deg": 2.6752546458852904,
+          "mean_mud_lateral_mps": 0.5526591773284453
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -1.8772380097892472,
+          "mean_time_s_success": null,
+          "mean_accidents": 2.433333333333333,
+          "mean_progress_pct": 31.41566666666666,
+          "mean_mud_slip_deg": 8.731947368421052,
+          "mean_mud_course_deg": 2.0107483066796537,
+          "mean_mud_lateral_mps": 0.33308229447249976
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": -14.426978738529767,
+          "mean_time_s_success": null,
+          "mean_accidents": 4.4,
+          "mean_progress_pct": 18.053333333333335,
+          "mean_mud_slip_deg": 10.343168316831681,
+          "mean_mud_course_deg": 4.041456585339884,
+          "mean_mud_lateral_mps": 0.6466685216760623
+        }
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 50000,
+            "mean_return": -11.515853259999998,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 100000,
+            "mean_return": -5.47270212,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 150000,
+            "mean_return": 1.6603943200000006,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 200000,
+            "mean_return": -0.7464857399999998,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 250000,
+            "mean_return": -0.7862020600000003,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 300000,
+            "mean_return": 5.398994519999998,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 350000,
+            "mean_return": 7.14352364,
+            "success_rate": 0.06
+          },
+          {
+            "timesteps": 400000,
+            "mean_return": 0.9279264400000001,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 450000,
+            "mean_return": 5.77496696,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 500000,
+            "mean_return": 4.798686199999999,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 550000,
+            "mean_return": 5.365606539999999,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 600000,
+            "mean_return": 4.62086402,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 650000,
+            "mean_return": 6.0436159599999995,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 700000,
+            "mean_return": 4.7497693,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 750000,
+            "mean_return": 7.31591946,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 800000,
+            "mean_return": 7.3596508,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 850000,
+            "mean_return": 6.68173734,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 900000,
+            "mean_return": 4.40917142,
+            "success_rate": 0.06
+          },
+          {
+            "timesteps": 950000,
+            "mean_return": 5.17610594,
+            "success_rate": 0.02
+          },
+          {
+            "timesteps": 1000000,
+            "mean_return": 4.036415,
+            "success_rate": 0.0
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 4,
+            "success_rate": 0.0,
+            "mean_return": -10.79428521957069,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 0.192,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null
+          },
+          {
+            "timesteps": 50000,
+            "success_rate": 0.0,
+            "mean_return": -8.191066546617197,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.0,
+            "mean_progress_pct": 6.481999999999999,
+            "mean_mud_slip_deg": null,
+            "mean_mud_course_deg": null,
+            "mean_mud_lateral_mps": null
+          },
+          {
+            "timesteps": 100000,
+            "success_rate": 0.0,
+            "mean_return": -2.9086827349517486,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.2,
+            "mean_progress_pct": 17.292,
+            "mean_mud_slip_deg": 1.1313636363636363,
+            "mean_mud_course_deg": 1.6306011529458488,
+            "mean_mud_lateral_mps": 0.15947659933145564
+          },
+          {
+            "timesteps": 150000,
+            "success_rate": 0.0,
+            "mean_return": 5.781726786859722,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 39.31999999999999,
+            "mean_mud_slip_deg": 5.134651162790697,
+            "mean_mud_course_deg": 4.333964478618015,
+            "mean_mud_lateral_mps": 0.628437862003761
+          },
+          {
+            "timesteps": 200000,
+            "success_rate": 0.0,
+            "mean_return": 6.830497118854471,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.4,
+            "mean_progress_pct": 35.286,
+            "mean_mud_slip_deg": 5.421333333333333,
+            "mean_mud_course_deg": 8.687135311343948,
+            "mean_mud_lateral_mps": 1.7824523293284826
+          },
+          {
+            "timesteps": 250000,
+            "success_rate": 0.0,
+            "mean_return": 10.112338138573937,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.6,
+            "mean_progress_pct": 46.872,
+            "mean_mud_slip_deg": 3.5574285714285714,
+            "mean_mud_course_deg": 2.3270180061571737,
+            "mean_mud_lateral_mps": 0.3447510566522654
+          },
+          {
+            "timesteps": 300000,
+            "success_rate": 0.0,
+            "mean_return": 6.552132516071175,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.4,
+            "mean_progress_pct": 42.288,
+            "mean_mud_slip_deg": 6.753333333333333,
+            "mean_mud_course_deg": 1.6704405306380687,
+            "mean_mud_lateral_mps": 0.37570526902321616
+          },
+          {
+            "timesteps": 350000,
+            "success_rate": 0.0,
+            "mean_return": 9.702734494851304,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 47.058,
+            "mean_mud_slip_deg": 6.053863636363636,
+            "mean_mud_course_deg": 1.3739838790156598,
+            "mean_mud_lateral_mps": 0.2727044776718619
+          },
+          {
+            "timesteps": 400000,
+            "success_rate": 0.2,
+            "mean_return": 20.355005744253322,
+            "mean_time_s_success": 88.75,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 58.35600000000001,
+            "mean_mud_slip_deg": 4.570769230769232,
+            "mean_mud_course_deg": 1.5552421302704358,
+            "mean_mud_lateral_mps": 0.39093277126516607
+          },
+          {
+            "timesteps": 450000,
+            "success_rate": 0.2,
+            "mean_return": 22.428017630332622,
+            "mean_time_s_success": 85.0,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 56.49400000000001,
+            "mean_mud_slip_deg": 7.6690476190476184,
+            "mean_mud_course_deg": 2.0288000096234082,
+            "mean_mud_lateral_mps": 0.4882676258738189
+          },
+          {
+            "timesteps": 500000,
+            "success_rate": 0.0,
+            "mean_return": 8.04148980690842,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.0,
+            "mean_progress_pct": 51.444,
+            "mean_mud_slip_deg": 9.677843137254902,
+            "mean_mud_course_deg": 3.5626996513341065,
+            "mean_mud_lateral_mps": 0.5659951670555419
+          },
+          {
+            "timesteps": 550000,
+            "success_rate": 0.0,
+            "mean_return": 10.02201546864509,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.0,
+            "mean_progress_pct": 55.220000000000006,
+            "mean_mud_slip_deg": 5.916153846153846,
+            "mean_mud_course_deg": 3.559993393815861,
+            "mean_mud_lateral_mps": 0.7534325741235293
+          },
+          {
+            "timesteps": 600000,
+            "success_rate": 0.0,
+            "mean_return": 7.624015866024723,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.0,
+            "mean_progress_pct": 51.286,
+            "mean_mud_slip_deg": 4.5441666666666665,
+            "mean_mud_course_deg": 2.287938331379534,
+            "mean_mud_lateral_mps": 0.5285207833719743
+          },
+          {
+            "timesteps": 650000,
+            "success_rate": 0.2,
+            "mean_return": 23.401761156636486,
+            "mean_time_s_success": 84.75,
+            "mean_accidents": 3.4,
+            "mean_progress_pct": 64.88000000000001,
+            "mean_mud_slip_deg": 7.230943396226415,
+            "mean_mud_course_deg": 2.4320500708845505,
+            "mean_mud_lateral_mps": 0.6164899504503072
+          },
+          {
+            "timesteps": 700000,
+            "success_rate": 0.2,
+            "mean_return": 21.436156538716137,
+            "mean_time_s_success": 80.5,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 62.788,
+            "mean_mud_slip_deg": 6.068444444444444,
+            "mean_mud_course_deg": 1.8872615758685032,
+            "mean_mud_lateral_mps": 0.48986432235909366
+          },
+          {
+            "timesteps": 750000,
+            "success_rate": 0.0,
+            "mean_return": 8.718854105567607,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.0,
+            "mean_progress_pct": 52.432,
+            "mean_mud_slip_deg": 5.0600000000000005,
+            "mean_mud_course_deg": 2.0108830290329727,
+            "mean_mud_lateral_mps": 0.42199248160220254
+          },
+          {
+            "timesteps": 800000,
+            "success_rate": 0.0,
+            "mean_return": 0.059605656565084784,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.8,
+            "mean_progress_pct": 34.362,
+            "mean_mud_slip_deg": 10.595384615384614,
+            "mean_mud_course_deg": 1.5696764935506478,
+            "mean_mud_lateral_mps": 0.44801907023666837
+          },
+          {
+            "timesteps": 850000,
+            "success_rate": 0.0,
+            "mean_return": 11.884295438159779,
+            "mean_time_s_success": null,
+            "mean_accidents": 4.0,
+            "mean_progress_pct": 57.922000000000004,
+            "mean_mud_slip_deg": 7.59054794520548,
+            "mean_mud_course_deg": 2.5022329161474075,
+            "mean_mud_lateral_mps": 0.5319628344428023
+          },
+          {
+            "timesteps": 900000,
+            "success_rate": 0.0,
+            "mean_return": 15.217264135457057,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.6,
+            "mean_progress_pct": 63.348,
+            "mean_mud_slip_deg": 7.316,
+            "mean_mud_course_deg": 2.28350364888977,
+            "mean_mud_lateral_mps": 0.5607812713900829
+          },
+          {
+            "timesteps": 950000,
+            "success_rate": 0.0,
+            "mean_return": 6.635861319567132,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.6,
+            "mean_progress_pct": 48.096,
+            "mean_mud_slip_deg": 6.590999999999999,
+            "mean_mud_course_deg": 1.3212539850558975,
+            "mean_mud_lateral_mps": 0.3080885214928057
+          },
+          {
+            "timesteps": 1000000,
+            "success_rate": 0.0,
+            "mean_return": 8.134353896701182,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.4,
+            "mean_progress_pct": 52.842000000000006,
+            "mean_mud_slip_deg": 6.276363636363639,
+            "mean_mud_course_deg": 1.6949283902747299,
+            "mean_mud_lateral_mps": 0.40397478035190965
+          }
+        ]
+      }
+    },
+    {
+      "algorithm": "qlearning",
+      "seed": 42,
+      "run_id": "rally-v5-qlearning-b6f4049d1ebf4f19924fae1b46510afe",
+      "mlflow_run_id": null,
+      "manifest": {
+        "run_id": "rally-v5-qlearning-b6f4049d1ebf4f19924fae1b46510afe",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "algorithm": "qlearning",
+        "git_commit": "9d3c8d1941b39b628f4d32290ca815e76f100d53",
+        "config_sha256": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+        "model_uri": "models/rally-v5-qlearning-b6f4049d1ebf4f19924fae1b46510afe/q_table.npy",
+        "model_sha256": "2c93591588e78616ff1462d0055f2109ed22e75e7b7fbe1922cff19255297963",
+        "normalization_uri": null,
+        "browser_model_uri": null,
+        "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v5.py en el commit indicado",
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "seed": 42,
+        "parent_run_id": null,
+        "training_origin": "desde_cero",
+        "budget": {
+          "timesteps": 1000269,
+          "train_seconds": 622.9
+        },
+        "optimizer_state": null,
+        "contract": {
+          "observation": {
+            "shape": [
+              140
+            ],
+            "dtype": "float32",
+            "order": [
+              "velocidad",
+              "rumbo_relativo",
+              "posicion_lateral",
+              "borde_izquierdo",
+              "borde_derecho",
+              "curva_aqui",
+              "curva_30m",
+              "curva_60m",
+              "altura",
+              "velocidad_vertical",
+              "en_el_aire",
+              "en_el_puente",
+              "combustible",
+              "progreso",
+              "velocidad_lateral",
+              "giro_yaw",
+              "volante_real",
+              "pedal_real",
+              "deslizamiento",
+              "agarre_bajo_ruedas",
+              "carril0_celda0_peligro",
+              "carril0_celda0_rampa",
+              "carril0_celda0_frena",
+              "carril0_celda0_agarre",
+              "carril0_celda0_puente",
+              "carril0_celda1_peligro",
+              "carril0_celda1_rampa",
+              "carril0_celda1_frena",
+              "carril0_celda1_agarre",
+              "carril0_celda1_puente",
+              "carril0_celda2_peligro",
+              "carril0_celda2_rampa",
+              "carril0_celda2_frena",
+              "carril0_celda2_agarre",
+              "carril0_celda2_puente",
+              "carril0_celda3_peligro",
+              "carril0_celda3_rampa",
+              "carril0_celda3_frena",
+              "carril0_celda3_agarre",
+              "carril0_celda3_puente",
+              "carril0_celda4_peligro",
+              "carril0_celda4_rampa",
+              "carril0_celda4_frena",
+              "carril0_celda4_agarre",
+              "carril0_celda4_puente",
+              "carril0_celda5_peligro",
+              "carril0_celda5_rampa",
+              "carril0_celda5_frena",
+              "carril0_celda5_agarre",
+              "carril0_celda5_puente",
+              "carril1_celda0_peligro",
+              "carril1_celda0_rampa",
+              "carril1_celda0_frena",
+              "carril1_celda0_agarre",
+              "carril1_celda0_puente",
+              "carril1_celda1_peligro",
+              "carril1_celda1_rampa",
+              "carril1_celda1_frena",
+              "carril1_celda1_agarre",
+              "carril1_celda1_puente",
+              "carril1_celda2_peligro",
+              "carril1_celda2_rampa",
+              "carril1_celda2_frena",
+              "carril1_celda2_agarre",
+              "carril1_celda2_puente",
+              "carril1_celda3_peligro",
+              "carril1_celda3_rampa",
+              "carril1_celda3_frena",
+              "carril1_celda3_agarre",
+              "carril1_celda3_puente",
+              "carril1_celda4_peligro",
+              "carril1_celda4_rampa",
+              "carril1_celda4_frena",
+              "carril1_celda4_agarre",
+              "carril1_celda4_puente",
+              "carril1_celda5_peligro",
+              "carril1_celda5_rampa",
+              "carril1_celda5_frena",
+              "carril1_celda5_agarre",
+              "carril1_celda5_puente",
+              "carril2_celda0_peligro",
+              "carril2_celda0_rampa",
+              "carril2_celda0_frena",
+              "carril2_celda0_agarre",
+              "carril2_celda0_puente",
+              "carril2_celda1_peligro",
+              "carril2_celda1_rampa",
+              "carril2_celda1_frena",
+              "carril2_celda1_agarre",
+              "carril2_celda1_puente",
+              "carril2_celda2_peligro",
+              "carril2_celda2_rampa",
+              "carril2_celda2_frena",
+              "carril2_celda2_agarre",
+              "carril2_celda2_puente",
+              "carril2_celda3_peligro",
+              "carril2_celda3_rampa",
+              "carril2_celda3_frena",
+              "carril2_celda3_agarre",
+              "carril2_celda3_puente",
+              "carril2_celda4_peligro",
+              "carril2_celda4_rampa",
+              "carril2_celda4_frena",
+              "carril2_celda4_agarre",
+              "carril2_celda4_puente",
+              "carril2_celda5_peligro",
+              "carril2_celda5_rampa",
+              "carril2_celda5_frena",
+              "carril2_celda5_agarre",
+              "carril2_celda5_puente",
+              "carril3_celda0_peligro",
+              "carril3_celda0_rampa",
+              "carril3_celda0_frena",
+              "carril3_celda0_agarre",
+              "carril3_celda0_puente",
+              "carril3_celda1_peligro",
+              "carril3_celda1_rampa",
+              "carril3_celda1_frena",
+              "carril3_celda1_agarre",
+              "carril3_celda1_puente",
+              "carril3_celda2_peligro",
+              "carril3_celda2_rampa",
+              "carril3_celda2_frena",
+              "carril3_celda2_agarre",
+              "carril3_celda2_puente",
+              "carril3_celda3_peligro",
+              "carril3_celda3_rampa",
+              "carril3_celda3_frena",
+              "carril3_celda3_agarre",
+              "carril3_celda3_puente",
+              "carril3_celda4_peligro",
+              "carril3_celda4_rampa",
+              "carril3_celda4_frena",
+              "carril3_celda4_agarre",
+              "carril3_celda4_puente",
+              "carril3_celda5_peligro",
+              "carril3_celda5_rampa",
+              "carril3_celda5_frena",
+              "carril3_celda5_agarre",
+              "carril3_celda5_puente"
+            ],
+            "units": "ver docs/rally-v5.md (velocidad/35 m/s, posición lateral/8 m, altura/4 m, velocidad lateral/5 m/s, giro/1 rad/s, volante/0,40 rad, deslizamiento/0,5 rad, agarre 0-1, sensores 0-1)",
+            "clipping": [
+              -5,
+              5
+            ]
+          },
+          "action": {
+            "shape": [
+              2
+            ],
+            "order": [
+              "acelerador(+)/freno(-)",
+              "giro(+ izquierda)"
+            ],
+            "range": [
+              -1,
+              1
+            ],
+            "units": "orden de pedal: fracción de 6 m/s² (acelerar) o 9 m/s² (frenar), el pedal real llega en 0,2 s; fracción de 0,40 rad de volante (orden: el volante real gira a 1,2 rad/s como máximo)"
+          },
+          "discretization": {
+            "states": 720,
+            "actions": 15,
+            "throttle": [
+              -1.0,
+              0.0,
+              1.0
+            ],
+            "steer": [
+              -0.3,
+              -0.08,
+              0.0,
+              0.08,
+              0.3
+            ],
+            "speed_bins_mps": [
+              3,
+              8,
+              14,
+              20,
+              26
+            ],
+            "psi_bins_rad": [
+              -0.12,
+              0.12
+            ],
+            "perdida_de_resolucion": "no ve la posición exacta en el carril, ni los otros carriles, ni la curvatura; el giro solo tiene 5 valores"
+          }
+        },
+        "files_sha256": {
+          "config.json": "e63a2e3f01793976a137505f7f457b4e81dbef776cb70b29b18b061fb16583e7",
+          "evaluation.json": "1fa0204cfe99a06f3900267774c1b609d7217599debc10b48bfd6cc2e939d587",
+          "q_table.npy": "2c93591588e78616ff1462d0055f2109ed22e75e7b7fbe1922cff19255297963",
+          "training_curves.json": "1f67c60980f150566ac400c4ca277f61398da730d4316b2b0b4904057f772681"
+        },
+        "source_sha256": {
+          "race_env_v5.py": "96b55c4a8fc4bf7a1b7e81a4445e6ff4a9ac66893eb6fc4cd6b84c98bb96febe",
+          "training_v5.py": "eed086bca514d5a1324a6a44d5c1d020ab2f52e084dc7624cbffa5ba34f17971",
+          "pipeline_v5.py": "c65cb9bc98e5dcdae266cb5be81d6b92f10725acc5592b0344997a542622d1a1",
+          "configs/rally-v5.json": "92d00dfd07c53842d45ade5b6863e9cecf946f0965637c97de00feb84b49f523"
+        }
+      },
+      "evaluation": {
+        "normal": {
+          "success_rate": 0.0,
+          "mean_return": -1.7573140333830988,
+          "mean_time_s_success": null,
+          "mean_accidents": 2.1,
+          "mean_progress_pct": 33.162666666666674,
+          "mean_mud_slip_deg": 3.3348578811369514,
+          "mean_mud_course_deg": 3.160300809665763,
+          "mean_mud_lateral_mps": 0.3883000319309669
+        },
+        "lluvia": {
+          "success_rate": 0.0,
+          "mean_return": -13.598605578831357,
+          "mean_time_s_success": null,
+          "mean_accidents": 4.333333333333333,
+          "mean_progress_pct": 20.618000000000002,
+          "mean_mud_slip_deg": 6.684821428571429,
+          "mean_mud_course_deg": 2.6784916730062927,
+          "mean_mud_lateral_mps": 0.44281664034640716
+        },
+        "sensor_ruidoso": {
+          "success_rate": 0.0,
+          "mean_return": -4.1454313182494165,
+          "mean_time_s_success": null,
+          "mean_accidents": 2.6,
+          "mean_progress_pct": 32.785333333333334,
+          "mean_mud_slip_deg": 2.4976985743380857,
+          "mean_mud_course_deg": 2.0235751232011023,
+          "mean_mud_lateral_mps": 0.3012691661735649
+        }
+      },
+      "curves": {
+        "entrenamiento": [
+          {
+            "timesteps": 83472,
+            "mean_return": -14.724695564590382,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 166709,
+            "mean_return": -16.291891245113675,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 250169,
+            "mean_return": -13.705903013660667,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 333360,
+            "mean_return": -12.978418902469064,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 416897,
+            "mean_return": -13.225796960766042,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 500225,
+            "mean_return": -10.752798026140901,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 583368,
+            "mean_return": -7.9027735300703545,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 666877,
+            "mean_return": -6.786091311625455,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 750164,
+            "mean_return": -5.579045447807569,
+            "success_rate": 0.0
+          },
+          {
+            "timesteps": 833356,
+            "mean_return": 4.684282581044611,
+            "success_rate": 0.08
+          },
+          {
+            "timesteps": 916679,
+            "mean_return": 2.1711434585732627,
+            "success_rate": 0.04
+          },
+          {
+            "timesteps": 1000269,
+            "mean_return": -5.850840287089209,
+            "success_rate": 0.0
+          }
+        ],
+        "evaluacion": [
+          {
+            "timesteps": 83472,
+            "success_rate": 0.0,
+            "mean_return": -5.348665033401611,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.6,
+            "mean_progress_pct": 31.76,
+            "mean_mud_slip_deg": 1.1683333333333332,
+            "mean_mud_course_deg": 1.258736945602705,
+            "mean_mud_lateral_mps": 0.12429609913611858
+          },
+          {
+            "timesteps": 166709,
+            "success_rate": 0.0,
+            "mean_return": -8.041483246614906,
+            "mean_time_s_success": null,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 22.724,
+            "mean_mud_slip_deg": 0.8854999999999998,
+            "mean_mud_course_deg": 2.129527284005061,
+            "mean_mud_lateral_mps": 0.2971024664964056
+          },
+          {
+            "timesteps": 250169,
+            "success_rate": 0.0,
+            "mean_return": -11.855972401097569,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 15.382,
+            "mean_mud_slip_deg": 3.466818181818182,
+            "mean_mud_course_deg": 1.5330022619280266,
+            "mean_mud_lateral_mps": 0.23040663708928222
+          },
+          {
+            "timesteps": 333360,
+            "success_rate": 0.0,
+            "mean_return": -6.812218255259475,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 13.565999999999999,
+            "mean_mud_slip_deg": 0.8033333333333332,
+            "mean_mud_course_deg": 0.09812026433916184,
+            "mean_mud_lateral_mps": 0.013074150659616373
+          },
+          {
+            "timesteps": 416897,
+            "success_rate": 0.0,
+            "mean_return": -15.359036109620542,
+            "mean_time_s_success": null,
+            "mean_accidents": 5.0,
+            "mean_progress_pct": 18.438,
+            "mean_mud_slip_deg": 0.24562499999999998,
+            "mean_mud_course_deg": 0.24461201345881065,
+            "mean_mud_lateral_mps": 0.05913310486449228
+          },
+          {
+            "timesteps": 500225,
+            "success_rate": 0.0,
+            "mean_return": -10.101141943256668,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.0,
+            "mean_progress_pct": 20.238,
+            "mean_mud_slip_deg": 3.2792452830188683,
+            "mean_mud_course_deg": 1.630011899844475,
+            "mean_mud_lateral_mps": 0.23890581562004126
+          },
+          {
+            "timesteps": 583368,
+            "success_rate": 0.0,
+            "mean_return": -5.981801181850743,
+            "mean_time_s_success": null,
+            "mean_accidents": 0.6,
+            "mean_progress_pct": 14.081999999999999,
+            "mean_mud_slip_deg": 5.093999999999999,
+            "mean_mud_course_deg": 3.361361579126394,
+            "mean_mud_lateral_mps": 0.7323921367758529
+          },
+          {
+            "timesteps": 666877,
+            "success_rate": 0.2,
+            "mean_return": 9.019596323530157,
+            "mean_time_s_success": 149.25,
+            "mean_accidents": 2.2,
+            "mean_progress_pct": 39.97,
+            "mean_mud_slip_deg": 2.308653846153846,
+            "mean_mud_course_deg": 1.4800210060137426,
+            "mean_mud_lateral_mps": 0.17343467801486925
+          },
+          {
+            "timesteps": 750164,
+            "success_rate": 0.2,
+            "mean_return": 13.569207768939714,
+            "mean_time_s_success": 103.0,
+            "mean_accidents": 3.8,
+            "mean_progress_pct": 52.432,
+            "mean_mud_slip_deg": 1.929576271186441,
+            "mean_mud_course_deg": 1.7398820718913666,
+            "mean_mud_lateral_mps": 0.31549397230031034
+          },
+          {
+            "timesteps": 833356,
+            "success_rate": 0.0,
+            "mean_return": -14.214256464165663,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.8,
+            "mean_progress_pct": 19.55,
+            "mean_mud_slip_deg": 18.831666666666663,
+            "mean_mud_course_deg": 7.171497198506428,
+            "mean_mud_lateral_mps": 0.772265874108188
+          },
+          {
+            "timesteps": 916679,
+            "success_rate": 0.0,
+            "mean_return": -7.527554983807218,
+            "mean_time_s_success": null,
+            "mean_accidents": 1.8,
+            "mean_progress_pct": 18.310000000000002,
+            "mean_mud_slip_deg": 2.1661111111111113,
+            "mean_mud_course_deg": 1.3610080108198432,
+            "mean_mud_lateral_mps": 0.2181593401767159
+          },
+          {
+            "timesteps": 1000269,
+            "success_rate": 0.0,
+            "mean_return": -2.4038066786587313,
+            "mean_time_s_success": null,
+            "mean_accidents": 3.2,
+            "mean_progress_pct": 39.284,
+            "mean_mud_slip_deg": 4.080816326530613,
+            "mean_mud_course_deg": 3.094754985459383,
+            "mean_mud_lateral_mps": 0.3778925227179574
+          }
+        ]
+      }
+    }
+  ]
+}
