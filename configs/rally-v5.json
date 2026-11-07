@@ -7,6 +7,11 @@
     "hypothesis": "Con llantas realistas (fórmula de Pacejka y círculo de agarre), volante y pedal que reaccionan de forma gradual y un barro con surcos que frena y no deja ir de lado, (1) el coche deja de cruzar el barro en diagonal: su ángulo de avance respecto a la pista dentro del barro baja de 12° (reglas en el N4) a menos de 3°, y (2) las reglas conservan al menos el 80% de vueltas completas y PPO no empeora más de 5 puntos frente al N4 (20%) en las mismas 30 pistas nuevas.",
     "change_vs_previous": "v4 -> v5: el coche pasa de un modelo cinemático (va siempre hacia donde apunta) a uno dinámico de dos ejes: velocidad hacia adelante y de lado, giro con inercia, fuerza de cada eje según la fórmula mágica de Pacejka, y círculo de agarre (acelerar y girar comparten el agarre). Volante y pedal con velocidad máxima de cambio. El barro frena con resistencia a la rodadura y sus surcos se oponen a moverse de lado respecto a la pista y enderezan el coche. La pista base pasa de tierra a asfalto. Hacer un trompo (deslizar más de 70°) cuenta como accidente. La observación agrega 6 datos (velocidad lateral, giro, volante y pedal reales, deslizamiento y agarre bajo las ruedas): familia de modelos nueva.",
     "selection_criteria": {"max_mean_mud_course_deg": 3.0, "min_success_rate_rules": 0.8, "n4_ppo_success_rate": 0.2, "ppo_not_worse_than_n4_by": 0.05},
+    "attempt": 2,
+    "previous_attempt": {"date": "6 nov", "commit": "9d3c8d1", "report": "reports/rally-v5-132e21c5a8cd4e7f8e6df073eb8270bb.json", "accepted": false,
+      "ppo_success_rate": 0.0, "qlearning_success_rate": 0.022, "rules_success_rate": 0.867, "rules_mud_course_deg": 2.71, "ppo_mean_accidents": 3.38,
+      "diagnosis": ["PPO manejaba «todo o nada»: acelerador a fondo el 46 % del tiempo y volante a tope el 32 %", "Con la física nueva eso hace derrapar y salirse de la pista (3,4 accidentes por vuelta)", "Llegó a 20–40 % a mitad del entrenamiento y lo olvidó: se guardaba el modelo del final"]},
+    "changes_vs_attempt_1": ["Se guarda el mejor punto del entrenamiento, elegido en 10 pistas de VALIDACIÓN (no en las 30 del examen)", "La tasa de aprendizaje baja en línea recta hasta 0 para no olvidar al final", "El modelo recomendado también se elige por validación", "Se probó exploración suave (gSDE) y se descartó: aprendía más lento"],
     "n4_reference": {"rules_success_rate": 0.867, "rules_mud_course_deg": 12.11, "rules_mud_lateral_mps": 2.52, "ppo_success_rate": 0.2, "ppo_mud_course_deg": 5.51, "qlearning_success_rate": 0.06}
   },
   "track": {
@@ -94,10 +99,12 @@
   "episode": {"max_steps": 600, "max_accidents": 5, "stall_steps": 40},
   "training": {
     "seeds": [7, 21, 42],
-    "ppo": {"total_timesteps": 1000000, "n_envs": 4, "n_steps": 512, "batch_size": 256, "n_epochs": 10, "learning_rate": 0.0003, "gamma": 0.99, "gae_lambda": 0.95, "clip_range": 0.2, "ent_coef": 0.005, "log_std_init": -0.5, "net_arch": [64, 64], "eval_every_steps": 50000, "eval_layouts_during_training": 5},
+    "ppo": {"total_timesteps": 1000000, "n_envs": 4, "n_steps": 512, "batch_size": 256, "n_epochs": 10, "learning_rate": 0.0003, "gamma": 0.99, "gae_lambda": 0.95, "clip_range": 0.2, "ent_coef": 0.005, "log_std_init": -0.5, "lr_schedule": "linear", "use_sde": false, "net_arch": [64, 64], "eval_every_steps": 50000, "eval_layouts_during_training": 5},
     "qlearning": {"alpha": 0.2, "gamma": 0.98, "epsilon_start": 1.0, "epsilon_end": 0.05, "speed_bins": [3, 8, 14, 20, 26], "psi_bins": [-0.12, 0.12]},
     "train_layout_seed_offset": 0,
     "evaluation_episodes": 30,
+    "validation_episodes": 10,
+    "validation_layout_seed_offset": 200000,
     "evaluation_layout_seed_offset": 100000
   },
   "tracking": {"experiment_name": "autonomous-rally-v5"}
