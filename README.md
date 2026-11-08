@@ -11,10 +11,11 @@ código, sus datos versionados (DVC), sus corridas (MLflow) y su vista web.
 | **N3** · `rally-v3-n3` | 4 carriles, rampas, puente, referencias, incidente de lluvia con intervenciones A/B | 100 % vs 53 % reglas; B recupera la lluvia | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v3-n3) | [rally-v3.md](docs/rally-v3.md) |
 | **N4** · `rally-v4-n4` | Física continua (m/s, agarre, gravedad), pista nueva en cada carrera, PPO (red neuronal) vs Q-learning | PPO 20 % vs Q-learning 6 % en pistas nuevas; hipótesis (≥70 %) no confirmada | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v4-n4) | [rally-v4.md](docs/rally-v4.md) |
 | **N5** · `rally-v5-n5` | Llantas de Pacejka, círculo de agarre, volante y pedal graduales, barro con surcos, asfalto en la web; 2 intentos | Barro 12° → 2,7° y reglas 87 % (cumplen); PPO 0 % (intento 1) → 10 % (intento 2), meta 15 %: rechazado | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v5-n5) | [rally-v5.md](docs/rally-v5.md) |
+| **N6** · `rally-v6-n6` | Transferencia de peso, suspensión (cabeceo, balanceo, aterrizajes), frenos según el peso, 6 sensores nuevos, reglas reajustadas | Banco: cabeceo 2,1° y balanceo 3,5° (cumplen); reglas 87 %; PPO 10 % → 12 % (meta 15 %): rechazado | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v6-n6) | [rally-v6.md](docs/rally-v6.md) |
 
 **Web pública:** https://autonomous-rally-lake.vercel.app (Vercel, equipo visual-2).
 `rally-dashboard/dist/historial.html` es la portada con el historial y enlaces a la carrera
-de cada versión (`index.html`, `v2.html`, `v3.html`, `v4.html`, `v5.html`). Para volver exactamente a una versión:
+de cada versión (`index.html`, `v2.html`, `v3.html`, `v4.html`, `v5.html`, `v6.html`). Para volver exactamente a una versión:
 `git checkout rally-v3-n3` (o la etiqueta que corresponda).
 
 ---

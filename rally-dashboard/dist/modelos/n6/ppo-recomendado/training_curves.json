@@ -1,0 +1,598 @@
+{
+  "entrenamiento_con_exploracion": [
+    {
+      "timesteps": 50000,
+      "mean_return": -12.650565519999997,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 100000,
+      "mean_return": -5.1577217,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 150000,
+      "mean_return": -0.48902848,
+      "success_rate": 0.0
+    },
+    {
+      "timesteps": 200000,
+      "mean_return": 1.8285843800000001,
+      "success_rate": 0.04
+    },
+    {
+      "timesteps": 250000,
+      "mean_return": 4.600598280000002,
+      "success_rate": 0.06
+    },
+    {
+      "timesteps": 300000,
+      "mean_return": 4.2510376800000005,
+      "success_rate": 0.06
+    },
+    {
+      "timesteps": 350000,
+      "mean_return": 5.57148522,
+      "success_rate": 0.08
+    },
+    {
+      "timesteps": 400000,
+      "mean_return": 1.743167,
+      "success_rate": 0.02
+    },
+    {
+      "timesteps": 450000,
+      "mean_return": 9.730454960000001,
+      "success_rate": 0.1
+    },
+    {
+      "timesteps": 500000,
+      "mean_return": 5.58637336,
+      "success_rate": 0.06
+    },
+    {
+      "timesteps": 550000,
+      "mean_return": 5.46643792,
+      "success_rate": 0.04
+    },
+    {
+      "timesteps": 600000,
+      "mean_return": 12.103850220000002,
+      "success_rate": 0.08
+    },
+    {
+      "timesteps": 650000,
+      "mean_return": 13.484080080000002,
+      "success_rate": 0.12
+    },
+    {
+      "timesteps": 700000,
+      "mean_return": 20.5352675,
+      "success_rate": 0.2
+    },
+    {
+      "timesteps": 750000,
+      "mean_return": 11.96562842,
+      "success_rate": 0.1
+    },
+    {
+      "timesteps": 800000,
+      "mean_return": 23.26941206,
+      "success_rate": 0.24
+    },
+    {
+      "timesteps": 850000,
+      "mean_return": 14.12159936,
+      "success_rate": 0.14
+    },
+    {
+      "timesteps": 900000,
+      "mean_return": 15.8015088,
+      "success_rate": 0.14
+    },
+    {
+      "timesteps": 950000,
+      "mean_return": 13.812974680000002,
+      "success_rate": 0.1
+    },
+    {
+      "timesteps": 1000000,
+      "mean_return": 15.33452252,
+      "success_rate": 0.1
+    }
+  ],
+  "evaluacion_sin_exploracion": [
+    {
+      "timesteps": 4,
+      "success_rate": 0.0,
+      "mean_return": -10.783659505427412,
+      "mean_time_s_success": null,
+      "mean_accidents": 0.0,
+      "mean_progress_pct": 0.21200000000000002,
+      "mean_mud_slip_deg": null,
+      "mean_mud_course_deg": null,
+      "mean_mud_lateral_mps": null,
+      "p95_roll_deg": null,
+      "max_dive_deg": null,
+      "wheel_lift_share": 0.0,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {},
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 0.20500000000000002
+    },
+    {
+      "timesteps": 50000,
+      "success_rate": 0.0,
+      "mean_return": -6.693580617096293,
+      "mean_time_s_success": null,
+      "mean_accidents": 0.0,
+      "mean_progress_pct": 10.548,
+      "mean_mud_slip_deg": 1.3090476190476192,
+      "mean_mud_course_deg": 4.326491258288205,
+      "mean_mud_lateral_mps": 0.2358818952452436,
+      "p95_roll_deg": 1.17,
+      "max_dive_deg": 1.45,
+      "wheel_lift_share": 0.0,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {},
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 13.236
+    },
+    {
+      "timesteps": 100000,
+      "success_rate": 0.0,
+      "mean_return": -3.2644808468187976,
+      "mean_time_s_success": null,
+      "mean_accidents": 0.0,
+      "mean_progress_pct": 15.342000000000002,
+      "mean_mud_slip_deg": 2.2733333333333334,
+      "mean_mud_course_deg": 3.0112473970899596,
+      "mean_mud_lateral_mps": 0.22543309811024884,
+      "p95_roll_deg": 1.4219999999999993,
+      "max_dive_deg": 1.91,
+      "wheel_lift_share": 0.0,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {},
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 23.605999999999998
+    },
+    {
+      "timesteps": 150000,
+      "success_rate": 0.0,
+      "mean_return": -6.165729744536934,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.2,
+      "mean_progress_pct": 15.632,
+      "mean_mud_slip_deg": 2.505,
+      "mean_mud_course_deg": 1.1002243045866167,
+      "mean_mud_lateral_mps": 0.1783147607927194,
+      "p95_roll_deg": 3.0144999999999977,
+      "max_dive_deg": 1.94,
+      "wheel_lift_share": 0.0,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "choca_con_la_valla": 6
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 28.002
+    },
+    {
+      "timesteps": 200000,
+      "success_rate": 0.2,
+      "mean_return": 20.51870160108904,
+      "mean_time_s_success": 111.25,
+      "mean_accidents": 0.8,
+      "mean_progress_pct": 46.916000000000004,
+      "mean_mud_slip_deg": 3.7785897435897438,
+      "mean_mud_course_deg": 2.526670361621391,
+      "mean_mud_lateral_mps": 0.34075252070354745,
+      "p95_roll_deg": 3.239,
+      "max_dive_deg": 1.96,
+      "wheel_lift_share": 0.0,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "hace_un_trompo": 1,
+        "sale_de_la_pista": 2,
+        "choca_con_la_valla": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 36.281
+    },
+    {
+      "timesteps": 250000,
+      "success_rate": 0.0,
+      "mean_return": 0.7951729743478673,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.0,
+      "mean_progress_pct": 29.65,
+      "mean_mud_slip_deg": 3.2846666666666664,
+      "mean_mud_course_deg": 2.862989845327758,
+      "mean_mud_lateral_mps": 0.5183237822975011,
+      "p95_roll_deg": 3.02,
+      "max_dive_deg": 1.95,
+      "wheel_lift_share": 0.0015600624024961,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "choca_con_la_valla": 3,
+        "cae_en_foso": 1,
+        "sale_de_la_pista": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 40.876000000000005
+    },
+    {
+      "timesteps": 300000,
+      "success_rate": 0.0,
+      "mean_return": 1.2543733711523637,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.0,
+      "mean_progress_pct": 29.243999999999993,
+      "mean_mud_slip_deg": 8.265277777777776,
+      "mean_mud_course_deg": 2.687121478424727,
+      "mean_mud_lateral_mps": 0.4900782965128348,
+      "p95_roll_deg": 3.117499999999999,
+      "max_dive_deg": 1.97,
+      "wheel_lift_share": 0.0060790273556231,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "choca_con_la_valla": 1,
+        "cae_en_foso": 4
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 42.046
+    },
+    {
+      "timesteps": 350000,
+      "success_rate": 0.2,
+      "mean_return": 20.13033949721769,
+      "mean_time_s_success": 105.5,
+      "mean_accidents": 1.0,
+      "mean_progress_pct": 46.52400000000001,
+      "mean_mud_slip_deg": 11.688382352941177,
+      "mean_mud_course_deg": 2.602355727070149,
+      "mean_mud_lateral_mps": 0.3846598721113157,
+      "p95_roll_deg": 3.4755,
+      "max_dive_deg": 1.98,
+      "wheel_lift_share": 0.002105263157894737,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "hace_un_trompo": 1,
+        "sale_de_la_pista": 1,
+        "cae_en_foso": 2,
+        "choca_con_la_valla": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 40.66199999999999
+    },
+    {
+      "timesteps": 400000,
+      "success_rate": 0.0,
+      "mean_return": 12.010768624288508,
+      "mean_time_s_success": null,
+      "mean_accidents": 2.8,
+      "mean_progress_pct": 56.82199999999999,
+      "mean_mud_slip_deg": 9.181868131868132,
+      "mean_mud_course_deg": 2.296725490865728,
+      "mean_mud_lateral_mps": 0.39399326050171835,
+      "p95_roll_deg": 3.4425,
+      "max_dive_deg": 2.0,
+      "wheel_lift_share": 0.0008960573476702509,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "sale_de_la_pista": 6,
+        "hace_un_trompo": 3,
+        "choca_con_la_valla": 4,
+        "cae_en_foso": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 42.876
+    },
+    {
+      "timesteps": 450000,
+      "success_rate": 0.2,
+      "mean_return": 22.7807824507,
+      "mean_time_s_success": 111.75,
+      "mean_accidents": 2.6,
+      "mean_progress_pct": 62.245999999999995,
+      "mean_mud_slip_deg": 10.444628099173553,
+      "mean_mud_course_deg": 3.332362063737831,
+      "mean_mud_lateral_mps": 0.5830213166943186,
+      "p95_roll_deg": 3.491499999999999,
+      "max_dive_deg": 2.06,
+      "wheel_lift_share": 0.001669449081803005,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "hace_un_trompo": 4,
+        "sale_de_la_pista": 7,
+        "cae_en_foso": 1,
+        "choca_con_la_valla": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 45.45
+    },
+    {
+      "timesteps": 500000,
+      "success_rate": 0.0,
+      "mean_return": 8.38613612755147,
+      "mean_time_s_success": null,
+      "mean_accidents": 1.4,
+      "mean_progress_pct": 41.882,
+      "mean_mud_slip_deg": 9.501206896551723,
+      "mean_mud_course_deg": 4.156212890360219,
+      "mean_mud_lateral_mps": 0.6792191102690975,
+      "p95_roll_deg": 3.41,
+      "max_dive_deg": 2.04,
+      "wheel_lift_share": 0.004932182490752158,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "sale_de_la_pista": 3,
+        "sale_volando_de_la_pista": 1,
+        "cae_en_foso": 1,
+        "choca_con_la_valla": 2
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 45.06699999999999
+    },
+    {
+      "timesteps": 550000,
+      "success_rate": 0.0,
+      "mean_return": 7.656262206596544,
+      "mean_time_s_success": null,
+      "mean_accidents": 2.0,
+      "mean_progress_pct": 41.739999999999995,
+      "mean_mud_slip_deg": 6.14225,
+      "mean_mud_course_deg": 4.3579326684782576,
+      "mean_mud_lateral_mps": 0.9009241502697275,
+      "p95_roll_deg": 3.4570000000000003,
+      "max_dive_deg": 2.3,
+      "wheel_lift_share": 0.0013089005235602095,
+      "landings": 1,
+      "mean_landing_vz": 2.94,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "choca_con_la_valla": 6,
+        "sale_de_la_pista": 3,
+        "hace_un_trompo": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 45.634
+    },
+    {
+      "timesteps": 600000,
+      "success_rate": 0.2,
+      "mean_return": 18.39400688678461,
+      "mean_time_s_success": 92.75,
+      "mean_accidents": 1.2,
+      "mean_progress_pct": 45.236000000000004,
+      "mean_mud_slip_deg": 15.05,
+      "mean_mud_course_deg": 5.635021358114652,
+      "mean_mud_lateral_mps": 0.9959703813985133,
+      "p95_roll_deg": 3.4589999999999987,
+      "max_dive_deg": 2.0,
+      "wheel_lift_share": 0.0012315270935960591,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "sale_de_la_pista": 3,
+        "choca_con_la_valla": 2,
+        "hace_un_trompo": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 43.763
+    },
+    {
+      "timesteps": 650000,
+      "success_rate": 0.4,
+      "mean_return": 34.27059961003807,
+      "mean_time_s_success": 96.25,
+      "mean_accidents": 1.8,
+      "mean_progress_pct": 62.83,
+      "mean_mud_slip_deg": 7.175612244897958,
+      "mean_mud_course_deg": 4.461613313118398,
+      "mean_mud_lateral_mps": 0.8075748403318807,
+      "p95_roll_deg": 3.493499999999999,
+      "max_dive_deg": 3.05,
+      "wheel_lift_share": 0.001763668430335097,
+      "landings": 2,
+      "mean_landing_vz": 4.22,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "sale_de_la_pista": 6,
+        "hace_un_trompo": 1,
+        "choca_con_la_valla": 2
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 42.498999999999995
+    },
+    {
+      "timesteps": 700000,
+      "success_rate": 0.4,
+      "mean_return": 31.922620453359826,
+      "mean_time_s_success": 98.625,
+      "mean_accidents": 1.6,
+      "mean_progress_pct": 53.10600000000001,
+      "mean_mud_slip_deg": 10.774307692307692,
+      "mean_mud_course_deg": 4.801418724390911,
+      "mean_mud_lateral_mps": 1.019105939057089,
+      "p95_roll_deg": 3.48,
+      "max_dive_deg": 2.26,
+      "wheel_lift_share": 0.0,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "sale_de_la_pista": 2,
+        "cae_en_foso": 1,
+        "choca_con_la_valla": 5
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 47.3
+    },
+    {
+      "timesteps": 750000,
+      "success_rate": 0.2,
+      "mean_return": 26.108250373930453,
+      "mean_time_s_success": 88.5,
+      "mean_accidents": 1.4,
+      "mean_progress_pct": 56.43000000000001,
+      "mean_mud_slip_deg": 7.188571428571429,
+      "mean_mud_course_deg": 4.831147644273862,
+      "mean_mud_lateral_mps": 0.9508380273452408,
+      "p95_roll_deg": 3.41,
+      "max_dive_deg": 1.99,
+      "wheel_lift_share": 0.0,
+      "landings": 1,
+      "mean_landing_vz": 6.9,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "sale_de_la_pista": 4,
+        "cae_en_foso": 1,
+        "hace_un_trompo": 2
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 43.98
+    },
+    {
+      "timesteps": 800000,
+      "success_rate": 0.4,
+      "mean_return": 33.59969542738135,
+      "mean_time_s_success": 87.125,
+      "mean_accidents": 0.4,
+      "mean_progress_pct": 48.318,
+      "mean_mud_slip_deg": 7.714693877551021,
+      "mean_mud_course_deg": 4.128697193822862,
+      "mean_mud_lateral_mps": 0.9702130241374702,
+      "p95_roll_deg": 3.43,
+      "max_dive_deg": 1.98,
+      "wheel_lift_share": 0.0024330900243309003,
+      "landings": 1,
+      "mean_landing_vz": 7.08,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "choca_con_la_valla": 1,
+        "sale_de_la_pista": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 44.584999999999994
+    },
+    {
+      "timesteps": 850000,
+      "success_rate": 0.2,
+      "mean_return": 18.89743624218112,
+      "mean_time_s_success": 92.5,
+      "mean_accidents": 1.4,
+      "mean_progress_pct": 47.79,
+      "mean_mud_slip_deg": 9.056724137931035,
+      "mean_mud_course_deg": 5.855987878845118,
+      "mean_mud_lateral_mps": 1.1218636167598144,
+      "p95_roll_deg": 3.3829999999999996,
+      "max_dive_deg": 2.24,
+      "wheel_lift_share": 0.0011695906432748538,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "sale_de_la_pista": 6,
+        "cae_en_foso": 1
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 45.09
+    },
+    {
+      "timesteps": 900000,
+      "success_rate": 0.2,
+      "mean_return": 18.55254433947966,
+      "mean_time_s_success": 89.25,
+      "mean_accidents": 1.6,
+      "mean_progress_pct": 45.040000000000006,
+      "mean_mud_slip_deg": 6.891249999999999,
+      "mean_mud_course_deg": 3.070270084868138,
+      "mean_mud_lateral_mps": 0.5632643065955844,
+      "p95_roll_deg": 3.43,
+      "max_dive_deg": 2.01,
+      "wheel_lift_share": 0.0,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "hace_un_trompo": 3,
+        "sale_de_la_pista": 3,
+        "choca_con_la_valla": 2
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 47.104
+    },
+    {
+      "timesteps": 950000,
+      "success_rate": 0.2,
+      "mean_return": 21.675231879704274,
+      "mean_time_s_success": 85.0,
+      "mean_accidents": 1.6,
+      "mean_progress_pct": 53.842,
+      "mean_mud_slip_deg": 5.365538461538462,
+      "mean_mud_course_deg": 2.9430738685073803,
+      "mean_mud_lateral_mps": 0.746171535600008,
+      "p95_roll_deg": 3.45,
+      "max_dive_deg": 1.97,
+      "wheel_lift_share": 0.0010548523206751054,
+      "landings": 0,
+      "mean_landing_vz": null,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "hace_un_trompo": 1,
+        "sale_de_la_pista": 3,
+        "cae_en_foso": 2,
+        "choca_con_la_valla": 2
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 45.60099999999999
+    },
+    {
+      "timesteps": 1000000,
+      "success_rate": 0.2,
+      "mean_return": 21.600934925692822,
+      "mean_time_s_success": 89.25,
+      "mean_accidents": 2.6,
+      "mean_progress_pct": 58.912,
+      "mean_mud_slip_deg": 5.022461538461538,
+      "mean_mud_course_deg": 2.985993906883257,
+      "mean_mud_lateral_mps": 0.6584475939881929,
+      "p95_roll_deg": 3.46,
+      "max_dive_deg": 1.98,
+      "wheel_lift_share": 0.0009871668311944718,
+      "landings": 1,
+      "mean_landing_vz": 7.49,
+      "bottom_outs": 0,
+      "accident_causes": {
+        "sale_de_la_pista": 4,
+        "hace_un_trompo": 3,
+        "choca_con_la_valla": 6
+      },
+      "validation_success_rate": 0.0,
+      "validation_progress_pct": 45.481
+    }
+  ]
+}

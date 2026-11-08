@@ -103,7 +103,60 @@ No cambia: sigue siendo `reward v5` (la del N5).
 
 ## 7. Resultados
 
-RESULTADOS_N6
+Corrida sin DVC ni MLflow (`--skip-tracking`), 3 semillas (7, 21, 42), 1 millón de pasos por
+modelo, mejor punto elegido en 10 pistas de validación, evaluadas en las **mismas 30 pistas del N4
+y del N5**. Informe: `reports/rally-v6-fa67dfc239f942bcb167518766d7aeea.json`.
+
+### Resultado de la hipótesis
+
+| Criterio (fijado antes de entrenar) | Meta | N5 | N6 | ¿Cumple? |
+|---|---|---|---|---|
+| Frenada a fondo desde 100 km/h: cabeceo | 1°–3° | 0° (no existía) | **2,1°** | Sí |
+| Curva constante a 0,9 g: balanceo | 2°–5° | 0° (no existía) | **3,5°** | Sí |
+| Vueltas completas · reglas | ≥ 80 % | 87 % | **87 %** | Sí |
+| Vueltas completas · PPO (media de 3 semillas) | ≥ 15 % | 10 % | **12 %** | No |
+
+**Veredicto: RECHAZADO** (3 de 4 criterios). La física se comporta como un coche real y las reglas
+reajustadas manejan igual que en el N5, pero PPO mejoró solo 2 puntos.
+
+### Pruebas de banco
+
+| Prueba | Resultado | Qué significa |
+|---|---|---|
+| Frenada 100 → 0 km/h | 42,7 m | Coche de calle con buenas llantas: 36–45 m |
+| Cabeceo máximo al frenar | 2,1° | La trompa se hunde |
+| Peso atrás al frenar | 27 % (en reposo 46 %) | La cola queda liviana: por eso frenar girando es peligroso |
+| Curva constante | 0,9 g, balanceo 3,5° | La carrocería se inclina hacia afuera |
+| Peso en las ruedas de afuera | 79 % | Las de adentro casi se levantan |
+| Caída a 6 m/s | compresión 25 cm de 30 | No golpea los topes |
+
+### En las 30 pistas
+
+| Política | Normal | Lluvia | Sensores con ruido | Accidentes por vuelta |
+|---|---|---|---|---|
+| Reglas a mano | 87 % (N5: 87 %) | 87 % (N5: 80 %) | — | 0,70 |
+| PPO (semillas 7 / 21 / 42) | 12 % (17 / 7 / 13) | 4 % (N5: 0 %) | 0 % | 2,3 |
+| Q-learning | 2 % (0 / 0 / 7) | 6 % | 10 % | 2,6 |
+| Azar | 0 % | — | — | 0,93 |
+
+* **PPO mejoró poco pero en todas partes**: 10 % → 12 % normal y 0 % → 4 % con lluvia (la primera
+  vez que la red termina vueltas mojadas). Sus accidentes: 29 salidas de pista, 26 vallas y 6 trompos
+  por cada 30 pistas (media de semillas).
+* **Q-learning bajó** (6 % → 2 %): la tabla no ve el peso ni la suspensión (sigue con 720 estados),
+  así que la física nueva la afecta sin darle información nueva.
+* Las ruedas casi nunca se levantan (0,1 % del tiempo): las reglas y PPO no llegan a ese límite.
+* Modelo recomendado: **PPO semilla 7** (el mejor en validación; también el mejor en el examen, 17 %).
+
+### Qué aprendimos y qué sigue
+
+Darle al agente más sensores de su propio coche (peso, suspensión) ayudó poco: el problema de PPO
+no es "sentir" el coche sino **ver la pista que viene**. Hoy solo ve 6 celdas de 10 m adelante y
+la curvatura a 30 y 60 m. Eso es exactamente el N7: sensores tipo Gran Turismo Sophy (curvatura y
+ancho de la pista adelante según la velocidad) y una recompensa revisada. Y en el N8 aprenderá
+primero imitando a las reglas, que hoy completan el 87 %.
+
+Paquetes publicados en la web: `modelos/n6/ppo-recomendado/` (model.zip, policy.onnx,
+normalization.json, manifest.json) y `modelos/n6/qlearning-mejor/` (q_table.npy).
 
 ## 8. Cómo ejecutarlo
 
