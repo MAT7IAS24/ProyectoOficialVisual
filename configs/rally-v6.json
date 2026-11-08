@@ -1,0 +1,273 @@
+{
+  "environment_version": "rally-v6",
+  "reward_version": "v5",
+  "level_id": "N6",
+  "experiment": {
+    "title": "Peso, suspensión y coche nuevo",
+    "hypothesis": "Con transferencia de peso (cabeceo y balanceo con suspensión de resorte y amortiguador), sensibilidad de la llanta a la carga y aterrizajes con suspensión, (1) el coche pasa dos pruebas de banco como un coche real: al frenar a fondo desde 100 km/h la trompa se hunde entre 1° y 3°, y en una curva constante de unos 0,9 g la carrocería se inclina entre 2° y 5°; (2) las reglas, reajustadas a la nueva física, conservan al menos el 80 % de vueltas completas; y (3) PPO, que ahora también siente el peso (6 sensores nuevos de carga y suspensión), supera el 10 % del N5 y llega al menos al 15 % en las mismas 30 pistas nuevas.",
+    "change_vs_previous": "v5 -> v6: el peso de cada rueda deja de ser fijo. Cabeceo y balanceo con resorte y amortiguador (1,5 y 1,3 Hz) deciden cuánto peso pasa adelante al frenar y hacia afuera en las curvas (altura del centro de gravedad 0,50 m, trocha 1,55 m, 55 % del balanceo en el eje delantero). Cada llanta agarra menos de lo proporcional con más peso (sensibilidad 0,15). Frenos con reparto según el peso (EBD). Aterrizajes con suspensión de 0,30 m de recorrido: la compresión da más agarre un instante y el tope de goma es un evento. La observación agrega 6 datos (peso adelante, peso afuera, cabeceo, balanceo, compresión y deslizamiento trasero): familia de modelos nueva. La recompensa no cambia (v5). Se mantiene la selección por pistas de validación del N5 (intento 2).",
+    "selection_criteria": {
+      "dive_deg_range": [
+        1.0,
+        3.0
+      ],
+      "roll_deg_range": [
+        2.0,
+        5.0
+      ],
+      "min_success_rate_rules": 0.8,
+      "min_success_rate_ppo": 0.15
+    },
+    "n5_reference": {
+      "rules_success_rate": 0.867,
+      "rules_rain_success_rate": 0.8,
+      "rules_mud_course_deg": 2.71,
+      "ppo_success_rate": 0.1,
+      "qlearning_success_rate": 0.056,
+      "ppo_mean_accidents": 1.89,
+      "report": "reports/rally-v5-e7e8a036393943de956ca4e29152784e.json"
+    },
+    "rules_retuned": {
+      "before": {
+        "lateral": 0.06,
+        "lateral_ref_mps": "sin límite",
+        "course": 0.6,
+        "yaw": 0.12,
+        "success_rate": 0.533,
+        "rain_success_rate": 0.267
+      },
+      "after": {
+        "lateral": 0.06,
+        "lateral_ref_mps": 10,
+        "course": 0.9,
+        "yaw": 0.35,
+        "success_rate": 0.867,
+        "rain_success_rate": 0.867
+      },
+      "note": "Probadas 9 variantes en la suite (sin entrenar nada). Soltar el freno al girar (1,5 y 3) empeoró."
+    }
+  },
+  "track": {
+    "straight_m": 300,
+    "radius_m": 80,
+    "lanes": 4,
+    "lane_width_m": 4.0,
+    "cell_m": 10,
+    "checkpoint_every_m": 50,
+    "start_clear_m": 40,
+    "finish_clear_m": 30
+  },
+  "physics": {
+    "dt_s": 0.25,
+    "substeps": 10,
+    "gravity_mps2": 9.81,
+    "max_speed_mps": 35,
+    "max_accel_mps2": 6.0,
+    "max_brake_mps2": 9.0,
+    "drag_per_v2": 0.0008,
+    "wheelbase_m": 2.7,
+    "cg_to_front_m": 1.25,
+    "cg_to_rear_m": 1.45,
+    "mass_kg": 1250,
+    "yaw_inertia_kgm2": 1900,
+    "cg_height_m": 0.5,
+    "track_width_m": 1.55,
+    "pitch_per_accel_rad": 0.0035,
+    "roll_per_accel_rad": 0.007,
+    "pitch_freq_hz": 1.5,
+    "roll_freq_hz": 1.3,
+    "suspension_damping_ratio": 0.6,
+    "front_roll_share": 0.55,
+    "heave_freq_hz": 1.6,
+    "heave_damping": 0.5,
+    "suspension_travel_m": 0.3,
+    "load_sensitivity": 0.15,
+    "wheel_lift_fraction": 0.05,
+    "max_steer_rad": 0.4,
+    "steer_rate_rad_s": 1.2,
+    "pedal_rate_per_s": 5.0,
+    "drive_front_share": 0.5,
+    "brake_front_share": 0.6,
+    "brake_follows_load": true,
+    "tire_B_front": 9.0,
+    "tire_B_rear": 11.0,
+    "tire_C": 1.8,
+    "tire_E": 0.95,
+    "kinematic_below_mps": 1.5,
+    "slide_event_deg": 6.0,
+    "spin_deg": 70.0,
+    "ramp_angle_deg": 20,
+    "ramp_height_m": 1.2,
+    "deck_height_m": 3.0,
+    "landing_lip_m": 0.6,
+    "hard_landing_vz_mps": 12.0,
+    "barrier_length_m": 2.0,
+    "barrier_crash_speed_mps": 6.0,
+    "fall_accident_drop_m": 2.0,
+    "initial_fuel_l": 40,
+    "fuel_idle_l_per_s": 0.08,
+    "fuel_throttle_l_per_s": 0.32
+  },
+  "terrains": {
+    "asfalto": {
+      "code": ".",
+      "grip": 1.0,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#3b3f45"
+    },
+    "lodo": {
+      "code": "L",
+      "grip": 0.45,
+      "rolling": 0.22,
+      "plow": 0.55,
+      "color": "#5a3b24"
+    },
+    "agua": {
+      "code": "A",
+      "grip": 0.35,
+      "rolling": 0.04,
+      "plow": 0.0,
+      "color": "#2f86d6"
+    },
+    "pasto": {
+      "code": "S",
+      "grip": 0.55,
+      "rolling": 0.08,
+      "plow": 0.1,
+      "color": "#6f9a2e"
+    },
+    "foso": {
+      "code": "F",
+      "grip": 0.0,
+      "rolling": 0.0,
+      "plow": 0.0,
+      "color": "#17110e"
+    },
+    "rampa": {
+      "code": "R",
+      "grip": 0.9,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#b9622f"
+    },
+    "valla": {
+      "code": "B",
+      "grip": 1.0,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#d8332a"
+    }
+  },
+  "generator": {
+    "section_m": 100,
+    "min_free_lanes_per_section": 1,
+    "patch_probabilities": {
+      "lodo": 0.22,
+      "agua": 0.18,
+      "pasto": 0.15,
+      "valla": 0.16,
+      "rampa_foso": 0.1,
+      "nada": 0.19
+    },
+    "patch_length_cells": [
+      1,
+      3
+    ],
+    "bridge_probability": 0.6,
+    "bridge_length_cells": [
+      6,
+      9
+    ],
+    "bridge_gap_m": 6
+  },
+  "sensors": {
+    "lookahead_cells": 6,
+    "features_per_cell": [
+      "peligro",
+      "rampa",
+      "frena",
+      "agarre",
+      "puente"
+    ],
+    "base_features": 26
+  },
+  "perturbations": {
+    "lluvia": {
+      "descripcion": "Lluvia: todo el agarre baja un 30% y el lodo frena un 30% más.",
+      "grip_factor": 0.7,
+      "rolling_factor": 1.3
+    },
+    "sensor_ruidoso": {
+      "descripcion": "Sensores con ruido gaussiano (desviación 0,1) en cada lectura. Desde el N5 también afecta a Q-learning.",
+      "obs_noise_std": 0.1
+    }
+  },
+  "reward": {
+    "per_meter": 0.05,
+    "checkpoint": 0.5,
+    "step": -0.02,
+    "accident": -5.0,
+    "stalled": -10.0,
+    "finish": 30.0,
+    "remaining_fuel_per_l": 0.2
+  },
+  "episode": {
+    "max_steps": 600,
+    "max_accidents": 5,
+    "stall_steps": 40
+  },
+  "training": {
+    "seeds": [
+      7,
+      21,
+      42
+    ],
+    "ppo": {
+      "total_timesteps": 1000000,
+      "n_envs": 4,
+      "n_steps": 512,
+      "batch_size": 256,
+      "n_epochs": 10,
+      "learning_rate": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_range": 0.2,
+      "ent_coef": 0.005,
+      "log_std_init": -0.5,
+      "lr_schedule": "linear",
+      "use_sde": false,
+      "net_arch": [
+        64,
+        64
+      ],
+      "eval_every_steps": 50000,
+      "eval_layouts_during_training": 5
+    },
+    "qlearning": {
+      "alpha": 0.2,
+      "gamma": 0.98,
+      "epsilon_start": 1.0,
+      "epsilon_end": 0.05,
+      "speed_bins": [
+        3,
+        8,
+        14,
+        20,
+        26
+      ],
+      "psi_bins": [
+        -0.12,
+        0.12
+      ]
+    },
+    "train_layout_seed_offset": 0,
+    "evaluation_episodes": 30,
+    "validation_episodes": 10,
+    "validation_layout_seed_offset": 200000,
+    "evaluation_layout_seed_offset": 100000
+  },
+  "tracking": {
+    "experiment_name": "autonomous-rally-v6"
+  }
+}
