@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/three/OrbitControls.js';
 import { GLTFLoader } from './vendor/three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from './vendor/three/addons/libs/meshopt_decoder.module.js';
+import { DecalGeometry } from './vendor/three/addons/geometries/DecalGeometry.js';
 import { buildVenue } from './venue.js';
 
 // Vista 3D del N6. Solo dibuja: la forma de la pista, los obstáculos de cada pista y las poses del
@@ -18,10 +20,11 @@ const cfg = data.config;
 const LANES = cfg.track.lanes, W = cfg.track.lane_width_m, CELL = cfg.track.cell_m, HALF = LANES * W / 2;
 const L = data.track_length, S = cfg.track.straight_m, R = cfg.track.radius_m;
 const P = cfg.physics;
-// Coche del N6: "Lowpoly WRC rally car" de Amon99 (CC BY 4.0, ver models3d/CREDITOS.md). Si el archivo
-// no está, se usa el coche del N4. yaw: giro para que mire a +z; length: largo real en metros.
-const CAR = { url: 'models3d/coche-rally.glb', yaw: 0, length: 4.05, wheelRadius: 0.33, wheel: /wheel|tire|tyre|rueda|llanta/i };
-const CAR_OLD = { url: 'models3d/coche.glb', yaw: 0, length: 4.4, wheelRadius: 0.34, wheel: /Wheel/ };
+// Coche del N6: "Car Concept" de Khronos (Eric Chadwick / Darmstadt Graphics Group, CC BY 4.0, ver
+// models3d/CREDITOS.md) con decoración de rally pintada en el navegador. Si no carga, se usa el coche del N4.
+// wheelGroup: nombre de cada grupo de rueda (llanta + rin + disco); el frente y el radio se calculan solos.
+const CAR = { url: 'models3d/coche-concepto.glb', length: 4.3, wheelGroup: /^Wheel(Front|Rear)[LR]$/, livery: true };
+const CAR_OLD = { url: 'models3d/coche.glb', yaw: 0, length: 4.4, wheelRadius: 0.34, wheel: /Wheel/, wheelGroup: null, livery: false };
 const RAMP_LEN = P.ramp_height_m / Math.tan(P.ramp_angle_deg * Math.PI / 180);
 const samples = data.track_samples;           // [x, y, rumbo] cada 2 m
 const STEP = 2;
@@ -204,40 +207,99 @@ try {
   const venue = buildVenue({ scene, renderer, sun, sunDir: SUN_DIR, at, center, L, S, R, HALF, mat });
 
   // ---------- modelos 3D ----------
-  const loader = new GLTFLoader();
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const load = url => loader.loadAsync(url).then(g => g.scene).catch(err => { console.warn('No cargó', url, err); return null; });
   const models = {};
   const ready = Promise.all([Promise.resolve(null), load(CAR.url).then(m => m ?? (Object.assign(CAR, CAR_OLD), load(CAR_OLD.url))), load('models3d/valla.glb')])
     .then(([estadio, coche, valla]) => { Object.assign(models, { estadio, coche, valla }); });
 
+  // Decoración de rally: amarillo con negro, número en las puertas y franja en el capó (se pinta una vez).
+  function liveryTex(text, w = 512, h = 512, bg = '#ffffff', fg = '#111111') {
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+    g.fillStyle = bg; g.beginPath(); g.roundRect(8, 8, w - 16, h - 16, 60); g.fill();
+    g.lineWidth = 14; g.strokeStyle = fg; g.stroke();
+    g.fillStyle = fg; g.font = `900 ${Math.round(h * 0.62)}px system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, w / 2, h / 2 + 10);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  }
+  function stripeTex() {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
+    g.fillStyle = '#111'; g.fillRect(0, 0, 512, 128); g.fillStyle = '#e8202a'; g.fillRect(0, 44, 512, 40);
+    g.fillStyle = '#fff'; g.font = '900 52px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('RALLY IA', 256, 66);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  }
+  let liveryDone = false;
+  function paintLivery(car) {
+    car.traverse(o => {
+      if (!o.isMesh) return;
+      const n = o.material?.name ?? '';
+      if (/^Paint 1/.test(n)) { o.material = o.material.clone(); o.material.color.set('#ffc414'); o.material.map = null; o.material.metalness = 0.25; o.material.roughness = 0.32; o.material.needsUpdate = true; }
+      if (/^Paint 2/.test(n)) { o.material = o.material.clone(); o.material.color.set('#16181b'); o.material.map = null; o.material.needsUpdate = true; }
+    });
+  }
+  function addDecals(car, body) {
+    // Se proyectan sobre la carrocería ya escalada y girada (coordenadas del grupo del coche).
+    car.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(car), size = box.getSize(new THREE.Vector3());
+    const numMat = new THREE.MeshStandardMaterial({ map: liveryTex('6'), transparent: true, polygonOffset: true, polygonOffsetFactor: -4, roughness: 0.4 });
+    const stripeMat = new THREE.MeshStandardMaterial({ map: stripeTex(), polygonOffset: true, polygonOffsetFactor: -4, roughness: 0.35 });
+    const targets = []; car.traverse(o => { if (o.isMesh && /^(Body|Paint)/.test(o.material?.name ?? '') || (o.isMesh && /^Paint/.test(o.material?.name ?? ''))) targets.push(o); });
+    const painted = []; car.traverse(o => { if (o.isMesh && /^Paint/.test(o.material?.name ?? '')) painted.push(o); });
+    const yMid = box.min.y + size.y * 0.42;
+    for (const side of [1, -1]) {
+      const pos = new THREE.Vector3(side * size.x / 2, yMid, box.min.z + size.z * 0.5), rot = new THREE.Euler(0, side * Math.PI / 2, 0);
+      for (const m of painted) { const g = new DecalGeometry(m, pos, rot, new THREE.Vector3(0.62, 0.62, 0.8)); if (g.attributes.position.count) body.add(new THREE.Mesh(g, numMat)); }
+    }
+    const hood = new THREE.Vector3(0, box.max.y, box.min.z + size.z * 0.78), hrot = new THREE.Euler(-Math.PI / 2, 0, Math.PI / 2);
+    for (const m of painted) { const g = new DecalGeometry(m, hood, hrot, new THREE.Vector3(1.15, 0.32, 2.4)); if (g.attributes.position.count) body.add(new THREE.Mesh(g, stripeMat)); }
+  }
   function prepCar(src, opacity = 1) {
     // g (posición y rumbo) -> body (cabeceo, balanceo, compresión) -> carrocería. Las ruedas cuelgan de g,
     // así quedan apoyadas en el suelo mientras la carrocería se inclina sobre la suspensión.
     const g = new THREE.Group(), body = new THREE.Group();
     g.add(body);
     const car = src.clone(true);
-    car.rotation.y = CAR.yaw;
+    if (CAR.livery && opacity === 1) paintLivery(car);
+    const groups = []; if (CAR.wheelGroup) car.traverse(o => { if (CAR.wheelGroup.test(o.name)) groups.push(o); });
+    // Hacia dónde mira el modelo: del centro de las ruedas traseras al de las delanteras.
+    if (groups.length === 4) {
+      const ctr = o => new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
+      const f = new THREE.Vector3(), r = new THREE.Vector3();
+      groups.forEach(o => (/Front/.test(o.name) ? f : r).add(ctr(o)));
+      const dir = f.sub(r); car.rotation.y = Math.atan2(-dir.x, dir.z);
+    } else car.rotation.y = CAR.yaw ?? 0;
+    car.updateMatrixWorld(true);
     const box0 = new THREE.Box3().setFromObject(car), size = box0.getSize(new THREE.Vector3());
-    car.scale.setScalar(CAR.length / Math.max(size.x, size.z));      // largo real del coche (m)
+    car.scale.multiplyScalar(CAR.length / Math.max(size.x, size.z));      // largo real del coche (m)
+    car.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(car), c = box.getCenter(new THREE.Vector3());
     car.position.set(-c.x, -box.min.y, -c.z);
     body.add(car); g.updateMatrixWorld(true);
-    const wheels = [], found = [];
     car.traverse(o => {
       if (!o.isMesh) return;
       o.castShadow = true;
       if (opacity < 1) { o.material = o.material.clone(); o.material.transparent = true; o.material.opacity = opacity; o.material.depthWrite = false; }
-      if (CAR.wheel.test(o.name)) found.push(o);
     });
-    for (const o of found) {
-      o.geometry = o.geometry.clone(); o.geometry.computeBoundingBox();
-      const wc = o.geometry.boundingBox.getCenter(new THREE.Vector3());
-      o.geometry.translate(-wc.x, -wc.y, -wc.z); o.position.add(wc);
-      o.updateMatrixWorld(true);
-      const pivot = new THREE.Group(), spin = new THREE.Group();   // pivot: vira con el volante · spin: rueda
-      const wp = new THREE.Vector3(); o.getWorldPosition(wp); g.worldToLocal(wp);
-      pivot.position.copy(wp); g.add(pivot); pivot.add(spin); spin.attach(o);
-      wheels.push({ pivot, spin, front: wp.z > 0 });            // el coche mira a +z: adelante = z positiva
+    if (CAR.livery && opacity === 1) addDecals(car, body);
+    const wheels = [];
+    const mount = (parts, front, still = []) => {
+      // pivot: vira con el volante · spin: gira con la distancia. Las pastillas de freno no giran.
+      const wb = new THREE.Box3(); parts.forEach(p => wb.expandByObject(p));
+      const wc = wb.getCenter(new THREE.Vector3()); g.worldToLocal(wc);
+      const radius = wb.getSize(new THREE.Vector3()).y / 2;
+      const pivot = new THREE.Group(), spin = new THREE.Group();
+      pivot.position.copy(wc); g.add(pivot); pivot.add(spin);
+      parts.forEach(p => spin.attach(p)); still.forEach(p => pivot.attach(p));
+      wheels.push({ pivot, spin, front: front ?? wc.z > 0, radius });
+    };
+    if (groups.length === 4) {
+      for (const grp of groups) {
+        const parts = [], still = [];
+        grp.traverse(o => { if (o.isMesh) (/BrakePad/.test(o.name) ? still : parts).push(o); });
+        mount(parts, /Front/.test(grp.name), still);
+      }
+    } else {
+      const found = []; car.traverse(o => { if (o.isMesh && CAR.wheel?.test(o.name)) found.push(o); });
+      found.forEach(o => mount([o]));
     }
     g.userData = { wheels, body };
     g.rotation.order = 'YXZ'; body.rotation.order = 'YXZ';
@@ -398,7 +460,13 @@ try {
     if (models.coche) {
       scene.remove(car); scene.remove(ghost);
       car = prepCar(models.coche); ghost = prepCar(models.coche, 0.45); ghost.visible = !!current?.ghostPoses;
-      ghost.traverse(o => { if (o.isMesh && !CAR.wheel.test(o.name) && !/glass|window|vidrio/i.test(o.name + (o.material?.name ?? ''))) { o.material.color = new THREE.Color('#5a8ee8'); } });
+      const paints = []; ghost.traverse(o => { if (o.isMesh && /^Paint/.test(o.material?.name ?? '')) paints.push(o); });
+      ghost.traverse(o => {
+        if (!o.isMesh) return;
+        const n = o.name + ' ' + (o.material?.name ?? '');
+        const tint = paints.length ? paints.includes(o) : !/wheel|glass|window|vidrio/i.test(n);
+        if (tint) { o.material.color = new THREE.Color('#5a8ee8'); o.material.map = null; o.material.needsUpdate = true; }
+      });
       scene.add(car); scene.add(ghost);
     }
     if (current) { layoutKey = null; buildLayout(current.layout); }
@@ -448,7 +516,7 @@ try {
     body.rotation.z = st.roll * exag;                              // + = se inclina a la derecha (curva a la izquierda)
     body.position.y = -st.heave * 0.6 * Math.min(exag, 2);         // se hunde al aterrizar, se estira en el aire
     for (const w of obj.userData.wheels) {
-      w.spin.rotation.x += st.dist / CAR.wheelRadius;              // rueda que gira con la distancia recorrida
+      w.spin.rotation.x += st.dist / (w.radius || CAR.wheelRadius || 0.33);              // rueda que gira con la distancia recorrida
       w.pivot.rotation.y = w.front ? st.steer : 0;                 // ruedas delanteras con el ángulo REAL del volante
     }
   }

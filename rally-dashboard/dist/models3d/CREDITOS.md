@@ -18,7 +18,7 @@ Los archivos se usan sin modificar; la escala, posición y color del coche "fant
 | Archivo | Qué es | Autor / fuente | Licencia | Uso |
 |---|---|---|---|---|
 | `hdri/cielo.exr` | Foto 360° de cielo (HDRI) reducida a 512×512 | Poly Haven, vía el paquete npm `@pmndrs/assets` | CC0 | Luz ambiental y reflejos del coche (`venue.js`) |
-| `coche-rally.glb` (pendiente) | "Lowpoly WRC rally car" | Amon99 · https://sketchfab.com/3d-models/lowpoly-wrc-rally-car-4330d849b2df437ca83071bc3644a6cf | CC BY 4.0 (dar crédito) | Coche del N6 en adelante; mientras no esté se usa `coche.glb` |
+| `coche-concepto.glb` | "Car Concept" (glTF Sample Assets de Khronos) · https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept | Eric Chadwick / Darmstadt Graphics Group GmbH (2024), a partir de un modelo de dominio público de Unity Fan | CC BY 4.0 (dar crédito) | Coche del N6 en adelante. Se comprimió con gltf-transform (texturas WebP, mallas meshopt: 11,8 → 2,6 MB) y en el navegador se pinta de amarillo con número 6 y franja "RALLY IA" en el capó |
 
 El estadio del N6 ya no usa `estadio.glb`: las tribunas, el público, el techo, las torres de luces, las
 banderas, las vallas publicitarias (con marcas inventadas), los árboles y las colinas se construyen con código

@@ -89,8 +89,14 @@ Soltar el freno al girar (1,5 y 3) se probó y empeoró: se descartó.
 
 ## 5. Qué se ve nuevo en la web
 
-* **Coche de rally nuevo** ("Lowpoly WRC rally car", Amon99, CC BY 4.0) con ruedas que giran y
-  viran sobre su propio eje. Si el archivo no está, se usa el coche del N4.
+* **Coche nuevo**: "Car Concept" de Khronos (CC BY 4.0) con decoración de rally pintada en el
+  navegador (amarillo, número 6 en las puertas y franja en el capó). Las cuatro ruedas giran y viran
+  sobre su propio eje y la carrocería se inclina sobre ellas. (El WRC de Sketchfab que elegimos primero
+  pide una cuenta de Epic Games para descargarlo; se puede cambiar después.)
+* **Estadio nuevo hecho con código** (`venue.js`): tribunas por niveles en todo el óvalo, unas 15 mil
+  personas que se mueven y saltan cuando pasa el coche, techo, torres de luces, banderas, vallas
+  publicitarias, pantalla gigante, carpas, boxes, árboles y colinas. Cielo con modelo de atmósfera y
+  luz de un HDRI de Poly Haven (CC0).
 * La **carrocería se inclina sobre las ruedas**: trompa abajo al frenar, hacia afuera en las curvas,
   se hunde al aterrizar. Opción **"Exagerar inclinación ×3"** para verlo en una exposición (los
   datos no cambian).
