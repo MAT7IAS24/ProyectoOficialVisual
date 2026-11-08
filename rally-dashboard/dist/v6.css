@@ -1,0 +1,8 @@
+.loads-card { text-align: center; }
+.loads-card > span { display: block; text-align: left; }
+svg.loads { width: 150px; height: 170px; display: block; margin: 4px auto 0; }
+svg.loads circle { transition: r .15s, fill .15s; opacity: .9; }
+svg.loads text { font: 700 8px system-ui; fill: #9aabb7; letter-spacing: .1em; }
+.loads-card small { display: block; color: #c9d4dc; font-size: 12px; }
+.metric-grid.three { grid-template-columns: repeat(3, 1fr); }
+.controls .exag { display: inline-flex; align-items: center; gap: 6px; }
