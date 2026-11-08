@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/three/OrbitControls.js';
 import { GLTFLoader } from './vendor/three/addons/loaders/GLTFLoader.js';
+import { buildVenue } from './venue.js';
 
 // Vista 3D del N6. Solo dibuja: la forma de la pista, los obstáculos de cada pista y las poses del
 // coche vienen de Python (pipeline_v6.py). Cada pose = [x, y, altura, rumbo de la carrocería,
@@ -93,35 +94,24 @@ const TEX = {
 };
 
 try {
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 0.78;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   host.appendChild(renderer.domElement);
   renderer.domElement.setAttribute('role', 'img');
-  renderer.domElement.setAttribute('aria-label', 'Pista 3D del experimento 5: asfalto, líneas pintadas, conos y coche con llantas que derrapan');
+  renderer.domElement.setAttribute('aria-label', 'Pista 3D del experimento 6: estadio con público, coche de rally y carrocería que se inclina sobre la suspensión');
 
   const scene = new THREE.Scene();
-  const HORIZON = new THREE.Color('#cfe3f0');
-  scene.fog = new THREE.Fog(HORIZON, 260, 1300);
-  // Cielo: degradé de azul intenso arriba a blanquecino en el horizonte.
-  {
-    const sky = new THREE.Mesh(new THREE.SphereGeometry(2500, 32, 16), new THREE.ShaderMaterial({
-      side: THREE.BackSide, depthWrite: false, fog: false,
-      uniforms: { top: { value: new THREE.Color('#3f7fc4') }, bottom: { value: HORIZON } },
-      vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-      fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying vec3 vP; void main(){ float h = clamp(vP.y * 2.2, 0.0, 1.0); gl_FragColor = vec4(mix(bottom, top, pow(h, 0.8)), 1.0); }',
-    }));
-    scene.add(sky);
-  }
-  const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 5000);
+  // Cielo, neblina y luz ambiental: los pone buildVenue (venue.js).
+  const camera = new THREE.PerspectiveCamera(55, 1, 0.3, 6000);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; controls.maxPolarAngle = Math.PI / 2 - 0.05; controls.enabled = false;
-  scene.add(new THREE.HemisphereLight('#dfefff', '#5d7f33', 1.6));
-  const sun = new THREE.DirectionalLight('#fff1d6', 3.2);
+  scene.add(new THREE.HemisphereLight('#dfefff', '#5d7f33', 1.2));
+  const sun = new THREE.DirectionalLight('#fff1d6', 4.3);
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -60, right: 60, top: 60, bottom: -60, near: 1, far: 400 });
   sun.shadow.normalBias = 0.04;
@@ -171,8 +161,8 @@ try {
   // ---------- entorno fijo: pasto, asfalto en TODA la pista, pintura, pianos, conos ----------
   {
     const gt = TEX.grass.clone(); gt.needsUpdate = true; gt.repeat.set(500, 500);
-    const grass = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), new THREE.MeshStandardMaterial({ map: gt, roughness: 1 }));
-    grass.rotation.x = -Math.PI / 2; grass.position.y = -0.05; grass.receiveShadow = true; scene.add(grass);
+    const grass = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000, 100, 100), new THREE.MeshStandardMaterial({ map: gt, roughness: 1 }));
+    grass.rotation.x = -Math.PI / 2; grass.position.y = -0.06; grass.receiveShadow = true; scene.add(grass);
     const asphalt = new THREE.MeshStandardMaterial({ map: TEX.asphalt, roughness: 0.92, metalness: 0.0 });
     scene.add(ribbon({ s0: 0, s1: L, d: 0, width: 2 * HALF + 1.2, h: 0.0, material: asphalt, tile: 5 }));
     // Banquina de tierra/grava a cada lado (visual: fuera de ahí ya es accidente "sale de la pista").
@@ -211,11 +201,13 @@ try {
     }
   }
 
+  const venue = buildVenue({ scene, renderer, sun, sunDir: SUN_DIR, at, center, L, S, R, HALF, mat });
+
   // ---------- modelos 3D ----------
   const loader = new GLTFLoader();
   const load = url => loader.loadAsync(url).then(g => g.scene).catch(err => { console.warn('No cargó', url, err); return null; });
   const models = {};
-  const ready = Promise.all([load('models3d/estadio.glb'), load(CAR.url).then(m => m ?? (Object.assign(CAR, CAR_OLD), load(CAR_OLD.url))), load('models3d/valla.glb')])
+  const ready = Promise.all([Promise.resolve(null), load(CAR.url).then(m => m ?? (Object.assign(CAR, CAR_OLD), load(CAR_OLD.url))), load('models3d/valla.glb')])
     .then(([estadio, coche, valla]) => { Object.assign(models, { estadio, coche, valla }); });
 
   function prepCar(src, opacity = 1) {
@@ -259,7 +251,7 @@ try {
 
   // ---------- obstáculos de la pista actual ----------
   let layoutGroup = null, layoutKey = null;
-  const mudMat = new THREE.MeshStandardMaterial({ map: TEX.mud, roughness: 0.55, metalness: 0.05 });
+  const mudMat = new THREE.MeshStandardMaterial({ map: TEX.mud, roughness: 0.9, metalness: 0.0 });
   const grassPatch = new THREE.MeshStandardMaterial({ map: TEX.grass, roughness: 1 });
   const waterMat = new THREE.MeshStandardMaterial({ color: '#3b86c9', roughness: 0.05, metalness: 0.3, transparent: true, opacity: 0.78 });
   function buildLayout(layout) {
@@ -403,7 +395,6 @@ try {
   let car = fallbackCar('#ffc320'), ghost = fallbackCar('#5a8ee8');
   ghost.visible = false; scene.add(car); scene.add(ghost);
   ready.then(() => {
-    buildStadium();
     if (models.coche) {
       scene.remove(car); scene.remove(ghost);
       car = prepCar(models.coche); ghost = prepCar(models.coche, 0.45); ghost.visible = !!current?.ghostPoses;
@@ -512,6 +503,7 @@ try {
       updateDrops(paused ? 0 : dt);
       // El sol (y su sombra) acompaña al coche para que la sombra sea nítida donde se mira.
       sun.position.copy(car.position).addScaledVector(SUN_DIR, 150); sun.target.position.copy(car.position);
+      venue.update(now / 1000, car.position);
       window.dispatchEvent(new CustomEvent('rally6:tick', { detail: { frame, end: st.end } }));
       updateCamera(dt, st);
     }
