@@ -19,7 +19,7 @@
         <div class="live"><i></i> REPRODUCCIÓN · PYTHON</div>
         <button id="reset" class="icon-button" aria-label="Reiniciar episodio">↻</button>
       </header>
-      <nav class="experiment-nav" aria-label="Experimento"><a href="index.html">Experimento 1</a><a href="v2.html">Experimento 2 · N2</a><a href="v3.html">Experimento 3 · N3</a><a href="v4.html" aria-current="page">Experimento 4 · N4</a></nav>
+      <nav class="experiment-nav" aria-label="Experimento"><a href="index.html">Experimento 1</a><a href="v2.html">Experimento 2 · N2</a><a href="v3.html">Experimento 3 · N3</a><a href="v4.html" aria-current="page">Experimento 4 · N4</a><a href="v5.html">Experimento 5 · N5</a></nav>
       <section class="workspace">
         <article class="stage">
           <div class="stage-title">
@@ -29,7 +29,7 @@
           <div class="mode-banner" id="modeBanner">CARGANDO…</div>
           <div class="world">
             <div id="scene3d" aria-label="Pista 3D: usa los botones de cámara"></div>
-            <div class="track-overlay"><span id="trackLabel">PISTA · 30 TRAMOS DE 100 m</span><strong id="trackScore">PUNTOS +0.0</strong></div>
+            <div class="track-overlay"><span id="trackLabel">PISTA · 30 TRAMOS DE 100 m</span><span id="weatherIndicator" class="weather-indicator" data-weather="dry">CLIMA SECO</span><strong id="trackScore">PUNTOS +0.0</strong></div>
             <div class="event-toast" id="eventToast" aria-live="polite"></div>
             <div class="view-tools" aria-label="Cámara" hidden>
               <button type="button" data-cam="follow" aria-pressed="true">Seguir coche</button>
@@ -53,7 +53,7 @@
               <article class="chart-card"><h2>Accidentes por episodio</h2><div id="accidentChart" class="chart" role="img"></div></article>
               <article class="chart-card"><h2>Error TD absoluto</h2><div id="tdChart" class="chart" role="img"></div></article>
             </div>
-            <p class="note">Las curvas usan los registros de entrenamiento de Python; son medias móviles para facilitar la lectura, no datos simulados por el navegador.</p>
+            <p class="note">Línea fina: resultado de cada episodio. Línea gruesa: media móvil usando la ventana definida en la configuración. Datos registrados por Python.</p>
           </section>
           <div id="replaySelectors" class="replay-selectors"><label>Semilla <select id="seedSelect" disabled></select></label><label>Escenario <select id="replaySelect" disabled></select></label></div>
           <p id="loadStatus" role="status">Cargando las corridas registradas…</p>

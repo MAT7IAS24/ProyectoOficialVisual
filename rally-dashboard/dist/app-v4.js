@@ -4,7 +4,7 @@ import { TERRAIN_COLORS_V4 as TERRAIN_COLORS } from './track-v3.js';
 const $ = id => document.getElementById(id);
 const signed = (n, d = 2) => `${n >= 0 ? '+' : ''}${Number(n).toFixed(d)}`;
 const pct = n => `${(n * 100).toFixed(0)}%`;
-let data, run, scenarios = [], selected = 0, frameIndex = 0, timer, playing = true, toastTimer;
+let data, run, scenarios = [], selected = 0, frameIndex = 0, timer, playing = true, toastTimer, laneAnimationFrame;
 
 const ACTION_LABELS = { frenar: 'Frenar', mantener: 'Mantener', acelerar: 'Acelerar', carril_izquierda: '← Carril', carril_derecha: 'Carril →' };
 const TERRAIN_LABELS = { asfalto: 'Tierra lisa', lodo: 'Lodo', agua: 'Agua', sin_pista: 'Sin pista (pasto)', foso: 'Foso', barril: 'Barril', rampa: 'Rampa', rampa_con_barril: 'Rampa con barril', puente: 'Puente', puente_roto: 'Hueco del puente', meta: 'Meta' };
@@ -66,6 +66,24 @@ function legend() {
   }));
 }
 
+function animateLaneMarker(from, to, duration) {
+  cancelAnimationFrame(laneAnimationFrame);
+  if (!from || !to || from.segment === to.segment && from.lane === to.lane || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const started = performance.now(), span = Math.max(80, duration * 0.82);
+  const step = now => {
+    const t = Math.min(1, (now - started) / span);
+    const eased = t * t * (3 - 2 * t);
+    drawLaneMap({
+      ...to,
+      segment: from.segment + (to.segment - from.segment) * eased,
+      lane: from.lane + (to.lane - from.lane) * eased,
+      layer: t < 0.5 ? from.layer : to.layer,
+    });
+    if (t < 1) laneAnimationFrame = requestAnimationFrame(step);
+  };
+  laneAnimationFrame = requestAnimationFrame(step);
+}
+
 // ---------- Reproducción ----------
 function toast(text) {
   const el = $('eventToast'); el.textContent = text; el.classList.add('show');
@@ -77,6 +95,8 @@ function render() {
   const env = data.config.environment;
   $('modeBanner').dataset.mode = sc.mode; $('modeBanner').textContent = sc.mode === 'intervention' ? `INTERVENCIÓN · ${sc.label.replace(/^Intervención /, '')}` : MODE_LABELS[sc.mode];
   $('layoutName').textContent = sc.layout === 'lluvia' ? 'Con lluvia (perturbación)' : 'Condiciones normales';
+  $('weatherIndicator').textContent = sc.layout === 'lluvia' ? 'LLUVIA · PISTA MOJADA' : 'CLIMA SECO';
+  $('weatherIndicator').dataset.weather = sc.layout === 'lluvia' ? 'rain' : 'dry';
   $('episode').textContent = sc.episode;
   $('progress').firstChild.textContent = frame.progress_pct.toFixed(0);
   $('progressBar').style.width = `${frame.progress_pct}%`;
@@ -87,6 +107,7 @@ function render() {
   $('reward').textContent = signed(frame.reward);
   $('return').textContent = signed(frame.return);
   $('trackScore').textContent = `PUNTOS ${signed(frame.return, 1)}`;
+  $('trackScore').dataset.impact = frame.accidents_now > 0 ? 'true' : 'false';
   $('lane').textContent = `${frame.lane + 1} / ${env.lanes}`;
   $('layer').textContent = frame.layer ? 'Sobre el puente' : 'Suelo';
   $('speedLevel').textContent = `${frame.speed_level} / ${env.max_speed_level}`;
@@ -111,10 +132,17 @@ function render() {
   if (frameIndex > 0 && said.length) toast(said[said.length - 1]);
   if (frameIndex > 0 && frame.termination_cause !== 'en_curso') toast(CAUSE_LABELS[frame.termination_cause]);
   drawLaneMap(frame);
+  animateLaneMarker(frameIndex === 0 ? frame : prev, frame, Number($('speed').value));
   const detail = {
     key: `${run.seed}:${selected}`, step: frame.steps, duration: Number($('speed').value),
     from: frameIndex === 0 ? frame : prev, to: frame, jump: frame.jump, crash_segment: frame.crash_segment,
+    gapCrossings: frame.gap_crossings ?? (frame.events.includes('cruza_el_hueco_del_puente')
+      ? frame.path.filter(point => point.layer === 1 && data.layouts[sc.layout][frame.lane].deck[point.segment] === 'G').map(point => ({ segment: point.segment }))
+      : []),
     layout: data.layouts[sc.layout],
+    weather: frame.weather ?? sc.layout,
+    actionName: frame.action === null ? null : env.actions[frame.action].name,
+    events: frame.events,
   };
   window.rallyV3Frame = detail;
   window.dispatchEvent(new CustomEvent('rally3:frame', { detail }));
@@ -151,29 +179,39 @@ function movingAverage(values, windowSize = 100) {
   });
 }
 
-function drawChart(id, values, color, label, percent = false) {
+function drawChart(id, rawValues, values, color, label, percent = false) {
   const host = $(id);
   const width = 720, height = 250, left = 54, right = 18, top = 14, bottom = 34;
   const plotWidth = width - left - right, plotHeight = height - top - bottom;
   const samples = values.filter(Number.isFinite);
+  const raw = rawValues.filter(Number.isFinite);
   if (!samples.length) {
     host.textContent = 'Sin métricas para graficar.';
     return;
   }
-  const low = percent ? 0 : Math.min(0, ...samples);
-  const high = percent ? 1 : Math.max(1, ...samples);
-  const range = high - low || 1;
+  const low = percent ? 0 : Math.min(...samples, ...raw);
+  const high = percent ? 1 : Math.max(...samples, ...raw);
+  const padding = percent ? 0 : Math.max((high - low) * 0.1, Math.abs(high) * 0.02, 0.1);
+  const min = percent ? 0 : low - padding;
+  const max = percent ? 1 : high + padding;
+  const range = max - min || 1;
   const count = Math.min(samples.length, 240);
-  const points = Array.from({ length: count }, (_, index) => {
-    const sourceIndex = Math.round(index * (samples.length - 1) / Math.max(1, count - 1));
-    const x = left + index * plotWidth / Math.max(1, count - 1);
-    const y = top + (high - samples[sourceIndex]) / range * plotHeight;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(' ');
+  const makePoints = (series, limit = count) => {
+    const pointCount = Math.min(series.length, limit);
+    return Array.from({ length: pointCount }, (_, index) => {
+      const sourceIndex = Math.round(index * (series.length - 1) / Math.max(1, pointCount - 1));
+      const x = left + index * plotWidth / Math.max(1, pointCount - 1);
+      const y = top + (max - series[sourceIndex]) / range * plotHeight;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+  };
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.setAttribute('preserveAspectRatio', 'none');
-  svg.setAttribute('aria-label', `${label}; ${samples.length} episodios, promedio final ${samples[samples.length - 1].toFixed(2)}`);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  svg.setAttribute('aria-label', `${label}; ${samples.length} episodios, media móvil final ${samples[samples.length - 1].toFixed(2)}`);
+  const title = document.createElementNS(svg.namespaceURI, 'title');
+  title.textContent = `${label}: datos por episodio y media móvil de 100 episodios`;
+  svg.append(title);
   for (let tick = 0; tick <= 4; tick++) {
     const y = top + tick * plotHeight / 4;
     const line = document.createElementNS(svg.namespaceURI, 'line');
@@ -183,17 +221,26 @@ function drawChart(id, values, color, label, percent = false) {
     const text = document.createElementNS(svg.namespaceURI, 'text');
     text.setAttribute('x', left - 8); text.setAttribute('y', y + 4);
     text.setAttribute('text-anchor', 'end'); text.setAttribute('class', 'chart-axis');
-    text.textContent = percent ? `${Math.round((1 - tick / 4) * 100)}%` : (high - tick * range / 4).toFixed(1);
+    text.textContent = percent ? `${Math.round((1 - tick / 4) * 100)}%` : (max - tick * range / 4).toFixed(1);
     svg.append(text);
   }
+  const rawLine = document.createElementNS(svg.namespaceURI, 'polyline');
+  rawLine.setAttribute('points', makePoints(raw, raw.length)); rawLine.setAttribute('fill', 'none');
+  rawLine.setAttribute('stroke', color); rawLine.setAttribute('stroke-width', '1');
+  rawLine.setAttribute('stroke-opacity', '0.25'); rawLine.setAttribute('stroke-linejoin', 'round');
+  svg.append(rawLine);
   const path = document.createElementNS(svg.namespaceURI, 'polyline');
-  path.setAttribute('points', points); path.setAttribute('fill', 'none');
-  path.setAttribute('stroke', color); path.setAttribute('stroke-width', '3');
+  path.setAttribute('points', makePoints(samples)); path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', color); path.setAttribute('stroke-width', '3.5');
   path.setAttribute('stroke-linecap', 'round'); path.setAttribute('stroke-linejoin', 'round');
   svg.append(path);
   const xStart = document.createElementNS(svg.namespaceURI, 'text');
   xStart.setAttribute('x', left); xStart.setAttribute('y', height - 8);
   xStart.setAttribute('class', 'chart-axis'); xStart.textContent = 'Ep. 1'; svg.append(xStart);
+  const xMiddle = document.createElementNS(svg.namespaceURI, 'text');
+  xMiddle.setAttribute('x', left + plotWidth / 2); xMiddle.setAttribute('y', height - 8);
+  xMiddle.setAttribute('text-anchor', 'middle'); xMiddle.setAttribute('class', 'chart-axis');
+  xMiddle.textContent = `Ep. ${Math.ceil(samples.length / 2)}`; svg.append(xMiddle);
   const xEnd = document.createElementNS(svg.namespaceURI, 'text');
   xEnd.setAttribute('x', width - right); xEnd.setAttribute('y', height - 8);
   xEnd.setAttribute('text-anchor', 'end'); xEnd.setAttribute('class', 'chart-axis');
@@ -203,11 +250,13 @@ function drawChart(id, values, color, label, percent = false) {
 
 function renderCharts() {
   const metrics = run.training_metrics ?? [];
+  const windowSize = data.config.training.summary_window ?? 100;
+  const average = values => movingAverage(values, windowSize);
   $('chartSeed').textContent = `Semilla ${run.seed} · clima mixto`;
-  drawChart('returnChart', movingAverage(metrics.map(item => item.return)), '#ffd12e', 'Retorno medio móvil');
-  drawChart('successChart', movingAverage(metrics.map(item => item.success)), '#47df9a', 'Éxito medio móvil', true);
-  drawChart('accidentChart', movingAverage(metrics.map(item => item.accidents)), '#ff8a7a', 'Accidentes medios móviles');
-  drawChart('tdChart', movingAverage(metrics.map(item => item.mean_abs_td_error)), '#70c4fa', 'Error TD absoluto medio móvil');
+  drawChart('returnChart', metrics.map(item => item.return), average(metrics.map(item => item.return)), '#ffd12e', 'Retorno medio móvil');
+  drawChart('successChart', metrics.map(item => item.success), average(metrics.map(item => item.success)), '#47df9a', 'Éxito medio móvil', true);
+  drawChart('accidentChart', metrics.map(item => item.accidents), average(metrics.map(item => item.accidents)), '#ff8a7a', 'Accidentes medios móviles');
+  drawChart('tdChart', metrics.map(item => item.mean_abs_td_error), average(metrics.map(item => item.mean_abs_td_error)), '#70c4fa', 'Error TD absoluto medio móvil');
 }
 
 function fillComparison() {

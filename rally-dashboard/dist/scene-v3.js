@@ -8,18 +8,26 @@ const host = document.getElementById('scene3d');
 const world = host.parentElement;
 const message = document.getElementById('sceneStatus');
 const tools = document.querySelector('.view-tools');
-const isV4 = window.rallySceneStyle === 'v4';
+const isV5 = window.rallySceneStyle === 'v5';
+const isV4 = window.rallySceneStyle === 'v4' || isV5;
+const levelLabel = isV5 ? 'N5' : 'N4';
 const terrainColors = isV4 ? TERRAIN_COLORS_V4 : TERRAIN_COLORS;
 
 const env = window.rallyV3Config.environment;
 const N = env.track_length_meters / env.segment_meters;        // 30 tramos
 const terrainByCode = Object.fromEntries(env.terrains.map(t => [t.code, t]));
-const track = makeTrack({ lanes: env.lanes });
+const track = makeTrack({
+  lanes: env.lanes,
+  straight: isV5 ? 150 : 120,
+  radius: isV5 ? 42 : 30,
+  startOffset: isV5 ? 18 : 14,
+});
 const CELL = track.perimeter / N;                              // largo de un tramo en la escena
 const RAMP_TOP = 2.4;   // altura de la punta de la rampa
 const DECK_H = 2.8;     // altura del puente (plataforma suspendida)
 const RAMP_PEAK = 0.8;  // la rampa sube en el 80% del tramo y cae en el 20% final
 let layout = window.rallyV3Layout;
+let weatherMode = 'normal';
 
 const uOf = s => THREE.MathUtils.clamp(s, 0, N) / N;
 const rampProfile = t => (t < RAMP_PEAK ? RAMP_TOP * t / RAMP_PEAK : RAMP_TOP * (1 - t) / (1 - RAMP_PEAK));
@@ -44,8 +52,10 @@ try {
   renderer.domElement.setAttribute('aria-label', 'Pista 3D de cuatro carriles con rampas, puente elevado, lodo, agua y barriles');
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(isV4 ? '#b7d4e4' : '#9fd3f2');
-  scene.fog = new THREE.Fog(isV4 ? '#b7d4e4' : '#9fd3f2', 180, 420);
+  const drySky = new THREE.Color(isV4 ? '#b7d4e4' : '#9fd3f2');
+  const rainSky = new THREE.Color('#71889a');
+  scene.background = drySky.clone();
+  scene.fog = new THREE.Fog(drySky, 180, 420);
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 900);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -54,7 +64,8 @@ try {
   controls.maxDistance = 320;
   controls.enabled = false;
 
-  scene.add(new THREE.HemisphereLight('#ffffff', isV4 ? '#53644e' : '#6d8f3a', isV4 ? 2.0 : 2.2));
+  const ambient = new THREE.HemisphereLight('#ffffff', isV4 ? '#53644e' : '#6d8f3a', isV4 ? 2.0 : 2.2);
+  scene.add(ambient);
   const sun = new THREE.DirectionalLight(isV4 ? '#fff1d2' : '#fff4dc', isV4 ? 3.5 : 3.2);
   sun.position.set(-60, 120, 70);
   sun.castShadow = true;
@@ -132,7 +143,11 @@ try {
     trackGroup = new THREE.Group();
     const add = m => (trackGroup.add(m), m);
     const fullWidth = track.W * env.lanes + 1.2;
-    add(strip({ lane: (env.lanes - 1) / 2, s0: 0, s1: N, top: 0.03, bottom: -0.25, width: fullWidth, material: mat(terrainColors.asfalto, { roughness: isV4 ? 0.96 : 0.85 }), steps: 900 }));
+    const roadMaterial = mat(terrainColors.asfalto, {
+      roughness: isV4 && weatherMode === 'lluvia' ? 0.3 : isV4 ? 0.96 : 0.85,
+      metalness: isV4 && weatherMode === 'lluvia' ? 0.16 : 0,
+    });
+    add(strip({ lane: (env.lanes - 1) / 2, s0: 0, s1: N, top: 0.03, bottom: -0.25, width: fullWidth, material: roadMaterial, steps: 900 }));
     layout.forEach((row, lane) => {
       for (let i = 0; i < N; i++) {
         const t = terrainByCode[row.ground[i]];
@@ -224,8 +239,9 @@ try {
     return value - Math.floor(value);
   };
   let c = 0;
-  const grandstandRows = isV4 ? 5 : 8;
-  const grandstandSpacing = isV4 ? 1.15 : 1.6;
+  const grandstandRows = isV5 ? 8 : isV4 ? 5 : 8;
+  const grandstandSpacing = isV5 ? 0.85 : isV4 ? 1.15 : 1.6;
+  const spectatorSpacing = isV5 ? 0.82 : isV4 ? 1.15 : 1.6;
   for (const side of [-1, 1]) {
     const zWall = side * (track.R + edge + 3);
     const wall = new THREE.Mesh(new THREE.BoxGeometry(track.S + 10, 2, 0.6), mat(isV4 ? '#36546a' : '#4f7fd9'));
@@ -238,24 +254,22 @@ try {
         mat(isV4 ? (row % 2 ? '#697b7d' : '#84918a') : (row % 2 ? '#d9d3c7' : '#c8c1b4')),
       );
       step.position.set(0, h / 2 - 0.3, z); step.receiveShadow = true; scene.add(step);
-      for (let x = -track.S / 2; x < track.S / 2 && c < 3990; x += 1.15) {
+      for (let x = -track.S / 2; x < track.S / 2 && c < 3990; x += spectatorSpacing) {
         const random = isV4 ? visualRandom(c + row * 401 + side * 197) : Math.random();
         if (random < 0.15) continue;
         const offset = isV4 ? visualRandom(c + 17) * 0.3 : Math.random() * 0.3;
         dummy.position.set(x + offset, h + 0.25, z); dummy.rotation.set(0, side > 0 ? Math.PI : 0, 0); dummy.updateMatrix();
         crowd.setMatrixAt(c, dummy.matrix); crowd.setColorAt(c, crowdColors[c % crowdColors.length]); c++;
       }
-      if (isV4) {
-        for (const side of [-1, 1]) {
-          const canopy = new THREE.Mesh(
-            new THREE.BoxGeometry(track.S + 16, 0.32, 8),
-            mat('#263b46', { metalness: 0.24, roughness: 0.62 }),
-          );
-          canopy.position.set(0, 4.5, side * (track.R + edge + 8.1));
-          canopy.castShadow = canopy.receiveShadow = true;
-          scene.add(canopy);
-        }
-      }
+    }
+    if (isV4) {
+      const canopy = new THREE.Mesh(
+        new THREE.BoxGeometry(track.S + 16, 0.32, 8),
+        mat('#263b46', { metalness: 0.24, roughness: 0.62 }),
+      );
+      canopy.position.set(0, 4.5, side * (track.R + edge + 8.1));
+      canopy.castShadow = canopy.receiveShadow = true;
+      scene.add(canopy);
     }
   }
   crowd.count = c; scene.add(crowd);
@@ -268,7 +282,7 @@ try {
     return new THREE.Mesh(new THREE.PlaneGeometry(w, w * 160 / 1024), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
   }
   const banner = label(
-    isV4 ? 'AUTONOMOUS RALLY LAB · N4' : 'AUTONOMOUS RALLY LAB · N3',
+    isV4 ? `AUTONOMOUS RALLY LAB · ${levelLabel}` : 'AUTONOMOUS RALLY LAB · N3',
     isV4 ? 28 : 40,
     '#ffffff',
     isV4 ? '#1d3545' : '#4f7fd9',
@@ -316,7 +330,7 @@ try {
         gate.add(lens);
       }
     }
-    const wordmark = label('RALLY · N4', 10, '#f7f1df', '#263640');
+    const wordmark = label(`RALLY · ${levelLabel}`, 10, '#f7f1df', '#263640');
     wordmark.position.set(0, 6.1, 0.48);
     gate.add(wordmark);
     scene.add(gate);
@@ -337,10 +351,17 @@ try {
   const glass = mat('#102532', { roughness: 0.2, metalness: 0.32 });
   const dark = mat(isV4 ? '#1a232a' : '#17232c', { roughness: 0.62, metalness: 0.18 });
   const wheels = [];
+  const frontWheels = [];
+  const brakeLights = [];
+  let exhaustGlow = null;
   if (isV4) {
     const red = mat('#c73f36', { roughness: 0.42, metalness: 0.22 });
     const silver = mat('#b8c5c7', { roughness: 0.3, metalness: 0.78 });
     const tire = mat('#111518', { roughness: 0.94 });
+    const brakeLamp = new THREE.MeshStandardMaterial({
+      color: '#ff3f32', emissive: '#a8130d', emissiveIntensity: 0.45,
+      roughness: 0.35,
+    });
     const hullShape = new THREE.Shape();
     hullShape.moveTo(-0.77, 0.36);
     hullShape.lineTo(0.77, 0.36);
@@ -405,10 +426,17 @@ try {
       );
       headlight.position.set(side * 0.63, 0.88, 1.37);
       body.add(headlight);
-      box(body, [0.25, 0.13, 0.07], [side * 0.62, 0.83, -1.38], red);
+      brakeLights.push(box(body, [0.25, 0.13, 0.07], [side * 0.62, 0.83, -1.38], brakeLamp));
     }
     box(body, [1.82, 0.2, 0.22], [0, 0.43, 1.48], dark);
     box(body, [1.82, 0.2, 0.22], [0, 0.43, -1.48], dark);
+    exhaustGlow = new THREE.Mesh(
+      new THREE.SphereGeometry(0.13, 12, 8),
+      new THREE.MeshBasicMaterial({ color: '#ff9a3d', transparent: true, opacity: 0.8 }),
+    );
+    exhaustGlow.position.set(0, 0.55, -1.59);
+    exhaustGlow.visible = false;
+    body.add(exhaustGlow);
     box(body, [1.72, 0.09, 0.3], [0, 1.5, -1.15], dark);
     for (const side of [-1, 1]) {
       box(body, [0.08, 0.42, 0.12], [side * 0.65, 1.28, -1.13], dark, [0.15, 0, side * 0.1]);
@@ -454,6 +482,7 @@ try {
         }
         body.add(wheel);
         wheels.push(wheel);
+        if (z > 0) frontWheels.push(wheel);
 
         const arch = new THREE.Mesh(
           new THREE.TorusGeometry(0.48, 0.07, 8, 24, Math.PI),
@@ -488,10 +517,55 @@ try {
     }
   }
 
+  const tireMist = [];
+  if (isV4) {
+    for (const side of [-1, 1]) {
+      const mist = new THREE.Mesh(
+        new THREE.SphereGeometry(0.42, 12, 8),
+        new THREE.MeshBasicMaterial({ color: '#c7d5db', transparent: true, opacity: 0, depthWrite: false }),
+      );
+      mist.position.set(side * 0.78, 0.38, -1.12);
+      mist.scale.set(1.15, 0.55, 1.4);
+      body.add(mist);
+      tireMist.push(mist);
+    }
+  }
+
+  // Lluvia local a la cámara: la pista solo cambia de aspecto cuando el replay
+  // marca clima lluvioso; las partículas son decorativas y no alteran la física.
+  let rainGroup = null, rainAttribute = null, rainPositions = null;
+  const rainCount = isV4 ? 520 : 0;
+  const rainRandom = value => {
+    const n = Math.sin(value * 127.1 + 311.7) * 43758.5453;
+    return n - Math.floor(n);
+  };
+  if (isV4) {
+    rainPositions = new Float32Array(rainCount * 6);
+    for (let i = 0; i < rainCount; i++) {
+      const j = i * 6;
+      const x = rainRandom(i * 3 + 1) * 72 - 36;
+      const y = rainRandom(i * 3 + 2) * 38 + 2;
+      const z = rainRandom(i * 3 + 3) * 72 - 36;
+      rainPositions.set([x, y, z, x + 0.1, y - 1.25, z + 0.22], j);
+    }
+    const rainGeometry = new THREE.BufferGeometry();
+    rainAttribute = new THREE.BufferAttribute(rainPositions, 3);
+    rainAttribute.setUsage(THREE.DynamicDrawUsage);
+    rainGeometry.setAttribute('position', rainAttribute);
+    rainGroup = new THREE.LineSegments(
+      rainGeometry,
+      new THREE.LineBasicMaterial({ color: '#c2e6f6', transparent: true, opacity: 0.46, depthWrite: false }),
+    );
+    rainGroup.frustumCulled = false;
+    rainGroup.visible = false;
+    scene.add(rainGroup);
+  }
+
   // ---------- Animación de un paso ----------
   // Cada paso de Python trae: de dónde salió, a dónde llegó, si saltó y si chocó.
   // Aquí se arma un recorrido de "puntos de paso" y se interpola entre ellos.
   let legs = [], started = 0, duration = 1, lastKey = null, shownS = 0.5;
+  let driveAction = null, currentSpeed = 0, skidUntil = 0;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const centerS = seg => Math.min(seg + 0.5, N);
 
@@ -501,7 +575,17 @@ try {
     const from = { s: centerS(d.from.segment), lane: d.from.lane, layer: d.from.layer };
     const to = { s: d.to.segment >= N ? N : centerS(d.to.segment), lane: d.to.lane, layer: d.to.layer };
     const out = [];
-    if (d.jump) {
+    if (d.gapCrossings?.length) {
+      const gap = d.gapCrossings[0].segment;
+      const takeoff = { s: Math.max(from.s, centerS(gap - 1)), lane: from.lane, layer: 1 };
+      const landing = { s: Math.min(to.s, centerS(gap + 1)), lane: to.lane, layer: 1 };
+      if (from.s < takeoff.s) out.push({ a: from, b: takeoff, kind: 'ground' });
+      out.push({
+        a: takeoff, b: landing, kind: 'flight', h0: DECK_H, h1: DECK_H,
+        peak: 1.55,
+      });
+      if (landing.s < to.s) out.push({ a: landing, b: to, kind: 'ground' });
+    } else if (d.jump) {
       const lift = { s: d.jump.from_segment + RAMP_PEAK, lane: to.lane, layer: 0 };
       out.push({ a: from, b: lift, kind: 'ground' });
       out.push({ a: lift, b: to, kind: 'flight', h0: RAMP_TOP, h1: to.s >= N ? 0 : heightOf(to.s, to.lane, to.layer), peak: 1.5 + d.jump.flight * 1.2 });
@@ -524,22 +608,44 @@ try {
     const k = THREE.MathUtils.clamp((f - leg.t0) / Math.max(1e-6, leg.t1 - leg.t0), 0, 1);
     const s = THREE.MathUtils.lerp(leg.a.s, leg.b.s, k);
     const lane = THREE.MathUtils.lerp(leg.a.lane, leg.b.lane, Math.min(1, k * 2));
+    const steer = (leg.b.lane - leg.a.lane) * Math.sin(Math.PI * k);
     let h, spin = 0;
     if (leg.kind === 'flight') h = THREE.MathUtils.lerp(leg.h0, leg.h1, k) + 4 * leg.peak * k * (1 - k);
     else if (leg.a.layer === leg.b.layer) h = heightOf(s, lane, leg.a.layer);
     else h = THREE.MathUtils.lerp(heightOf(s, lane, leg.a.layer), heightOf(s, lane, leg.b.layer), THREE.MathUtils.smoothstep(k, 0, 1));
     if (leg.kind === 'bounce' || leg.kind === 'fall') spin = Math.sin(k * Math.PI) * 0.9;
-    return { s, lane, h, spin, kind: leg.kind };
+    return { s, lane, h, spin, steer, kind: leg.kind };
   }
 
   function receive(d) {
     if (!d) return;
-    if (d.layout && d.layout !== layout) { layout = d.layout; buildTrack(); }
+    const nextWeather = isV4 && (d.weather === 'lluvia' || d.weather === 'rain') ? 'lluvia' : 'normal';
+    const layoutChanged = Boolean(d.layout && d.layout !== layout);
+    const weatherChanged = nextWeather !== weatherMode;
+    if (layoutChanged) layout = d.layout;
+    if (weatherChanged) {
+      weatherMode = nextWeather;
+      const rain = weatherMode === 'lluvia';
+      const sky = rain ? rainSky : drySky;
+      scene.background.copy(sky);
+      scene.fog.color.copy(sky);
+      scene.fog.near = rain ? 110 : 180;
+      scene.fog.far = rain ? 275 : 420;
+      ambient.intensity = rain ? 1.45 : isV4 ? 2.0 : 2.2;
+      sun.intensity = rain ? 1.7 : isV4 ? 3.5 : 3.2;
+      if (rainGroup) rainGroup.visible = rain;
+    }
+    if (layoutChanged || weatherChanged) buildTrack();
+    driveAction = d.actionName;
+    currentSpeed = Number(d.to.speed_level ?? 0);
+    if (isV4 && (d.events ?? []).some(event => /derrape|choca|cae_/.test(event))) {
+      skidUntil = performance.now() + Math.max(420, d.duration * 0.9);
+    }
     legs = plan(d);
     const fresh = d.key !== lastKey || d.step === 0;
     lastKey = d.key;
     started = performance.now();
-    duration = fresh || reduced.matches ? 0 : Math.max(80, d.duration * 0.85);
+    duration = fresh || reduced.matches ? 0 : Math.max(60, d.duration * (isV5 ? 1 : 0.85));
   }
   window.addEventListener('rally3:frame', e => receive(e.detail));
 
@@ -555,12 +661,17 @@ try {
   }
   for (const btn of tools.querySelectorAll('button[data-cam]')) btn.onclick = () => setMode(btn.dataset.cam);
 
-  function updateCamera(dt, p, dir, normalIn) {
+  function updateCamera(dt, p, dir, normalIn, speedRatio = 0) {
     if (mode === 'free') { controls.update(); return; }
     const desired = new THREE.Vector3(), look = car.position.clone();
     if (mode === 'follow') {
-      desired.copy(car.position).addScaledVector(dir, isV4 ? -12 : -15).add(new THREE.Vector3(0, isV4 ? 6.2 : 7, 0));
-      look.addScaledVector(dir, isV4 ? 7 : 8).y += 1;
+      desired.copy(car.position).addScaledVector(dir, isV4 ? -12 - speedRatio * 4 : -15).add(new THREE.Vector3(0, isV4 ? 6.2 + speedRatio * 1.1 : 7, 0));
+      look.addScaledVector(dir, isV4 ? 7 + speedRatio * 2.5 : 8).y += 1;
+      if (isV4) {
+        const now = performance.now();
+        const impact = Math.max(0, (skidUntil - now) / 500);
+        desired.add(new THREE.Vector3(Math.sin(now * 0.085) * 0.8 * impact, Math.sin(now * 0.12) * 0.35 * impact, Math.cos(now * 0.1) * 0.45 * impact));
+      }
     } else if (mode === 'side') {
       desired.copy(car.position).addScaledVector(normalIn, 24).addScaledVector(dir, -4).add(new THREE.Vector3(0, 11, 0));
       look.addScaledVector(dir, 4).addScaledVector(normalIn, -3);
@@ -583,8 +694,27 @@ try {
   let lastNow = performance.now();
   renderer.setAnimationLoop(now => {
     const dt = Math.min(0.1, (now - lastNow) / 1000); lastNow = now;
+    if (rainGroup) {
+      rainGroup.position.set(car.position.x, 0, car.position.z);
+      if (weatherMode === 'lluvia' && !reduced.matches) {
+        for (let i = 0; i < rainCount; i++) {
+          const j = i * 6;
+          let x = rainPositions[j], y = rainPositions[j + 1] - dt * (22 + i % 9), z = rainPositions[j + 2] + dt * 3.5;
+          if (y < -2) {
+            x = rainRandom(i * 3 + Math.floor(now / 700) + 1) * 72 - 36;
+            y = 36 + rainRandom(i + Math.floor(now / 500)) * 8;
+            z = rainRandom(i * 5 + Math.floor(now / 900)) * 72 - 36;
+          }
+          rainPositions.set([x, y, z, x + 0.1, y - 1.25, z + 0.22], j);
+        }
+        rainAttribute.needsUpdate = true;
+      }
+    }
     if (!legs.length) { renderer.render(scene, camera); return; }
-    const f = duration ? Math.min(1, (now - started) / duration) : 1;
+    const progress = duration ? Math.min(1, (now - started) / duration) : 1;
+    // En N5 los frames históricos llegan ya en pasos cortos. Mantener la
+    // velocidad lineal evita frenar y arrancar visualmente en cada transición.
+    const f = isV4 && !isV5 ? THREE.MathUtils.smoothstep(progress, 0, 1) : progress;
     const st = sample(f);
     const off = track.laneOffset(st.lane), p = track.pointAt(uOf(st.s), off);
     const ahead = sample(Math.min(1, f + 0.01));
@@ -592,10 +722,34 @@ try {
     car.position.set(p.x, st.h + 0.05, p.z);
     car.rotation.y = Math.atan2(p.dx, p.dz) + st.spin;
     car.rotation.x = st.kind === 'flight' || Math.abs(slope) < 3 ? -Math.atan(THREE.MathUtils.clamp(slope, -1.2, 1.2)) * 0.8 : 0;
+    if (isV4) {
+      const accelerating = driveAction === 'acelerar';
+      const braking = driveAction === 'frenar';
+      const speedRatio = currentSpeed / Math.max(1, env.max_speed_level);
+      const pitch = accelerating ? -0.045 : braking ? 0.065 : 0;
+      body.position.y += ((st.kind === 'flight' ? 0 : 0.035 * Math.sin(now * 0.006 * (1 + speedRatio * 2))) - body.position.y) * Math.min(1, dt * 8);
+      body.rotation.x += (pitch - body.rotation.x) * Math.min(1, dt * 7);
+      body.rotation.z += (-st.steer * 0.08 - body.rotation.z) * Math.min(1, dt * 8);
+      for (const wheel of frontWheels) wheel.rotation.y = st.steer * 0.28;
+      for (const lamp of brakeLights) lamp.material.emissiveIntensity = braking ? 3.2 : 0.45;
+      if (exhaustGlow) {
+        exhaustGlow.visible = accelerating && speedRatio > 0.25;
+        if (exhaustGlow.visible) exhaustGlow.scale.setScalar(0.8 + 0.25 * Math.sin(now * 0.035));
+      }
+      const skidding = now < skidUntil;
+      for (const mist of tireMist) {
+        mist.visible = skidding;
+        if (skidding) {
+          const fade = Math.max(0, (skidUntil - now) / 500);
+          mist.material.opacity = 0.28 * fade;
+          mist.scale.set(1.15 + (1 - fade) * 0.7, 0.55 + (1 - fade) * 0.3, 1.4 + (1 - fade) * 0.8);
+        }
+      }
+    }
     for (const w of wheels) w.rotation.x += (st.s - shownS) * CELL / 0.45;
     shownS = st.s;
     const dir = new THREE.Vector3(p.dx, 0, p.dz), normalIn = new THREE.Vector3(p.nx, 0, p.nz);
-    updateCamera(dt, p, dir, normalIn);
+    updateCamera(dt, p, dir, normalIn, currentSpeed / Math.max(1, env.max_speed_level));
     renderer.render(scene, camera);
   });
 
