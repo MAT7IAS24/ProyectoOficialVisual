@@ -1,0 +1,99 @@
+# Experimento 7 · rally-v7 / reward v7 (nivel N7) · "Ver la pista como un piloto"
+
+Código: `race_env_v7.py`, `training_v7.py`, `pipeline_v7.py`, `configs/rally-v7.json`,
+pruebas `tests/test_rally_v7.py`, web `rally-dashboard/dist/v7.html` (+ `scene-v7.js`, `venue.js`).
+Los niveles N4, N5 y N6 siguen intactos (una prueba revisa su huella SHA-256).
+
+## 1. Por qué este experimento
+
+En el N5 y el N6 la física quedó realista y las reglas escritas a mano completan el 87 % de las
+vueltas, pero PPO se quedó en 10 % y 12 %. Darle más sensores de su propio coche (peso, suspensión)
+casi no ayudó. Al ver las carreras se nota por qué: **PPO llega demasiado rápido a las curvas y a los
+obstáculos**. Solo veía 60 m adelante y la curvatura a 30 y 60 m; a 100 km/h eso es apenas 2 segundos,
+y frenar de 100 a 50 km/h ya toma unos 30 m.
+
+Gran Turismo Sophy (Sony AI, *Nature* 2022), el agente que le ganó a los mejores pilotos humanos de
+Gran Turismo, resolvió esto con dos ideas que copiamos:
+
+1. **Mirar por tiempo**: la red recibe puntos de la pista a varios segundos adelante, no a metros fijos.
+2. **Una recompensa que castiga lo que un piloto evita**: chocar fuerte y deslizar sin control.
+
+**Hipótesis (escrita antes de entrenar):** si PPO ve la pista como un piloto y la recompensa castiga
+más los choques rápidos y el derrape, entonces (1) PPO completa **al menos el 25 %** de las vueltas
+en las mismas 30 pistas nuevas (N6: 12 %), (2) **choca menos que en el N6** (2,29 accidentes por
+vuelta) y (3) las reglas, con la misma física, conservan **al menos el 80 %**.
+
+## 2. Lo que cambia (y lo que no)
+
+**No cambia:** la física (llantas de Pacejka, peso que se mueve, suspensión), las 30 pistas del examen,
+las 10 pistas de validación, 1 millón de pasos, 3 semillas (7, 21, 42) y la forma de elegir el mejor
+punto del entrenamiento. Así, si PPO mejora, el cambio se le puede atribuir a la mirada y a la recompensa.
+
+### Mirada de piloto: 8 puntos a 0,5; 1; 1,5; 2; 2,5; 3; 4 y 5 segundos
+Para cada tiempo *t*, el punto está a `velocidad × t` metros adelante sobre la línea central (con mínimo
+5 m/s para que parado también mire, y máximo 200 m). De cada punto la red recibe 3 números:
+
+| Dato | Cómo se calcula | Escala |
+|---|---|---|
+| Adelante | distancia al punto en la dirección en que apunta el coche | ÷ 200 m |
+| Costado | cuánto se corre el punto hacia la izquierda (+) o derecha (−) del coche | ÷ 20 m |
+| Curva | curvatura de la pista en ese punto × radio de la curva (0 en recta, 1 en curva) | — |
+
+A 100 km/h el punto de 5 s queda 140 m adelante; a 30 km/h, 42 m. En la web, **"Ver lo que ve la IA"**
+dibuja esos 8 puntos sobre la pista (verdes en recta, naranjas en curva).
+
+### Obstáculos hasta 100 m (antes 60 m)
+Las celdas de 10 m con peligro, rampa, frenado, agarre y puente pasan de 6 a 10 por carril.
+
+### Observación: de 146 a 250 números
+26 del coche (como el N6) + 24 de la mirada (8 puntos × 3) + 200 de celdas (4 carriles × 10 celdas × 5).
+
+### Recompensa v7
+| Componente | v5 (N5 y N6) | v7 (N7) |
+|---|---|---|
+| Avance | +0,05 por metro nuevo | igual |
+| Checkpoint | +0,5 cada 100 m | igual |
+| Paso | −0,02 | igual |
+| **Accidente** | −5 siempre | **−(5 + 0,01 × velocidad²)**, velocidad en m/s al chocar: a 30 km/h −5,7; a 90 km/h −11,3 |
+| **Derrape** | — | **−0,002 por cada grado** de deslizamiento medio del paso por encima de 6° |
+| Atascado / meta / combustible | −10 / +30 / +0,2 por litro | igual |
+
+El avance se cuenta sobre el punto más lejano alcanzado (`max_s`), así que no se puede "farmear"
+yendo y viniendo (la trampa que aprendió el coche del video de Yosh).
+
+## 3. Arreglos de la web pedidos al ver el N6
+
+* **Ruedas que "se volvían locas"**: a 100 km/h una rueda real da unas 12 vueltas por segundo y, a 60
+  cuadros por segundo, se ve temblar o girar al revés (efecto "rueda de carreta"). Ahora el giro
+  dibujado por cuadro tiene un tope. Además el ángulo de las ruedas delanteras se suaviza un poco solo
+  en el dibujo (≈ 0,1 s); los datos no cambian. Parte del movimiento es real: PPO mueve el volante de
+  tope a tope muy seguido (se ve también en "Volante pedido / real").
+* **Vallas y arco de meta de lado**: quedaban paralelos a la pista por un giro de 90° que sobraba desde
+  el N5. Ahora están cruzados. El arco es nuevo: cartel "SALIDA · META" con cuadros y luces.
+
+## 4. Mejoras visuales
+
+* Sombras más suaves y nítidas (mapa de 4096 × 4096), pasto cortado en franjas como en un estadio y
+  manchas grandes para que no se vea repetido.
+* Cámara de persecución un poco más lejos y más suave.
+* Puntos de la mirada de la IA en 3D (ver arriba).
+
+## 5. Resultados
+
+RESULTADOS_N7
+
+## 6. Cómo ejecutarlo
+
+```powershell
+.venv\Scripts\python.exe -m unittest tests.test_rally_v7
+$env:PYTHONUTF8="1"; $env:PREFECT_SERVER_EPHEMERAL_ENABLED="true"; $env:DVC_NO_ANALYTICS="1"
+.venv\Scripts\python.exe run_experiment.py --environment-version rally-v7
+```
+
+Prueba rápida sin DVC ni MLflow: `python pipeline_v7.py --timesteps 20000 --seeds 7 --skip-tracking`.
+
+## 7. Límites
+
+* Q-learning no recibe la mirada nueva: su tabla sigue teniendo 720 estados (meterle 24 números más
+  la haría imposible de llenar). Sirve de referencia, no compite en igualdad.
+* La mirada usa la línea central de la pista, no la trazada ideal (Sophy usa los bordes de la pista).

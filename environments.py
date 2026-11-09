@@ -15,6 +15,9 @@ def make_env(environment_version="rally-v1", config=None, perturbation=None):
     if environment_version == "rally-v5":
         from race_env_v5 import RallyV5Env, DEFAULT_CONFIG
         return RallyV5Env(DEFAULT_CONFIG if config is None else config, perturbation)
+    if environment_version == "rally-v7":
+        from race_env_v7 import RallyV7Env, DEFAULT_CONFIG
+        return RallyV7Env(DEFAULT_CONFIG if config is None else config, perturbation)
     if environment_version == "rally-v6":
         from race_env_v6 import RallyV6Env, DEFAULT_CONFIG
         return RallyV6Env(DEFAULT_CONFIG if config is None else config, perturbation)
