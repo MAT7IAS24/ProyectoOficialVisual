@@ -1,0 +1,760 @@
+{
+  "suite_id": "rally-v5-e1033bcfce7b46a0bd8abbde4856cf8d",
+  "environment_version": "rally-v5",
+  "reward_version": "v5",
+  "level_id": "N5",
+  "tracking": "omitido (--skip-tracking): sin DVC ni MLflow; corrida de prueba",
+  "config": {
+    "environment_version": "rally-v5",
+    "reward_version": "v5",
+    "level_id": "N5",
+    "experiment": {
+      "hypothesis": "A long exit straight, an explicit mud penalty and a severe crash cost should produce faster and safer driving. The bridge gap is crossed only with enough speed.",
+      "change_vs_previous": "v4 -> v5: track extended to 4000 m with a safe exit straight; initial fuel increased; mud penalized; accidents cost more and roll back two segments. Successful bridge jumps are recorded for replay.",
+      "selection_criteria": {
+        "min_success_rate_normal": 0.9,
+        "min_success_rate_rain": 0.9
+      }
+    },
+    "environment": {
+      "track_length_meters": 4000,
+      "segment_meters": 100,
+      "lanes": 4,
+      "initial_lane": 1,
+      "random_start_lane": true,
+      "initial_speed_level": 0,
+      "max_speed_level": 3,
+      "initial_fuel": 190,
+      "fuel_base_cost": 2,
+      "fuel_speed_cost": 3,
+      "fuel_lane_change_cost": 1,
+      "fuel_bucket_thresholds": [
+        50,
+        100,
+        150
+      ],
+      "lane_change_max_speed": 2,
+      "max_accidents": 4,
+      "accident_rollback_segments": 2,
+      "max_steps": 100,
+      "actions": [
+        {
+          "name": "frenar",
+          "speed_delta": -1,
+          "lane_delta": 0
+        },
+        {
+          "name": "mantener",
+          "speed_delta": 0,
+          "lane_delta": 0
+        },
+        {
+          "name": "acelerar",
+          "speed_delta": 1,
+          "lane_delta": 0
+        },
+        {
+          "name": "carril_izquierda",
+          "speed_delta": 0,
+          "lane_delta": -1
+        },
+        {
+          "name": "carril_derecha",
+          "speed_delta": 0,
+          "lane_delta": 1
+        }
+      ],
+      "terrains": [
+        {
+          "id": 0,
+          "code": ".",
+          "name": "asfalto",
+          "kind": "free"
+        },
+        {
+          "id": 1,
+          "code": "L",
+          "name": "lodo",
+          "kind": "slow",
+          "speed_cap": 1
+        },
+        {
+          "id": 2,
+          "code": "A",
+          "name": "agua",
+          "kind": "skid",
+          "safe_speed": 2
+        },
+        {
+          "id": 3,
+          "code": "S",
+          "name": "sin_pista",
+          "kind": "slow",
+          "speed_cap": 2
+        },
+        {
+          "id": 4,
+          "code": "F",
+          "name": "foso",
+          "kind": "pit"
+        },
+        {
+          "id": 5,
+          "code": "B",
+          "name": "barril",
+          "kind": "barrel"
+        },
+        {
+          "id": 6,
+          "code": "R",
+          "name": "rampa",
+          "kind": "ramp",
+          "min_speed": 2,
+          "slow_cap": 1,
+          "barrel_on_ramp": false
+        },
+        {
+          "id": 7,
+          "code": "K",
+          "name": "rampa_con_barril",
+          "kind": "ramp",
+          "min_speed": 2,
+          "slow_cap": 1,
+          "barrel_on_ramp": true
+        },
+        {
+          "id": 8,
+          "code": "P",
+          "name": "puente",
+          "kind": "deck"
+        },
+        {
+          "id": 9,
+          "code": "G",
+          "name": "puente_roto",
+          "kind": "deck_gap",
+          "min_speed": 3
+        }
+      ],
+      "flight_segments": {
+        "2": 2,
+        "3": 3
+      },
+      "lane_layout": [
+        {
+          "name": "Carril 1 Ãƒâ€šÃ‚Â· Lodo",
+          "ground": "....LLL.....LL......LLL.................",
+          "deck": "----------------------------------------"
+        },
+        {
+          "name": "Carril 2 Ãƒâ€šÃ‚Â· Agua",
+          "ground": "......AA.....AA......AAA....A...........",
+          "deck": "----------------------------------------"
+        },
+        {
+          "name": "Carril 3 Ãƒâ€šÃ‚Â· Pista incompleta",
+          "ground": "...SSS..RFFA.....SSS...RFFA.............",
+          "deck": "----------------------------------------"
+        },
+        {
+          "name": "Carril 4 Ãƒâ€šÃ‚Â· Rampas y puente",
+          "ground": "...B..K...R.LLAA.FLL..K...B.R...........",
+          "deck": "------------PPPPPGPP--------------------"
+        }
+      ]
+    },
+    "perturbations": {
+      "lluvia": {
+        "descripcion": "Charcos y barro aparecen en carriles 1, 3 y 4.",
+        "ground_overrides": [
+          {
+            "lane": 3,
+            "segments": [
+              20,
+              21,
+              24,
+              25
+            ],
+            "code": "A"
+          },
+          {
+            "lane": 2,
+            "segments": [
+              2,
+              3
+            ],
+            "code": "A"
+          },
+          {
+            "lane": 2,
+            "segments": [
+              27,
+              28,
+              29
+            ],
+            "code": "L"
+          },
+          {
+            "lane": 0,
+            "segments": [
+              8,
+              9
+            ],
+            "code": "A"
+          }
+        ]
+      }
+    },
+    "reward": {
+      "step": -1,
+      "new_segment": 2,
+      "fuel_unit": -0.05,
+      "accident": -25,
+      "finish": 60,
+      "remaining_fuel_unit": 0.1,
+      "mud_entry": -2.5
+    },
+    "training": {
+      "episodes": 6000,
+      "alpha": 0.25,
+      "gamma": 0.985,
+      "epsilon_start": 1.0,
+      "epsilon_end": 0.05,
+      "seed": 7,
+      "seeds": [
+        7,
+        21,
+        42
+      ],
+      "weather_mix_probability": 0.5,
+      "evaluation_episodes": 50,
+      "evaluation_seed_offset": 10000,
+      "summary_window": 100
+    },
+    "tracking": {
+      "experiment_name": "autonomous-rally-v5"
+    }
+  },
+  "evaluation": {
+    "normal": {
+      "success_rate": 1.0,
+      "mean_return": 112.47566666666667,
+      "mean_steps": 20.866666666666667,
+      "mean_fuel": 21.06,
+      "mean_accidents": 0.0
+    },
+    "lluvia": {
+      "success_rate": 1.0,
+      "mean_return": 113.40933333333334,
+      "mean_steps": 20.493333333333336,
+      "mean_fuel": 23.573333333333334,
+      "mean_accidents": 0.0
+    }
+  },
+  "between_seed_evaluation": {
+    "normal": {
+      "success_rate": {
+        "mean": 1.0,
+        "sample_std": 0.0,
+        "sample_variance": 0.0
+      },
+      "mean_return": {
+        "mean": 112.47566666666667,
+        "sample_std": 1.8691501633986884,
+        "sample_variance": 3.4937223333333436
+      },
+      "mean_steps": {
+        "mean": 20.866666666666667,
+        "sample_std": 1.2663859338026986,
+        "sample_variance": 1.603733333333333
+      },
+      "mean_fuel": {
+        "mean": 21.06,
+        "sample_std": 5.736932978517354,
+        "sample_variance": 32.9124
+      },
+      "mean_accidents": {
+        "mean": 0.0,
+        "sample_std": 0.0,
+        "sample_variance": 0.0
+      }
+    },
+    "lluvia": {
+      "success_rate": {
+        "mean": 1.0,
+        "sample_std": 0.0,
+        "sample_variance": 0.0
+      },
+      "mean_return": {
+        "mean": 113.40933333333334,
+        "sample_std": 1.7148834751473077,
+        "sample_variance": 2.9408253333333065
+      },
+      "mean_steps": {
+        "mean": 20.493333333333336,
+        "sample_std": 1.4435142303882331,
+        "sample_variance": 2.083733333333333
+      },
+      "mean_fuel": {
+        "mean": 23.573333333333334,
+        "sample_std": 2.507694824601538,
+        "sample_variance": 6.288533333333338
+      },
+      "mean_accidents": {
+        "mean": 0.0,
+        "sample_std": 0.0,
+        "sample_variance": 0.0
+      }
+    }
+  },
+  "baselines": {
+    "normal": {
+      "aleatoria": {
+        "success_rate": 0.02,
+        "mean_return": -71.446,
+        "mean_steps": 43.79333333333333,
+        "mean_fuel": 11.573333333333332,
+        "mean_accidents": 2.2533333333333334
+      },
+      "reglas": {
+        "success_rate": 0.5466666666666667,
+        "mean_return": 15.252000000000004,
+        "mean_steps": 22.02,
+        "mean_fuel": 39.48,
+        "mean_accidents": 1.8133333333333335
+      }
+    },
+    "lluvia": {
+      "aleatoria": {
+        "success_rate": 0.02,
+        "mean_return": -69.82799999999999,
+        "mean_steps": 44.02666666666667,
+        "mean_fuel": 9.613333333333333,
+        "mean_accidents": 2.206666666666667
+      },
+      "reglas": {
+        "success_rate": 0.5466666666666667,
+        "mean_return": 11.452666666666723,
+        "mean_steps": 31.313333333333333,
+        "mean_fuel": 23.62666666666667,
+        "mean_accidents": 1.54
+      }
+    }
+  },
+  "selection": {
+    "criteria": {
+      "min_success_rate_normal": 0.9,
+      "min_success_rate_rain": 0.9
+    },
+    "normal_success_rate": 1.0,
+    "rain_success_rate": 1.0,
+    "accepted": true
+  },
+  "runs": [
+    {
+      "seed": 7,
+      "experiment_id": "rally-v5-61a086e6d60341678b068860905a299a",
+      "mlflow_run_id": null,
+      "dvc_pointer": null,
+      "metadata": {
+        "experiment_id": "rally-v5-61a086e6d60341678b068860905a299a",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "reward_version": "v5",
+        "algorithm": "sparse_tabular_q_learning",
+        "seed": 7,
+        "episodes": 6000,
+        "state_shape": [
+          41,
+          4,
+          4,
+          4,
+          2,
+          11,
+          191,
+          5,
+          101,
+          41,
+          2
+        ],
+        "state_count": 456588647680,
+        "action_count": 5,
+        "stored_state_count": 146296,
+        "observation_fields": [
+          "tramo",
+          "nivel_velocidad",
+          "balde_combustible",
+          "carril",
+          "capa",
+          "terreno_adelante",
+          "combustible_exact",
+          "accidentes",
+          "pasos",
+          "mejor_tramo",
+          "lluvia"
+        ],
+        "actions": [
+          {
+            "name": "frenar",
+            "speed_delta": -1,
+            "lane_delta": 0
+          },
+          {
+            "name": "mantener",
+            "speed_delta": 0,
+            "lane_delta": 0
+          },
+          {
+            "name": "acelerar",
+            "speed_delta": 1,
+            "lane_delta": 0
+          },
+          {
+            "name": "carril_izquierda",
+            "speed_delta": 0,
+            "lane_delta": -1
+          },
+          {
+            "name": "carril_derecha",
+            "speed_delta": 0,
+            "lane_delta": 1
+          }
+        ],
+        "state_encoding": "numpy.ravel_multi_index(obs, state_shape), order C; sparse keys in q_table.npz",
+        "config_sha256": "a8a11b4c0cda7beced8aad7241fa8abaa744f8ff4c9f8e2c39917dff4a14d7ff",
+        "dataset_sha256": "5b9d647d7c4e3e17f84082f48969b75761eb6b166167b169cd36f7cd6ed2abb5",
+        "model_sha256": "ed241dbe2f57db9e422f7ca22adec0c6809970bb2619bc96b0d549132db91943",
+        "source_git_head": "c5124dd1a8993bf1042cbf9b2e39bcf488189ea9",
+        "source_sha256": {
+          "race_env_v5.py": "8356e17913ff334b01a17205ae625b3e2710860ef96a831da09ea157f6d75c85",
+          "training_v5.py": "4d9ea725f871555c4c5e4d8ae0023935968232e9b9eed408ac55ba86859d7acd",
+          "pipeline_v5.py": "96283209b048a27f72a562ee760e4625241b8a7819006350512639baff38ea2d",
+          "configs/rally-v5.json": "86c69f8d8a5608c72834a38b49699aacae63538c78608bde797b185d4a35fd36",
+          "environments.py": "1c4abd590baf0cddeac50616554554ae57eacd69bff3cc56a67d46343a7a39a4",
+          "run_experiment.py": "7121eddc40a327bdfcacebb5487fd2147c2600eecf4069015439be7e4243ff16"
+        },
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "evaluation": {
+          "success_rate": 1.0,
+          "mean_return": 113.84400000000001,
+          "mean_steps": 20.28,
+          "mean_fuel": 24.16,
+          "mean_accidents": 0.0
+        },
+        "evaluation_lluvia": {
+          "success_rate": 1.0,
+          "mean_return": 114.588,
+          "mean_steps": 19.68,
+          "mean_fuel": 25.12,
+          "mean_accidents": 0.0
+        },
+        "baselines": {
+          "normal": {
+            "aleatoria": {
+              "success_rate": 0.02,
+              "mean_return": -84.17399999999999,
+              "mean_steps": 43.36,
+              "mean_fuel": 14.6,
+              "mean_accidents": 2.68
+            },
+            "reglas": {
+              "success_rate": 0.48,
+              "mean_return": 3.5060000000000087,
+              "mean_steps": 21.84,
+              "mean_fuel": 41.8,
+              "mean_accidents": 2.08
+            }
+          },
+          "lluvia": {
+            "aleatoria": {
+              "success_rate": 0.02,
+              "mean_return": -77.01099999999998,
+              "mean_steps": 44.02,
+              "mean_fuel": 8.7,
+              "mean_accidents": 2.48
+            },
+            "reglas": {
+              "success_rate": 0.48,
+              "mean_return": -1.4979999999999265,
+              "mean_steps": 34.08,
+              "mean_fuel": 20.92,
+              "mean_accidents": 1.72
+            }
+          }
+        },
+        "training_success_rate": 0.11433333333333333,
+        "last_window_success_rate": 0.73
+      }
+    },
+    {
+      "seed": 21,
+      "experiment_id": "rally-v5-8e946346a521447eb93d65579362ec84",
+      "mlflow_run_id": null,
+      "dvc_pointer": null,
+      "metadata": {
+        "experiment_id": "rally-v5-8e946346a521447eb93d65579362ec84",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "reward_version": "v5",
+        "algorithm": "sparse_tabular_q_learning",
+        "seed": 21,
+        "episodes": 6000,
+        "state_shape": [
+          41,
+          4,
+          4,
+          4,
+          2,
+          11,
+          191,
+          5,
+          101,
+          41,
+          2
+        ],
+        "state_count": 456588647680,
+        "action_count": 5,
+        "stored_state_count": 145188,
+        "observation_fields": [
+          "tramo",
+          "nivel_velocidad",
+          "balde_combustible",
+          "carril",
+          "capa",
+          "terreno_adelante",
+          "combustible_exact",
+          "accidentes",
+          "pasos",
+          "mejor_tramo",
+          "lluvia"
+        ],
+        "actions": [
+          {
+            "name": "frenar",
+            "speed_delta": -1,
+            "lane_delta": 0
+          },
+          {
+            "name": "mantener",
+            "speed_delta": 0,
+            "lane_delta": 0
+          },
+          {
+            "name": "acelerar",
+            "speed_delta": 1,
+            "lane_delta": 0
+          },
+          {
+            "name": "carril_izquierda",
+            "speed_delta": 0,
+            "lane_delta": -1
+          },
+          {
+            "name": "carril_derecha",
+            "speed_delta": 0,
+            "lane_delta": 1
+          }
+        ],
+        "state_encoding": "numpy.ravel_multi_index(obs, state_shape), order C; sparse keys in q_table.npz",
+        "config_sha256": "b01ca5b5be560adcb8c78f239b9d23d57fc1799496c2e25e654886f893ba8b29",
+        "dataset_sha256": "6655a707d74ac5106b4a7de6289b11e9138e61158a30d227502eeef1079cdd82",
+        "model_sha256": "a47b03efe5824e1c0b5691c6961d915226e851cf8fbb354cb1956b642995ad5d",
+        "source_git_head": "c5124dd1a8993bf1042cbf9b2e39bcf488189ea9",
+        "source_sha256": {
+          "race_env_v5.py": "8356e17913ff334b01a17205ae625b3e2710860ef96a831da09ea157f6d75c85",
+          "training_v5.py": "4d9ea725f871555c4c5e4d8ae0023935968232e9b9eed408ac55ba86859d7acd",
+          "pipeline_v5.py": "96283209b048a27f72a562ee760e4625241b8a7819006350512639baff38ea2d",
+          "configs/rally-v5.json": "86c69f8d8a5608c72834a38b49699aacae63538c78608bde797b185d4a35fd36",
+          "environments.py": "1c4abd590baf0cddeac50616554554ae57eacd69bff3cc56a67d46343a7a39a4",
+          "run_experiment.py": "7121eddc40a327bdfcacebb5487fd2147c2600eecf4069015439be7e4243ff16"
+        },
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "evaluation": {
+          "success_rate": 1.0,
+          "mean_return": 113.23700000000001,
+          "mean_steps": 20.0,
+          "mean_fuel": 24.58,
+          "mean_accidents": 0.0
+        },
+        "evaluation_lluvia": {
+          "success_rate": 1.0,
+          "mean_return": 114.198,
+          "mean_steps": 19.64,
+          "mean_fuel": 24.92,
+          "mean_accidents": 0.0
+        },
+        "baselines": {
+          "normal": {
+            "aleatoria": {
+              "success_rate": 0.02,
+              "mean_return": -62.629,
+              "mean_steps": 45.1,
+              "mean_fuel": 8.02,
+              "mean_accidents": 1.86
+            },
+            "reglas": {
+              "success_rate": 0.6,
+              "mean_return": 24.903000000000006,
+              "mean_steps": 22.14,
+              "mean_fuel": 37.54,
+              "mean_accidents": 1.6
+            }
+          },
+          "lluvia": {
+            "aleatoria": {
+              "success_rate": 0.02,
+              "mean_return": -64.04899999999999,
+              "mean_steps": 45.1,
+              "mean_fuel": 7.82,
+              "mean_accidents": 1.92
+            },
+            "reglas": {
+              "success_rate": 0.6,
+              "mean_return": 21.56700000000005,
+              "mean_steps": 30.3,
+              "mean_fuel": 23.62,
+              "mean_accidents": 1.36
+            }
+          }
+        },
+        "training_success_rate": 0.11983333333333333,
+        "last_window_success_rate": 0.78
+      }
+    },
+    {
+      "seed": 42,
+      "experiment_id": "rally-v5-563f2d44c92f4be69ff7899a46190c11",
+      "mlflow_run_id": null,
+      "dvc_pointer": null,
+      "metadata": {
+        "experiment_id": "rally-v5-563f2d44c92f4be69ff7899a46190c11",
+        "level_id": "N5",
+        "environment_version": "rally-v5",
+        "reward_version": "v5",
+        "algorithm": "sparse_tabular_q_learning",
+        "seed": 42,
+        "episodes": 6000,
+        "state_shape": [
+          41,
+          4,
+          4,
+          4,
+          2,
+          11,
+          191,
+          5,
+          101,
+          41,
+          2
+        ],
+        "state_count": 456588647680,
+        "action_count": 5,
+        "stored_state_count": 144755,
+        "observation_fields": [
+          "tramo",
+          "nivel_velocidad",
+          "balde_combustible",
+          "carril",
+          "capa",
+          "terreno_adelante",
+          "combustible_exact",
+          "accidentes",
+          "pasos",
+          "mejor_tramo",
+          "lluvia"
+        ],
+        "actions": [
+          {
+            "name": "frenar",
+            "speed_delta": -1,
+            "lane_delta": 0
+          },
+          {
+            "name": "mantener",
+            "speed_delta": 0,
+            "lane_delta": 0
+          },
+          {
+            "name": "acelerar",
+            "speed_delta": 1,
+            "lane_delta": 0
+          },
+          {
+            "name": "carril_izquierda",
+            "speed_delta": 0,
+            "lane_delta": -1
+          },
+          {
+            "name": "carril_derecha",
+            "speed_delta": 0,
+            "lane_delta": 1
+          }
+        ],
+        "state_encoding": "numpy.ravel_multi_index(obs, state_shape), order C; sparse keys in q_table.npz",
+        "config_sha256": "7f6e17be1fa1c76826bd4e34e2e1645a9a760a0e45070526977e84a3acf28e4b",
+        "dataset_sha256": "7646bfa51427128cbf2aae893964b5255890c02982d3127046d9c85de526351c",
+        "model_sha256": "14d5830a3050dac11d0de0552fe583d585cbe68fbf1ee9ead04b5a320665f7af",
+        "source_git_head": "c5124dd1a8993bf1042cbf9b2e39bcf488189ea9",
+        "source_sha256": {
+          "race_env_v5.py": "8356e17913ff334b01a17205ae625b3e2710860ef96a831da09ea157f6d75c85",
+          "training_v5.py": "4d9ea725f871555c4c5e4d8ae0023935968232e9b9eed408ac55ba86859d7acd",
+          "pipeline_v5.py": "96283209b048a27f72a562ee760e4625241b8a7819006350512639baff38ea2d",
+          "configs/rally-v5.json": "86c69f8d8a5608c72834a38b49699aacae63538c78608bde797b185d4a35fd36",
+          "environments.py": "1c4abd590baf0cddeac50616554554ae57eacd69bff3cc56a67d46343a7a39a4",
+          "run_experiment.py": "7121eddc40a327bdfcacebb5487fd2147c2600eecf4069015439be7e4243ff16"
+        },
+        "evaluation_suite_id": "rally-v5-suite-1",
+        "evaluation": {
+          "success_rate": 1.0,
+          "mean_return": 110.346,
+          "mean_steps": 22.32,
+          "mean_fuel": 14.44,
+          "mean_accidents": 0.0
+        },
+        "evaluation_lluvia": {
+          "success_rate": 1.0,
+          "mean_return": 111.44200000000001,
+          "mean_steps": 22.16,
+          "mean_fuel": 20.68,
+          "mean_accidents": 0.0
+        },
+        "baselines": {
+          "normal": {
+            "aleatoria": {
+              "success_rate": 0.02,
+              "mean_return": -67.535,
+              "mean_steps": 42.92,
+              "mean_fuel": 12.1,
+              "mean_accidents": 2.22
+            },
+            "reglas": {
+              "success_rate": 0.56,
+              "mean_return": 17.347000000000005,
+              "mean_steps": 22.08,
+              "mean_fuel": 39.1,
+              "mean_accidents": 1.76
+            }
+          },
+          "lluvia": {
+            "aleatoria": {
+              "success_rate": 0.02,
+              "mean_return": -68.42399999999999,
+              "mean_steps": 42.96,
+              "mean_fuel": 12.32,
+              "mean_accidents": 2.22
+            },
+            "reglas": {
+              "success_rate": 0.56,
+              "mean_return": 14.289000000000046,
+              "mean_steps": 29.56,
+              "mean_fuel": 26.34,
+              "mean_accidents": 1.54
+            }
+          }
+        },
+        "training_success_rate": 0.11783333333333333,
+        "last_window_success_rate": 0.72
+      }
+    }
+  ]
+}

@@ -168,3 +168,12 @@ el avance, devuelve el auto dos tramos, aumenta accidentes y aplica la penalidad
 configurada de accidente. La política de referencia ahora intenta cambiar de
 carril para evitar también ese obstáculo. Los resultados históricos no se
 recalculan automáticamente; la nueva regla toma efecto en futuras corridas.
+
+### Previsualización regenerada con la regla de barriles
+
+Se volvió a ejecutar la corrida de prueba con la regla corregida (sin DVC ni
+MLflow) y se actualizó `rally-dashboard/dist/v5-results.json`. Las reproducciones
+registran choques en los barriles de rampa, retroceso y penalidad; los episodios
+que el modelo evita siguen disponibles y los saltos se conservan en otras
+escenas. El tablero abre primero un choque de barril para hacer visible la
+colisión. Informe: `reports/rally-v5-e1033bcfce7b46a0bd8abbde4856cf8d.json`.

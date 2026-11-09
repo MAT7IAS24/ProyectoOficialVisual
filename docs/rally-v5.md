@@ -94,3 +94,11 @@ tramos incluso a velocidad de salto. La política de referencia trata el barril
 de rampa como obstáculo evitable y cambia de carril cuando puede. Los resultados
 históricos del tablero siguen siendo snapshots de la corrida anterior; para
 representar esta regla en datos nuevos se debe volver a ejecutar el pipeline.
+
+### Previsualización actualizada
+
+La corrida de prueba posterior a la corrección regeneró el archivo de replay y
+el informe `reports/rally-v5-e1033bcfce7b46a0bd8abbde4856cf8d.json`. La
+reproducción conserva escenas de salto y muestra choques con penalización donde
+la trayectoria encuentra el barril. N5 abre primero un choque registrado. Esta
+corrida es de previsualización, sin DVC ni MLflow.

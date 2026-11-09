@@ -168,10 +168,11 @@ function selectSeed() {
   const rain = run.metadata.evaluation_lluvia;
   $('seedSummary').textContent = `Semilla ${run.seed}: ${data.config.training.episodes} episodios con clima mixto. Evaluación normal: ${pct(m.success_rate)} éxito, retorno ${m.mean_return.toFixed(1)}; lluvia: ${pct(rain.success_rate)}, retorno ${rain.mean_return.toFixed(1)}. Estados Q visitados: ${run.metadata.stored_state_count.toLocaleString()}. Modelo ${run.experiment_id}${run.mlflow_run_id ? ` · MLflow ${run.mlflow_run_id}` : ''}.`;
   renderCharts();
-  // Abrir por defecto una reproducción que sí contenga un salto registrado.
-  // El primer episodio normal de la suite puede no pasar por las rampas.
+  // Priorizar un choque de barril visible; si no existe, abrir un salto.
+  const barrelCrashScenario = scenarios.findIndex(s => s.frames.some(frame =>
+    frame.events.includes('choca_con_el_barril_de_la_rampa') || frame.events.includes('choca_con_barril')));
   const jumpScenario = scenarios.findIndex(s => s.frames.some(frame => frame.jump || frame.events.includes('salta_la_rampa')));
-  pick(jumpScenario >= 0 ? jumpScenario : 0);
+  pick(barrelCrashScenario >= 0 ? barrelCrashScenario : jumpScenario >= 0 ? jumpScenario : 0);
 }
 
 function movingAverage(values, windowSize = 100) {
