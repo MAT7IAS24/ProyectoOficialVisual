@@ -64,7 +64,7 @@ export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, 
   }
   const posts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.12, 0.85, 0.12).translate(0, 0.42, 0), steel, Math.ceil(L / 4) * 2);
   { const o = new THREE.Object3D(); let k = 0; for (const side of [1, -1]) for (let s = 0; s < L; s += 4) { o.position.copy(at(s, side * (HALF + 3.78), 0)); o.updateMatrix(); posts.setMatrixAt(k++, o.matrix); } posts.count = k; scene.add(posts); }
-  const ads = ['AUTONOMOUS RALLY', 'APRENDIZAJE POR REFUERZO', 'N6 · PESO Y SUSPENSIÓN', 'DATOS · MODELOS · VERSIONES', 'PPO vs Q-LEARNING', 'RALLY IA 2026'];
+  const ads = ['AUTONOMOUS RALLY', 'APRENDIZAJE POR REFUERZO', window.RALLY_AD ?? 'FÍSICA REALISTA', 'DATOS · MODELOS · VERSIONES', 'PPO vs Q-LEARNING', 'RALLY IA 2026'];
   const adColors = [['#e8202a', '#fff'], ['#0b3d91', '#ffd12e'], ['#111', '#47df9a'], ['#ffd12e', '#111'], ['#f5f5f5', '#0b3d91'], ['#1d8a4a', '#fff']];
   const adTex = canvasTex(2048, 64, (g, w, h) => {
     const seg = w / ads.length;
