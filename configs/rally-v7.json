@@ -1,6 +1,6 @@
 {
   "environment_version": "rally-v7",
-  "reward_version": "v7",
+  "reward_version": "v5",
   "level_id": "N7",
   "experiment": {
     "title": "Ver la pista como un piloto",
@@ -17,7 +17,37 @@
       "qlearning_success_rate": 0.022,
       "ppo_mean_accidents": 2.29,
       "report": "reports/rally-v6-fa67dfc239f942bcb167518766d7aeea.json"
-    }
+    },
+    "attempt": 2,
+    "previous_attempt": {
+      "date": "9 nov",
+      "commit": "856f0ff",
+      "report": "reports/rally-v7-b8fac7f9c91042e881552185f989b060.json",
+      "accepted": false,
+      "reward_version": "v7",
+      "ppo_success_rate": 0.022,
+      "ppo_by_seed": [
+        0.0,
+        0.067,
+        0.0
+      ],
+      "qlearning_success_rate": 0.044,
+      "rules_success_rate": 0.867,
+      "ppo_mean_accidents": 2.3,
+      "ppo_mean_crash_kmh": 32.1,
+      "ppo_mean_progress_pct": 34.2,
+      "diagnosis": [
+        "PPO no se quedó quieto: avanzó en promedio el 34 % de la vuelta y siguió chocando (sobre todo con las vallas: 37 por cada 30 pistas)",
+        "Chocó más despacio (32 km/h en promedio): la recompensa v7 sí le enseñó a bajar la velocidad, pero no a esquivar",
+        "Se cambiaron dos cosas a la vez (mirada y recompensa): no se sabe cuál empeoró"
+      ]
+    },
+    "changes_vs_attempt_1": [
+      "Se vuelve a la recompensa v5 del N6 (accidente −5 fijo, sin castigo por derrape)",
+      "Se mantiene la mirada de piloto (250 números)",
+      "Así se aísla el efecto de la mirada: si PPO mejora, la recompensa v7 era la culpable; si no, lo es la mirada"
+    ],
+    "hypothesis_attempt_2": "Con la mirada de piloto y la recompensa del N6, PPO completa al menos el 25 % de las vueltas, choca menos que en el N6 y las reglas conservan al menos el 80 % (mismos criterios del intento 1)."
   },
   "track": {
     "straight_m": 300,
@@ -192,8 +222,8 @@
     "checkpoint": 0.5,
     "step": -0.02,
     "accident": -5.0,
-    "accident_per_v2": 0.01,
-    "slip_per_deg": 0.002,
+    "accident_per_v2": 0.0,
+    "slip_per_deg": 0.0,
     "slip_free_deg": 6.0,
     "stalled": -10.0,
     "finish": 30.0,

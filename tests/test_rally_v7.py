@@ -149,8 +149,11 @@ class PilotViewTests(unittest.TestCase):
         self.assertAlmostEqual(o[names.index("pista_3s_curva")], 1.0, places=3)   # a 75 m ya es curva (×radio = 1)
         self.assertGreater(o[names.index("pista_5s_costado")], 0.2)              # la pista se va hacia un lado
 
+    # Recompensa v7 del intento 1 (el intento 2 vuelve a v5 poniendo estos dos términos en 0).
+    V7 = {"accident": -5.0, "accident_per_v2": 0.01, "slip_per_deg": 0.002, "slip_free_deg": 6.0}
+
     def test_crash_cost_grows_with_speed(self):
-        rw = load_config()["reward"]
+        rw = self.V7
         cost = lambda v: rw["accident"] - rw["accident_per_v2"] * v ** 2
         self.assertAlmostEqual(cost(0), -5.0)
         self.assertLess(cost(25), 2 * cost(0))                      # a 90 km/h cuesta más del doble que casi parado
@@ -162,8 +165,15 @@ class PilotViewTests(unittest.TestCase):
         env._crash([], "sale_de_la_pista")
         self.assertAlmostEqual(env.crash_speeds[0], 20.0, places=3)
 
+    def test_attempt_2_uses_the_n6_reward(self):
+        c = load_config()
+        self.assertEqual(c["reward_version"], "v5")
+        self.assertEqual(c["reward"]["accident_per_v2"], 0.0)
+        self.assertEqual(c["reward"]["slip_per_deg"], 0.0)
+        self.assertEqual(c["reward"]["accident"], -5.0)
+
     def test_slip_penalty_only_above_free_angle(self):
-        rw = load_config()["reward"]
+        rw = self.V7
         pen = lambda deg: -rw["slip_per_deg"] * max(0.0, deg - rw["slip_free_deg"])
         self.assertEqual(pen(4.0), 0.0)
         self.assertAlmostEqual(pen(16.0), -0.02)

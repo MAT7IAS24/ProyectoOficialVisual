@@ -179,7 +179,7 @@ def rally_v7_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
     for r in results:
         r.setdefault("mlflow_run_id", None)
 
-    report = {"suite_id": suite_id, "environment_version": "rally-v7", "reward_version": "v7", "level_id": "N7",
+    report = {"suite_id": suite_id, "environment_version": "rally-v7", "reward_version": config["reward_version"], "level_id": "N7",
               "tracking": "omitido (--skip-tracking): sin DVC ni MLflow, no es corrida oficial" if skip_tracking else "DVC + MLflow",
               "config": config, "selection": selection, "summary": summary, "between_seeds": between,
               "baselines": {k: v["summary"] for k, v in baselines.items()},
