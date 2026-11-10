@@ -119,6 +119,27 @@ function fillBench() {
     (data.tracking.startsWith('omitido') ? ' Nota: datos generados sin DVC ni MLflow; la corrida oficial se repite con tracking.' : '');
 }
 
+function fillAttempts() {
+  const e = data.config.experiment, prev = e.previous_attempt;
+  if (!prev) return;
+  const ppo = data.summary.ppo.normal, q = data.summary.qlearning.normal, sel = data.selection;
+  const box = (title, ok, okLabel, items, big) => `<div class="attempt"><h3>${title}<em class="${ok ? 'ok' : ''}">${okLabel}</em></h3><div class="big">${big}</div><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
+  $('attemptGrid').innerHTML = [
+    box(`Intento 1 · ${prev.date} · recompensa ${prev.reward_version}`, false, 'RECHAZADO', [
+      `PPO ${pct(prev.ppo_success_rate)} (semillas ${prev.ppo_by_seed.map(pct).join(' / ')}) · Q-learning ${pct(prev.qlearning_success_rate)} · reglas ${pct(prev.rules_success_rate)}`,
+      `${prev.ppo_mean_accidents.toFixed(2)} accidentes por vuelta, a ${Math.round(prev.ppo_mean_crash_kmh)} km/h en promedio`,
+      ...prev.diagnosis,
+    ], `PPO ${pct(prev.ppo_success_rate)}`),
+    box(`Intento ${e.attempt} · misma mirada, recompensa ${data.reward_version}`, sel.accepted, sel.accepted ? 'ACEPTADO' : 'RECHAZADO', [
+      `PPO ${pct(ppo.success_rate)} · Q-learning ${pct(q.success_rate)} · reglas ${pct(sel.rules_success_rate)}`,
+      `${ppo.mean_accidents.toFixed(2)} accidentes por vuelta${ppo.mean_crash_kmh == null ? '' : `, a ${Math.round(ppo.mean_crash_kmh)} km/h en promedio`}`,
+      ...e.changes_vs_attempt_1,
+    ], `PPO ${pct(ppo.success_rate)}`),
+  ].join('');
+  $('attemptNote').textContent = `El intento 1 sigue guardado: código en el commit ${prev.commit}, informe ${prev.report}. Entre los dos intentos solo cambió la recompensa; la mirada, la física y las 30 pistas son las mismas.`;
+  $('attempts').hidden = false;
+}
+
 function fillTable() {
   const rows = [];
   const old = v6 ? { aleatoria: v6.baselines.aleatoria, reglas: v6.baselines.reglas, reglas_lluvia: v6.baselines.reglas_lluvia, ...v6.summary } : null;
@@ -144,8 +165,8 @@ function fillExplainer() {
     ['Mirar por segundos, no por metros', `Los pilotos miran "a dónde voy a estar en 2 segundos". La red recibe 8 puntos de la pista a ${(sn.course_times_s ?? [0.5, 5]).join(', ')} s adelante, a su velocidad actual: a 100 km/h ve 140 m; a 30 km/h, 42 m. Actívalo con "Ver lo que ve la IA" (verde = recta, naranja = curva).`],
     ['Qué sabe de cada punto', 'Cuántos metros adelante queda, cuánto se corre hacia un lado (si la pista dobla) y cuánto se curva ahí. Es la misma idea de Gran Turismo Sophy (Sony AI, revista Nature 2022), que le ganó a los mejores pilotos humanos.'],
     ['Obstáculos más lejos', `Las celdas de barro, agua, rampas y vallas llegan a ${(data.config.sensors?.lookahead_cells ?? 10) * 10} m (antes 60 m). A 100 km/h el coche necesita unos 45 m para frenar.`],
-    ['Chocar rápido cuesta más', `Antes todo choque costaba 5 puntos. Ahora cuesta 5 + ${rw.accident_per_v2} × velocidad² (m/s): a 30 km/h unos 5,7 puntos; a 90 km/h, 11,3. Así aprende a bajar la velocidad antes del peligro.`],
-    ['Derrapar sin control tiene un costo', `Si el deslizamiento medio de un paso pasa de ${rw.slip_free_deg}°, se resta ${rw.slip_per_deg} por cada grado de más. Es pequeño: avanzar sigue siendo lo que más suma (${rw.per_meter} por metro).`],
+    ['Chocar rápido cuesta más (intento 1)', `En el intento 1 cada choque costaba 5 + 0,01 × velocidad² (m/s): a 30 km/h unos 5,7 puntos; a 90 km/h, 11,3. ${rw.accident_per_v2 ? 'Sigue activo.' : 'En el intento 2 se volvió a −5 fijo (como el N6) para ver si esto era lo que empeoraba a PPO.'}`],
+    ['Derrapar sin control (intento 1)', `En el intento 1, si el deslizamiento medio de un paso pasaba de 6°, se restaba 0,002 por cada grado de más. ${rw.slip_per_deg ? 'Sigue activo.' : 'En el intento 2 se quitó.'} Avanzar es lo que más suma (${rw.per_meter} por metro).`],
     ['Lo que NO cambió', 'La física es la del N6 (llantas, peso, suspensión), las mismas 30 pistas del examen, 1 millón de pasos y 3 semillas. Así la diferencia se le puede atribuir a la mirada y a la recompensa.'],
   ];
   $('explainGrid').innerHTML = items.map(([h, b]) => `<div><b>${h}</b>${b}</div>`).join('');
@@ -188,7 +209,7 @@ try {
   $('modelInfo').textContent = rec ? `Modelo recomendado: PPO semilla ${rec.seed} · ${rec.run_id} · SHA-256 ${rec.model_sha256.slice(0, 12)}… · paquete en modelos/n7/ppo-recomendado/ (model.zip, policy.onnx, normalization.json, manifest.json)` : '';
   $('replaySelect').replaceChildren(...scenarios.map((s, i) => new Option(s.label, String(i))));
   $('replaySelect').disabled = $('toggle').disabled = false;
-  fillBench(); fillTable(); fillExplainer(); drawCurves();
+  fillBench(); fillAttempts(); fillTable(); fillExplainer(); drawCurves();
   const params = new URLSearchParams(location.search);
   let wanted = scenarios.findIndex(s => s.id === params.get('escenario'));
   if (wanted < 0) wanted = scenarios.findIndex(s => s.id === 'antes-despues-0');
