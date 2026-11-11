@@ -259,6 +259,89 @@ def make_vec(config, seed, n_envs):
     return VecNormalize(venv, norm_obs=True, norm_reward=True, clip_obs=10.0, gamma=config["training"]["ppo"]["gamma"])
 
 
+from stable_baselines3.common.running_mean_std import RunningMeanStd as _RunningMeanStd
+
+
+class FrozenRMS(_RunningMeanStd):
+    """Media y varianza FIJAS para normalizar la observación (intento 3). Se calculan con los datos de la
+    imitación y ya no se mueven durante PPO: si se movieran, la red que aprendió imitando vería números
+    distintos a los que aprendió y "olvidaría" lo aprendido."""
+    def __init__(self, mean, var, count):
+        self.mean, self.var, self.count = np.asarray(mean, np.float64), np.asarray(var, np.float64), float(count)
+
+    def update(self, arr):
+        pass
+
+    def copy(self):
+        return FrozenRMS(self.mean.copy(), self.var.copy(), self.count)
+
+
+def imitate_rules(model, venv, config, seed, valid, log=print):
+    """Intento 3 · "Aprender de un maestro" (DAgger, Ross et al. 2011).
+
+    Ronda 0: las reglas (el maestro) manejan y se anota qué hicieron en cada instante.
+    Rondas siguientes: maneja la red (el alumno); en cada instante se anota qué HABRÍA hecho el maestro
+    ahí. Así el alumno también aprende a corregirse cuando ya se equivocó (con solo copiar vueltas
+    perfectas nunca ve cómo salir de un error). Después de cada ronda la red se reajusta con TODOS los datos.
+
+    Solo se entrena la parte de la red que decide la acción (el "actor"); el crítico lo aprende PPO."""
+    import torch
+    ic = config["training"]["imitation"]
+    env = RallyV7Env(config)
+    policy = model.policy
+    actor_params = list(policy.mlp_extractor.policy_net.parameters()) + list(policy.action_net.parameters())
+    rng = np.random.default_rng(seed)
+    torch.manual_seed(seed)
+    X, Y, curve, env_steps = [], [], [], 0
+    layout_seed = ic["layout_seed_offset"] + seed * 10000          # pistas de entrenamiento: nunca las del examen ni las de validación
+
+    def actor_mean(obs_t):
+        return policy.action_net(policy.mlp_extractor.forward_actor(policy.extract_features(obs_t)))
+
+    def student(obs):
+        with torch.no_grad():
+            x = torch.as_tensor(venv.normalize_obs(obs[None, :]), dtype=torch.float32)
+            return np.clip(actor_mean(x)[0].numpy(), -1, 1).astype(np.float32)
+
+    for rnd in range(ic["rounds"]):
+        finished = 0
+        for _ in range(ic["episodes_per_round"]):
+            obs, info = env.reset(seed=layout_seed, options={"layout": generate_layout(config, layout_seed)})
+            layout_seed += 1
+            teacher = rule_policy(env)
+            while True:
+                wanted = teacher(obs)                               # lo que haría el maestro aquí
+                X.append(obs.copy()); Y.append(wanted)
+                obs, _, terminated, truncated, info = env.step(wanted if rnd == 0 else student(obs))
+                env_steps += 1
+                if terminated or truncated:
+                    break
+            finished += info["termination_cause"] == "vuelta_completada"
+        x = np.asarray(X, np.float32)
+        venv.obs_rms = FrozenRMS(x.mean(0), x.var(0), len(x))
+        xn = torch.as_tensor(venv.normalize_obs(x), dtype=torch.float32)
+        y = torch.as_tensor(np.asarray(Y, np.float32))
+        opt = torch.optim.Adam(actor_params, ic["learning_rate"])
+        sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, ic["epochs"])
+        for _ in range(ic["epochs"]):
+            perm, total = torch.randperm(len(xn)), 0.0
+            for i in range(0, len(xn), ic["batch_size"]):
+                idx = perm[i:i + ic["batch_size"]]
+                loss = torch.nn.functional.smooth_l1_loss(actor_mean(xn[idx]), y[idx], beta=0.05)
+                opt.zero_grad(); loss.backward(); opt.step()
+                total += loss.item() * len(idx)
+            sched.step()
+        point = {"round": rnd, "samples": len(X), "env_steps": env_steps, "driver": "maestro" if rnd == 0 else "alumno",
+                 "laps_while_collecting": finished / ic["episodes_per_round"], "loss": total / len(xn)}
+        if valid:
+            v = evaluate(lambda e: student, config, valid, seed=seed)["summary"]
+            point.update({"validation_success_rate": v["success_rate"], "validation_progress_pct": v["mean_progress_pct"]})
+        curve.append(point)
+        log(f"   Imitación semilla {seed} · ronda {rnd} ({point['driver']} al volante) · {len(X)} ejemplos · "
+            f"validación {point.get('validation_success_rate', float('nan')):.0%}")
+    return {"curve": curve, "env_steps": env_steps, "samples": len(X)}
+
+
 def ppo_policy_factory(model, vecnorm):
     def factory(env):
         def act(obs):
@@ -333,17 +416,44 @@ def train_ppo(config, seed, output_root=ROOT, eval_layouts=None, log=print):
     model = PPO("MlpPolicy", venv, seed=seed, n_steps=pc["n_steps"], batch_size=pc["batch_size"], n_epochs=pc["n_epochs"],
                 learning_rate=learning_rate, gamma=pc["gamma"], gae_lambda=pc["gae_lambda"], clip_range=pc["clip_range"],
                 ent_coef=pc["ent_coef"], use_sde=pc.get("use_sde", False), sde_sample_freq=pc.get("sde_sample_freq", -1),
-                policy_kwargs={"net_arch": pc["net_arch"], "log_std_init": pc["log_std_init"]}, verbose=0, device="cpu")
+                target_kl=pc.get("target_kl"),
+                policy_kwargs={"net_arch": pc["net_arch"], "log_std_init": pc["log_std_init"], "ortho_init": pc.get("ortho_init", True)},
+                verbose=0, device="cpu")
     probe = eval_layouts[: pc["eval_layouts_during_training"]] if eval_layouts else evaluation_layouts(config, pc["eval_layouts_during_training"])
     valid = validation_layouts(config)
     best = {"score": None, "timesteps": None, "path": folder / "_mejor_punto.zip", "obs_rms": None}
     train_curve, eval_curve = [], []
+
+    # ---- Intento 3: primero imitar a las reglas, luego PPO ----
+    imitation, imitation_factory = None, None
+    actor_params = [*model.policy.mlp_extractor.policy_net.parameters(), *model.policy.action_net.parameters(), model.policy.log_std]
+    warmup = 0
+    if config["training"].get("imitation"):
+        imitation = imitate_rules(model, venv, config, seed, valid, log)
+        frozen_policy, frozen_rms = copy.deepcopy(model.policy), venv.obs_rms.copy()
+
+        def imitation_factory(env):
+            def act(obs):
+                nobs = np.clip((obs[None, :] - frozen_rms.mean) / np.sqrt(frozen_rms.var + venv.epsilon), -venv.clip_obs, venv.clip_obs)
+                action, _ = frozen_policy.predict(nobs.astype(np.float32), deterministic=True)
+                return np.clip(action[0], -1, 1).astype(np.float32)
+            return act
+        # El crítico (la parte que estima "qué tan bien voy") empieza en blanco. Si PPO corrige al actor con un
+        # crítico en blanco, daña lo aprendido. Por eso los primeros pasos solo aprende el crítico.
+        warmup = pc.get("critic_warmup_steps", 0)
+        for prm in actor_params:
+            prm.requires_grad_(warmup == 0)
 
     class Curves(BaseCallback):
         """Guarda las dos curvas que pide la guía: entrenamiento (con exploración) y evaluación (sin exploración)."""
         def __init__(self):
             super().__init__()
             self.ep_returns, self.ep_success, self.next_eval = [], [], 0
+
+        def _on_rollout_start(self):
+            if warmup and self.num_timesteps >= warmup:
+                for prm in actor_params:
+                    prm.requires_grad_(True)
 
         def _on_step(self):
             for info in self.locals["infos"]:
@@ -387,13 +497,16 @@ def train_ppo(config, seed, output_root=ROOT, eval_layouts=None, log=print):
     model.save(folder / "model.zip")
     venv.save(str(folder / "vecnormalize.pkl"))
     n_obs = RallyV7Env(config).observation_space.shape[0]
-    write_json(folder / "normalization.json", {"type": "VecNormalize (media y varianza móviles)", "mean": venv.obs_rms.mean.tolist(),
+    write_json(folder / "normalization.json", {"type": "media y varianza fijas, calculadas con los datos de la imitación" if imitation else "VecNormalize (media y varianza móviles)", "mean": venv.obs_rms.mean.tolist(),
                                                "var": venv.obs_rms.var.tolist(), "epsilon": venv.epsilon, "clip_obs": venv.clip_obs,
                                                "formula": "obs_normalizada = clip((obs - mean) / sqrt(var + epsilon), -clip_obs, clip_obs)"})
     export_onnx(model, venv, folder / "policy.onnx", n_obs)
     onnx_error = verify_onnx(folder / "policy.onnx", model, venv, config)
     log(f"   ONNX verificado: diferencia máxima con SB3 = {onnx_error:.2e}")
+    for prm in actor_params:
+        prm.requires_grad_(True)
     return {"algorithm": "ppo", "run_id": run_id, "seed": seed, "folder": folder, "model": model, "vecnorm": venv,
+            "imitation": imitation, "imitation_policy_factory": imitation_factory,
             "policy_factory": ppo_policy_factory(model, venv), "train_curve": train_curve, "eval_curve": eval_curve,
             "train_seconds": train_seconds, "timesteps": int(model.num_timesteps), "onnx_max_abs_error": onnx_error, "chosen_checkpoint": chosen}
 

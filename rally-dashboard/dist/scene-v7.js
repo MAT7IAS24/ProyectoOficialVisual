@@ -271,6 +271,10 @@ try {
     const car = src.clone(true);
     if (CAR.livery && opacity === 1) paintLivery(car);
     const groups = []; if (CAR.wheelGroup) car.traverse(o => { if (CAR.wheelGroup.test(o.name)) groups.push(o); });
+    // El modelo trae las ruedas delanteras ya viradas (y todas con un giro guardado). Si se hacen girar así,
+    // el eje queda torcido y la rueda bambolea. Se enderezan: el eje de cada rueda queda cruzado al coche.
+    groups.forEach(o => o.quaternion.identity());
+    car.updateMatrixWorld(true);
     // Hacia dónde mira el modelo: del centro de las ruedas traseras al de las delanteras.
     if (groups.length === 4) {
       const ctr = o => new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
@@ -312,7 +316,12 @@ try {
       const found = []; car.traverse(o => { if (o.isMesh && CAR.wheel?.test(o.name)) found.push(o); });
       found.forEach(o => mount([o]));
     }
-    g.userData = { wheels, body };
+    // Luces de freno: dos barras rojas atrás que se encienden cuando el pedal frena.
+    const brake = new THREE.Group(), bm = new THREE.MeshBasicMaterial({ color: '#ff2a1a', transparent: opacity < 1, opacity });
+    const bb = new THREE.Box3().setFromObject(body);
+    for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.07, 0.06), bm); m.position.set(sx * 0.52, bb.max.y * 0.62, bb.min.z + 0.05); brake.add(m); }
+    brake.visible = false; body.add(brake);
+    g.userData = { wheels, body, brake };
     g.rotation.order = 'YXZ'; body.rotation.order = 'YXZ';
     return g;
   }
@@ -468,14 +477,14 @@ try {
   const DROPS = 260;
   const drops = new THREE.InstancedMesh(new THREE.SphereGeometry(0.07, 6, 4), new THREE.MeshStandardMaterial({ roughness: 0.6 }), DROPS);
   drops.frustumCulled = false; scene.add(drops);
-  const dropState = Array.from({ length: DROPS }, () => ({ life: 0, p: new THREE.Vector3(), v: new THREE.Vector3() }));
+  const dropState = Array.from({ length: DROPS }, () => ({ life: 0, g: 9.81, p: new THREE.Vector3(), v: new THREE.Vector3() }));
   let dropNext = 0;
   const hide = new THREE.Matrix4().makeScale(0, 0, 0);
   for (let i = 0; i < DROPS; i++) drops.setMatrixAt(i, hide);
   function splash(pos, h, speed, color) {
     const dir = new THREE.Vector3(Math.cos(h), 0, -Math.sin(h)), left = new THREE.Vector3(-Math.sin(h), 0, -Math.cos(h));
     for (let k = 0; k < 3; k++) {
-      const d = dropState[dropNext]; d.life = 0.7 + Math.random() * 0.5;
+      const d = dropState[dropNext]; d.life = 0.7 + Math.random() * 0.5; d.g = 9.81;
       d.p.copy(pos).addScaledVector(dir, -1.4).addScaledVector(left, (Math.random() < 0.5 ? -1 : 1) * 0.8); d.p.y = 0.15;
       d.v.copy(dir).multiplyScalar(-0.15 * speed - Math.random() * 2).addScaledVector(left, (Math.random() - 0.5) * 3); d.v.y = 1.5 + Math.random() * 2.5;
       drops.setColorAt(dropNext, color); dropNext = (dropNext + 1) % DROPS;
@@ -485,7 +494,7 @@ try {
   function updateDrops(dt) {
     dropState.forEach((d, i) => {
       if (d.life <= 0) return;
-      d.life -= dt; d.v.y -= 9.81 * dt; d.p.addScaledVector(d.v, dt);
+      d.life -= dt; d.v.y -= d.g * dt; d.p.addScaledVector(d.v, dt);
       if (d.p.y < 0.03) { d.p.y = 0.03; d.v.set(0, 0, 0); }
       mObj.position.copy(d.p); mObj.rotation.set(0, 0, 0); mObj.scale.setScalar(d.life > 0 ? 1 : 0); mObj.updateMatrix();
       drops.setMatrixAt(i, d.life > 0 ? mObj.matrix : hide);
@@ -493,6 +502,68 @@ try {
     mObj.scale.setScalar(1);
     drops.instanceMatrix.needsUpdate = true;
   }
+  // ---------- intento 3: polvo, humo, chispas, confeti y la línea que siguió cada coche ----------
+  // Nubes: imágenes redondas y suaves que siempre miran a la cámara, crecen y se desvanecen.
+  const puffTex = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+    const r = g.createRadialGradient(32, 32, 2, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,0.9)'); r.addColorStop(0.5, 'rgba(255,255,255,0.35)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = r; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+  })();
+  const PUFFS = 140;
+  const puffs = Array.from({ length: PUFFS }, () => {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffTex, transparent: true, depthWrite: false, opacity: 0 }));
+    sp.visible = false; scene.add(sp); return { sp, life: 0, max: 1, v: new THREE.Vector3(), grow: 1, alpha: 0.5 };
+  });
+  let puffNext = 0;
+  function puff(pos, color, { size = 0.8, grow = 2.2, life = 1.1, alpha = 0.45, up = 0.6, spread = 0.5 } = {}) {
+    const q = puffs[puffNext]; puffNext = (puffNext + 1) % PUFFS;
+    q.life = q.max = life * (0.7 + Math.random() * 0.6); q.grow = grow; q.alpha = alpha;
+    q.sp.position.copy(pos); q.sp.position.x += (Math.random() - 0.5) * spread; q.sp.position.z += (Math.random() - 0.5) * spread;
+    q.sp.scale.setScalar(size); q.sp.material.color.set(color); q.sp.visible = true;
+    q.v.set((Math.random() - 0.5) * 0.8, up * (0.6 + Math.random() * 0.8), (Math.random() - 0.5) * 0.8);
+  }
+  function updatePuffs(dt) {
+    for (const q of puffs) {
+      if (q.life <= 0) continue;
+      q.life -= dt; if (q.life <= 0) { q.sp.visible = false; continue; }
+      q.sp.position.addScaledVector(q.v, dt); q.sp.scale.addScalar(q.grow * dt);
+      q.sp.material.opacity = q.alpha * (q.life / q.max);
+    }
+  }
+  function burst(pos, color, n, { speed = 6, up = 5, life = 1.2, g = 9.81 } = {}) {
+    for (let k = 0; k < n; k++) {
+      const d = dropState[dropNext]; d.life = life * (0.6 + Math.random() * 0.8); d.g = g;
+      d.p.copy(pos); d.p.y += 0.5;
+      d.v.set((Math.random() - 0.5) * speed, up * (0.4 + Math.random()), (Math.random() - 0.5) * speed);
+      drops.setColorAt(dropNext, typeof color === 'function' ? color() : color); dropNext = (dropNext + 1) % DROPS;
+    }
+    if (drops.instanceColor) drops.instanceColor.needsUpdate = true;
+  }
+  const C_SPARK = new THREE.Color('#ffb53a'), CONFETTI = ['#ffc320', '#ff4d4d', '#4dd2ff', '#7dff7a', '#ffffff', '#d07bff'].map(c => new THREE.Color(c));
+  const CRASH = new Set(['sale_de_la_pista', 'hace_un_trompo', 'choca_con_la_valla', 'aterrizaje_duro', 'cae_en_foso', 'cae_del_puente', 'sale_volando_de_la_pista', 'choca_con_el_borde_del_puente']);
+  let shake = 0, lastFxFrame = -1, celebrated = false;
+  // Línea que siguió cada coche: una cinta pegada al piso (amarilla = coche principal, azul = el otro).
+  function makeTrail(color) {
+    const N = 9000, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 2 * 3), idx = new Uint32Array((N - 1) * 6);
+    for (let i = 0; i < N - 1; i++) idx.set([2 * i, 2 * i + 1, 2 * i + 2, 2 * i + 1, 2 * i + 3, 2 * i + 2], i * 6);
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.setDrawRange(0, 0);
+    const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide }));
+    mesh.frustumCulled = false; mesh.renderOrder = 2; scene.add(mesh);
+    return { mesh, pos, n: 0, N, last: null };
+  }
+  const trailCar = makeTrail('#ffc320'), trailGhost = makeTrail('#5a8ee8');
+  let showTrails = true;
+  function clearTrail(t) { t.n = 0; t.last = null; t.mesh.geometry.setDrawRange(0, 0); }
+  function addTrail(t, obj, h) {
+    if (!showTrails || t.n >= t.N) return;
+    if (t.last && t.last.distanceTo(obj.position) < 0.5) return;
+    if (t.last && t.last.distanceTo(obj.position) > 30) { clearTrail(t); }
+    t.last = obj.position.clone();
+    const lx = -Math.sin(h) * 0.16, lz = -Math.cos(h) * 0.16, y = obj.position.y + 0.05, i = t.n * 6;
+    t.pos.set([obj.position.x + lx, y, obj.position.z + lz, obj.position.x - lx, y, obj.position.z - lz], i);
+    t.n++; t.mesh.geometry.attributes.position.needsUpdate = true; t.mesh.geometry.setDrawRange(0, Math.max(0, (t.n - 1) * 6));
+  }
+  window.addEventListener('rally7:trails', e => { showTrails = e.detail; trailCar.mesh.visible = trailGhost.mesh.visible = showTrails; });
   const C_MARK = new THREE.Color('#141414'), C_MUD_MARK = new THREE.Color('#3b2716'), C_MUD = new THREE.Color('#5a3b24'), C_WATER = new THREE.Color('#cfe8ff');
 
   // ---------- coches ----------
@@ -528,7 +599,7 @@ try {
     if (d.layout && (!current || current.layout.seed !== d.layout.seed)) buildLayout(d.layout);
     current = { ...d, poses: posesOf(d.frames), ghostPoses: d.ghost ? posesOf(d.ghost.frames) : null };
     ghost.visible = !!d.ghost;
-    clearMarks();
+    clearMarks(); clearTrail(trailCar); clearTrail(trailGhost); lastFxFrame = -1; celebrated = false;
     stepMs = d.stepMs; playStart = performance.now() - (d.frameIndex * stepMs); paused = d.paused; pausedAt = d.frameIndex * stepMs;
   }
   window.addEventListener('rally7:scenario', e => receive(e.detail));
@@ -561,8 +632,11 @@ try {
     // parece temblar o girar al revés (efecto "rueda de carreta"). Se limita el giro dibujado por cuadro.
     // El ángulo del volante se suaviza un poco SOLO en el dibujo (≈0,1 s); los datos no cambian.
     obj.userData.steerShown = (obj.userData.steerShown ?? 0) + (st.steer - (obj.userData.steerShown ?? 0)) * 0.35;
+    // Metros recorridos desde el cuadro anterior (antes se sumaba la distancia entre dos datos en cada cuadro).
+    const u = obj.userData, moved = u.px === undefined ? 0 : Math.hypot(st.x - u.px, st.y - u.py);
+    u.px = st.x; u.py = st.y;
     for (const w of obj.userData.wheels) {
-      w.spin.rotation.x += Math.min(0.42, st.dist / (w.radius || CAR.wheelRadius || 0.33));
+      w.spin.rotation.x += 0.6 * Math.tanh(moved / (w.radius || CAR.wheelRadius || 0.33) / 0.6);
       w.pivot.rotation.y = w.front ? obj.userData.steerShown : 0;
     }
   }
@@ -603,17 +677,37 @@ try {
     if (current) {
       const t = elapsed();
       const st = sample(current.poses, t); place(car, st);
-      if (current.ghostPoses) place(ghost, sample(current.ghostPoses, t));
+      addTrail(trailCar, car, st.h);
+      if (current.ghostPoses) { const gs = sample(current.ghostPoses, t); place(ghost, gs); if (!gs.end) addTrail(trailGhost, ghost, gs.h); }
       const frame = Math.min(current.frames.length - 1, Math.floor(t / stepMs) + 1);
       const f = current.frames[frame];
       const speed = f?.speed_mps ?? 0, ground = st.z < 0.1 && !f?.airborne;
+      if (car.userData.brake) car.userData.brake.visible = (f?.pedal ?? 0) < -0.15;
       if (!paused && ground && speed > 2) {
         const sliding = Math.abs(st.slip) > 0.1 || f?.wheelspin;
         if (f?.terrain_here === 'lodo') { addMarks(car.position, st.h, C_MUD_MARK); splash(car.position, st.h, speed, C_MUD); }
         else if (f?.terrain_here === 'agua') splash(car.position, st.h, speed, C_WATER);
         else if (sliding) addMarks(car.position, st.h, C_MARK);
         else lastMark = null;
+        // Polvo y humo detrás del coche: café en pasto, blanco si las llantas patinan, gris suave en asfalto rápido.
+        const rear = car.position.clone().addScaledVector(new THREE.Vector3(Math.cos(st.h), 0, -Math.sin(st.h)), -1.7); rear.y += 0.25;
+        if (f?.terrain_here === 'pasto') { if (Math.random() < 0.6) puff(rear, '#a08a5c', { alpha: 0.5, grow: 2.6 }); }
+        else if (f?.terrain_here === 'lodo') { if (Math.random() < 0.3) puff(rear, '#6b4a30', { alpha: 0.4, size: 0.6 }); }
+        else if (sliding && f?.terrain_here !== 'agua') { if (Math.random() < 0.7) puff(rear, '#e8e8e8', { alpha: 0.5, grow: 3 }); }
+        else if (speed > 14 && Math.random() < 0.12) puff(rear, '#b9b4a8', { alpha: 0.16, size: 0.6, grow: 1.6, life: 0.8 });
       }
+      // Choque: humo oscuro, chispas y un sacudón de cámara. Meta: confeti.
+      if (!paused && frame !== lastFxFrame) {
+        lastFxFrame = frame;
+        if ((f?.events ?? []).some(e => CRASH.has(e))) {
+          for (let k = 0; k < 10; k++) puff(car.position, k % 2 ? '#3a3a3a' : '#8a8378', { size: 1.2, grow: 4, life: 1.6, alpha: 0.6, up: 1.6, spread: 2 });
+          burst(car.position, C_SPARK, 30, { speed: 9, up: 4, life: 0.7 }); shake = 0.45;
+        }
+        if (!celebrated && f?.termination_cause === 'vuelta_completada') {
+          celebrated = true; burst(car.position, () => CONFETTI[Math.floor(Math.random() * CONFETTI.length)], 200, { speed: 12, up: 11, life: 3.2, g: 4 });
+        }
+      }
+      updatePuffs(paused ? 0 : dt);
       updateDrops(paused ? 0 : dt);
       // El sol (y su sombra) acompaña al coche para que la sombra sea nítida donde se mira.
       sun.position.copy(car.position).addScaledVector(SUN_DIR, 150); sun.target.position.copy(car.position);
@@ -622,6 +716,7 @@ try {
       updateLook((prevF?.s ?? 0) + ((f?.s ?? 0) - (prevF?.s ?? 0)) * frac, speed, car.position);
       window.dispatchEvent(new CustomEvent('rally7:tick', { detail: { frame, end: st.end } }));
       updateCamera(dt, st);
+      if (shake > 0 && mode !== 'free') { shake -= dt; const a = Math.max(0, shake) * 0.9; camera.position.x += (Math.random() - 0.5) * a; camera.position.y += (Math.random() - 0.5) * a; }
     }
     renderer.render(scene, camera);
   });

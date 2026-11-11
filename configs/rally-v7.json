@@ -3,11 +3,11 @@
   "reward_version": "v5",
   "level_id": "N7",
   "experiment": {
-    "title": "Ver la pista como un piloto",
-    "hypothesis": "Si PPO ve la pista como un piloto (8 puntos de la línea central a 0,5–5 segundos adelante según su velocidad y obstáculos hasta 100 m) y la recompensa castiga más los choques rápidos y el derrape sin control (estilo Gran Turismo Sophy), entonces (1) PPO completa al menos el 25 % de las vueltas en las mismas 30 pistas nuevas (N6: 12 %), (2) choca menos que en el N6 (2,29 accidentes por vuelta) y (3) las reglas, con la misma física, conservan al menos el 80 %.",
-    "change_vs_previous": "v6 -> v7: la física no cambia. Observación de 146 a 250 números: 24 de mirada tipo Sophy (adelante, costado y curvatura de la pista a 0,5; 1; 1,5; 2; 2,5; 3; 4 y 5 s, con mínimo 5 m/s y máximo 200 m) y celdas de obstáculos de 6 a 10 (60 -> 100 m). Recompensa v5 -> v7: accidente = -(5 + 0,01 × velocidad²) en vez de -5 fijo, y derrape = -0,002 por cada grado de deslizamiento medio por encima de 6° en cada paso. Mismo entrenamiento (1 M pasos, 3 semillas, mejor punto por validación).",
+    "title": "Aprender de un maestro",
+    "hypothesis": "Si PPO primero imita a las reglas (el maestro, que completa el 87 % de las vueltas) y después se afina solo con PPO, entonces (1) PPO completa al menos el 70 % de las vueltas en las mismas 30 pistas nuevas (N6: 12 %; intento 2 del N7: 9 %), (2) choca menos que en el N6 (2,29 accidentes por vuelta) y (3) las reglas, con la misma física, conservan al menos el 80 %. La meta del 70 % está escrita en la hoja de ruta desde el 7 de noviembre. Antes de la corrida completa se hizo una prueba piloto de 5 minutos con una sola semilla para comprobar que la imitación funcionaba.",
+    "change_vs_previous": "Intento 3 del N7. No cambian la física, las pistas, la mirada de piloto (250 números) ni la recompensa (v5). Cambia CÓMO aprende PPO: (a) imitación tipo DAgger: 8 rondas de 60 pistas; en la ronda 0 manejan las reglas y en las demás maneja la red mientras se anota qué habría hecho el maestro; (b) la red crece de 64×64 a 256×256 neuronas; (c) la normalización de la observación queda fija con los datos de la imitación; (d) PPO afina 400 mil pasos con pasos pequeños (tasa 0,00005, recorte 0,1, ruido de exploración bajo) y los primeros 40 mil pasos solo aprende el crítico; (e) se guarda el mejor punto en validación, que incluye el punto de partida (solo imitación).",
     "selection_criteria": {
-      "min_success_rate_ppo": 0.25,
+      "min_success_rate_ppo": 0.7,
       "min_success_rate_rules": 0.8
     },
     "n6_reference": {
@@ -18,36 +18,56 @@
       "ppo_mean_accidents": 2.29,
       "report": "reports/rally-v6-fa67dfc239f942bcb167518766d7aeea.json"
     },
-    "attempt": 2,
-    "previous_attempt": {
-      "date": "9 nov",
-      "commit": "856f0ff",
-      "report": "reports/rally-v7-b8fac7f9c91042e881552185f989b060.json",
-      "accepted": false,
-      "reward_version": "v7",
-      "ppo_success_rate": 0.022,
-      "ppo_by_seed": [
-        0.0,
-        0.067,
-        0.0
-      ],
-      "qlearning_success_rate": 0.044,
-      "rules_success_rate": 0.867,
-      "ppo_mean_accidents": 2.3,
-      "ppo_mean_crash_kmh": 32.1,
-      "ppo_mean_progress_pct": 34.2,
-      "diagnosis": [
-        "PPO no se quedó quieto: avanzó en promedio el 34 % de la vuelta y siguió chocando (sobre todo con las vallas: 37 por cada 30 pistas)",
-        "Chocó más despacio (32 km/h en promedio): la recompensa v7 sí le enseñó a bajar la velocidad, pero no a esquivar",
-        "Se cambiaron dos cosas a la vez (mirada y recompensa): no se sabe cuál empeoró"
-      ]
-    },
-    "changes_vs_attempt_1": [
-      "Se vuelve a la recompensa v5 del N6 (accidente −5 fijo, sin castigo por derrape)",
-      "Se mantiene la mirada de piloto (250 números)",
-      "Así se aísla el efecto de la mirada: si PPO mejora, la recompensa v7 era la culpable; si no, lo es la mirada"
+    "attempt": 3,
+    "previous_attempts": [
+      {
+        "date": "9 nov",
+        "commit": "856f0ff",
+        "report": "reports/rally-v7-b8fac7f9c91042e881552185f989b060.json",
+        "accepted": false,
+        "reward_version": "v7",
+        "ppo_success_rate": 0.022,
+        "ppo_by_seed": [
+          0.0,
+          0.067,
+          0.0
+        ],
+        "qlearning_success_rate": 0.044,
+        "rules_success_rate": 0.867,
+        "ppo_mean_accidents": 2.3,
+        "ppo_mean_crash_kmh": 32.1,
+        "ppo_mean_progress_pct": 34.2,
+        "diagnosis": [
+          "PPO no se quedó quieto: avanzó en promedio el 34 % de la vuelta y siguió chocando (sobre todo con las vallas: 37 por cada 30 pistas)",
+          "Chocó más despacio (32 km/h en promedio): la recompensa v7 sí le enseñó a bajar la velocidad, pero no a esquivar",
+          "Se cambiaron dos cosas a la vez (mirada y recompensa): no se sabe cuál empeoró"
+        ],
+        "what": "Mirada de piloto + recompensa v7 (castiga choques rápidos y derrape), PPO desde cero (1 M de pasos)"
+      },
+      {
+        "date": "10 nov",
+        "report": "reports/rally-v7-cbe8818880ae4d7b9ed50b0c7187d7f6.json",
+        "accepted": false,
+        "reward_version": "v5",
+        "what": "Mirada de piloto con la recompensa del N6, PPO desde cero (1 M de pasos)",
+        "ppo_success_rate": 0.08888888888888889,
+        "ppo_by_seed": [
+          0.0,
+          0.167,
+          0.1
+        ],
+        "ppo_mean_accidents": 1.611111111111111,
+        "ppo_mean_crash_kmh": 35.979385166011575,
+        "qlearning_success_rate": 0.022222222222222223,
+        "rules_success_rate": 0.8666666666666667
+      }
     ],
-    "hypothesis_attempt_2": "Con la mirada de piloto y la recompensa del N6, PPO completa al menos el 25 % de las vueltas, choca menos que en el N6 y las reglas conservan al menos el 80 % (mismos criterios del intento 1)."
+    "changes_vs_attempt_2": [
+      "PPO ya no empieza de cero: primero imita a las reglas (DAgger)",
+      "Red más grande: 256×256 (antes 64×64)",
+      "PPO solo afina: 400 mil pasos con pasos pequeños (antes 1 M desde cero)",
+      "Misma física, misma mirada, misma recompensa v5 y mismas 30 pistas: lo único que cambia es la forma de aprender"
+    ]
   },
   "track": {
     "straight_m": 300,
@@ -241,25 +261,28 @@
       42
     ],
     "ppo": {
-      "total_timesteps": 1000000,
+      "total_timesteps": 400000,
       "n_envs": 4,
       "n_steps": 512,
       "batch_size": 256,
       "n_epochs": 10,
-      "learning_rate": 0.0003,
+      "learning_rate": 5e-05,
       "gamma": 0.99,
       "gae_lambda": 0.95,
-      "clip_range": 0.2,
-      "ent_coef": 0.005,
-      "log_std_init": -0.5,
+      "clip_range": 0.1,
+      "ent_coef": 0.0,
+      "log_std_init": -2.0,
       "lr_schedule": "linear",
       "use_sde": false,
       "net_arch": [
-        64,
-        64
+        256,
+        256
       ],
-      "eval_every_steps": 50000,
-      "eval_layouts_during_training": 5
+      "eval_every_steps": 40000,
+      "eval_layouts_during_training": 5,
+      "target_kl": 0.02,
+      "critic_warmup_steps": 40000,
+      "ortho_init": false
     },
     "qlearning": {
       "alpha": 0.2,
@@ -282,7 +305,16 @@
     "evaluation_episodes": 30,
     "validation_episodes": 10,
     "validation_layout_seed_offset": 200000,
-    "evaluation_layout_seed_offset": 100000
+    "evaluation_layout_seed_offset": 100000,
+    "imitation": {
+      "method": "DAgger",
+      "rounds": 8,
+      "episodes_per_round": 60,
+      "epochs": 30,
+      "learning_rate": 0.001,
+      "batch_size": 512,
+      "layout_seed_offset": 300000
+    }
   },
   "tracking": {
     "experiment_name": "autonomous-rally-v7"

@@ -1,4 +1,4 @@
-"""Prefect + DVC + MLflow para el nivel N7 (mirada tipo Sophy y recompensa v7).
+"""Prefect + DVC + MLflow para el nivel N7 (mirada tipo Sophy; intento 3: PPO aprende primero imitando a las reglas).
 
  1. validar la configuración y generar la suite fija de 30 pistas (las MISMAS semillas que el N4, para comparar)
  2. por cada semilla: entrenar PPO (SB3) y Q-learning con el MISMO presupuesto de pasos
@@ -128,6 +128,10 @@ def rally_v7_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
             res = fn(config, seed, layouts, output_root)
             evs = eval_task(res, config, layouts, keep=(0, 1, 2))
             res["evaluations"] = evs
+            if res.get("imitation_policy_factory"):
+                # Intento 3: cuánto logra el alumno SOLO con imitar, antes de que PPO lo afine.
+                res["imitation_evaluation"] = evaluate(res["imitation_policy_factory"], config, layouts, seed=seed)["summary"]
+                print(f"   solo imitación, semilla {seed}: {res['imitation_evaluation']['success_rate']:.0%}")
             res["manifest"] = package(res, config, evs)
             print(f"{kind} semilla {seed}: normal {evs['normal']['summary']['success_rate']:.0%} · lluvia {evs['lluvia']['summary']['success_rate']:.0%} · ruido {evs['sensor_ruidoso']['summary']['success_rate']:.0%}")
             results.append(res)
@@ -162,7 +166,14 @@ def rally_v7_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
                  "ppo_success_rate": ppo_s, "qlearning_success_rate": q_s,
                  "n6_reference": n6, "recommended_run_id": best["run_id"], "recommended_seed": best["seed"],
                  "recommended_by": "validación" if config["training"].get("validation_episodes") else "suite",
-                 "attempt": config["experiment"].get("attempt", 1), "previous_attempt": config["experiment"].get("previous_attempt")}
+                 "attempt": config["experiment"].get("attempt", 1), "previous_attempt": config["experiment"].get("previous_attempt"),
+                 "previous_attempts": config["experiment"].get("previous_attempts")}
+    if all(r.get("imitation_evaluation") for r in by["ppo"]):
+        im = [r["imitation_evaluation"] for r in by["ppo"]]
+        selection["imitation_only"] = {"success_rate": float(np.mean([i["success_rate"] for i in im])), "by_seed": [i["success_rate"] for i in im],
+                                       "mean_accidents": float(np.mean([i["mean_accidents"] for i in im])),
+                                       "env_steps": [r["imitation"]["env_steps"] for r in by["ppo"]]}
+        selection["lap_time_s"] = {"ppo": summary["ppo"]["normal"]["mean_time_s_success"], "reglas": rules["mean_time_s_success"]}
 
     # DVC: suite de pistas + resultados por caso (los datos de este experimento de RL).
     data_dir = output_root / "data" / "experiments" / suite_id
@@ -187,7 +198,8 @@ def rally_v7_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
               "dvc_pointers": dvc_pointers,
               "runs": [{"algorithm": r["algorithm"], "seed": r["seed"], "run_id": r["run_id"], "mlflow_run_id": r["mlflow_run_id"],
                         "manifest": r["manifest"], "evaluation": {c: ev["summary"] for c, ev in r["evaluations"].items()},
-                        "chosen_checkpoint": r.get("chosen_checkpoint"),
+                        "chosen_checkpoint": r.get("chosen_checkpoint"), "imitation": r.get("imitation"),
+                        "imitation_evaluation": r.get("imitation_evaluation"),
                         "curves": {"entrenamiento": r["train_curve"], "evaluacion": r["eval_curve"]}} for r in results]}
     write_json(ROOT / "reports" / f"{suite_id}.json", report)
 
@@ -197,20 +209,24 @@ def rally_v7_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
     track = Track(config["track"]["straight_m"], config["track"]["radius_m"])
     samples = [[round(v, 3) for v in track.center(s)] for s in np.arange(0, track.length, 2.0)]
     scenarios = []
+    # Alumno y maestro: el PPO recomendado (amarillo) y las reglas (azul) en la MISMA pista.
     for i in (0, 1, 2):
-        scenarios.append({"id": f"ppo-vs-q-{i}", "label": f"PPO vs Q-learning · pista nueva #{i + 1}", "mode": "evaluation", "policy": "PPO", "layout": layouts[i],
-                          "frames": best["evaluations"]["normal"]["replays"][i]["frames"],
-                          "ghost": {"policy": "Q-learning", "frames": q_best["evaluations"]["normal"]["replays"][i]["frames"]}})
-    # Antes y después: PPO del N6 (fantasma) contra PPO del N7 en la MISMA pista.
+        scenarios.append({"id": f"alumno-maestro-{i}", "label": f"Alumno (PPO) y maestro (reglas) · pista nueva #{i + 1}", "mode": "compare",
+                          "policy": "PPO · el alumno", "layout": layouts[i], "frames": best["evaluations"]["normal"]["replays"][i]["frames"],
+                          "ghost": {"policy": "Reglas · el maestro", "frames": baselines["reglas"]["replays"][i]["frames"]}})
+    # Antes y ahora: PPO sin maestro (intento 2, fantasma) contra PPO con maestro (intento 3) en la MISMA pista.
     import json as _json
-    v6_web = ROOT / "rally-dashboard" / "dist" / "v6-results.json"
-    if v6_web.exists():
-        old = {sc["id"]: sc for sc in _json.loads(v6_web.read_text(encoding="utf-8"))["scenarios"]}
+    before = ROOT / "rally-dashboard" / "dist" / "v7-intento2-ppo.json"
+    if before.exists():
+        old = _json.loads(before.read_text(encoding="utf-8"))["replays"]
         for i in (0, 1, 2):
-            if f"ppo-vs-q-{i}" in old and old[f"ppo-vs-q-{i}"]["layout"]["ground"] == layouts[i]["ground"]:
-                scenarios.append({"id": f"antes-despues-{i}", "label": f"PPO del N6 y PPO del N7 · pista nueva #{i + 1}", "mode": "compare",
-                                  "policy": "PPO N7 (mirada de piloto)", "layout": layouts[i], "frames": best["evaluations"]["normal"]["replays"][i]["frames"],
-                                  "ghost": {"policy": "PPO N6", "frames": old[f"ppo-vs-q-{i}"]["frames"]}})
+            if old[i]["layout_ground"] == layouts[i]["ground"]:
+                scenarios.append({"id": f"antes-despues-{i}", "label": f"PPO sin maestro y PPO con maestro · pista nueva #{i + 1}", "mode": "compare",
+                                  "policy": "PPO con maestro", "layout": layouts[i], "frames": best["evaluations"]["normal"]["replays"][i]["frames"],
+                                  "ghost": {"policy": "PPO sin maestro (intento 2)", "frames": old[i]["frames"]}})
+    scenarios.append({"id": "ppo-vs-q-0", "label": "PPO y Q-learning · pista nueva #1", "mode": "evaluation", "policy": "PPO", "layout": layouts[0],
+                      "frames": best["evaluations"]["normal"]["replays"][0]["frames"],
+                      "ghost": {"policy": "Q-learning", "frames": q_best["evaluations"]["normal"]["replays"][0]["frames"]}})
     for i in (0, 1):
         scenarios.append({"id": f"reglas-{i}", "label": f"Referencia de reglas · pista nueva #{i + 1}", "mode": "baseline", "policy": "Reglas", "layout": layouts[i],
                           "frames": baselines["reglas"]["replays"][i]["frames"]})

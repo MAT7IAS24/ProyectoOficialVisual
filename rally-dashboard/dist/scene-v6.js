@@ -260,6 +260,9 @@ try {
     const car = src.clone(true);
     if (CAR.livery && opacity === 1) paintLivery(car);
     const groups = []; if (CAR.wheelGroup) car.traverse(o => { if (CAR.wheelGroup.test(o.name)) groups.push(o); });
+    // El modelo trae las ruedas delanteras ya viradas: se enderezan para que no bamboleen al girar.
+    groups.forEach(o => o.quaternion.identity());
+    car.updateMatrixWorld(true);
     // Hacia dónde mira el modelo: del centro de las ruedas traseras al de las delanteras.
     if (groups.length === 4) {
       const ctr = o => new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
