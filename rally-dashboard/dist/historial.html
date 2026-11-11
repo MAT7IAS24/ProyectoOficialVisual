@@ -249,30 +249,32 @@
     </article>
 
     <article class="card">
-      <div class="side"><div class="num">N7</div><div class="tag">rally-v7-n7</div><div class="date">10 nov 2026</div></div>
+      <div class="side"><div class="num">N7</div><div class="tag">rally-v7-n7-maestro</div><div class="date">11 nov 2026</div></div>
       <div>
-        <span class="eyebrow">Experimento 7 · mirada de piloto · 2 intentos</span>
-        <h2>Ver la pista como un piloto</h2>
-        <p>La física no cambia. La IA ahora mira como un piloto (idea de Gran Turismo Sophy): 8 puntos de la pista a 0,5–5 segundos adelante según su velocidad, y obstáculos hasta 100 m. En la web se puede ver lo que ve la IA, las ruedas ya no tiemblan, y las vallas y el arco de SALIDA · META quedaron cruzados sobre la pista.</p>
+        <span class="eyebrow">Experimento 7 · aprender de un maestro · 3 intentos</span>
+        <h2>Aprender de un maestro</h2>
+        <p>La física no cambia. Lo que cambia es <b>cómo aprende</b> la IA: antes PPO aprendía sola, a punta de chocar, y casi nunca llegaba a la meta. Ahora primero copia a un maestro (las reglas escritas a mano, que terminan el 87 % de las vueltas) y después practica por su cuenta. En la web: las ruedas ya no giran para todos lados, hay polvo y humo, chispas al chocar, confeti en la meta, luces de freno y la línea que siguió cada coche.</p>
         <dl class="kv">
-          <dt>Ambiente</dt><dd>250 sensores (24 de mirada por tiempo, celdas de obstáculos de 60 a 100 m); misma física del N6</dd>
-          <dt>Hipótesis</dt><dd>PPO ≥ 25 % (N6: 12 %), menos accidentes que el N6 (2,29 por vuelta) y reglas ≥ 80 %</dd>
-          <dt>Intento 1</dt><dd>Mirada + recompensa nueva (chocar rápido cuesta más, castigo por derrape): PPO 2 %. Rechazado y guardado</dd>
-          <dt>Intento 2</dt><dd>Misma mirada con la recompensa del N6, para saber cuál de los dos cambios falló: PPO 9 %</dd>
+          <dt>Ambiente</dt><dd>El mismo del N6, con mirada de piloto (250 sensores: 8 puntos de la pista a 0,5–5 segundos adelante)</dd>
+          <dt>Hipótesis</dt><dd>PPO ≥ 70 % (N6: 12 %), menos accidentes que el N6 (2,29 por vuelta) y reglas ≥ 80 %</dd>
+          <dt>Intento 1 · 9 nov</dt><dd>Mirada de piloto + recompensa nueva, PPO desde cero: 2 %. Rechazado y guardado</dd>
+          <dt>Intento 2 · 10 nov</dt><dd>Mirada de piloto con la recompensa del N6, PPO desde cero: 9 %. Rechazado y guardado (etiqueta <code>rally-v7-n7</code>)</dd>
+          <dt>Intento 3 · 11 nov</dt><dd>PPO primero imita a las reglas (DAgger) y después afina 400 mil pasos: <b>80 %</b>. Aceptado</dd>
         </dl>
         <div class="result">
-          <div class="stat"><b>9 %</b><span>PPO (intento 1: 2 %)</span></div>
-          <div class="stat"><b>1,61</b><span>Accidentes (N6: 2,29)</span></div>
-          <div class="stat"><b>87 %</b><span>Reglas</span></div>
-          <div class="stat"><b>2 %</b><span>Q-learning</span></div>
-          <div class="stat"><b class="bad">No</b><span>Hipótesis (2 de 3)</span></div>
+          <div class="stat"><b>80 %</b><span>PPO (N6: 12 %)</span></div>
+          <div class="stat"><b>1,28</b><span>Accidentes (N6: 2,29)</span></div>
+          <div class="stat"><b>58 %</b><span>PPO con lluvia (N6: 4 %)</span></div>
+          <div class="stat"><b>87 %</b><span>Reglas (el maestro)</span></div>
+          <div class="stat"><b class="ok">Sí</b><span>Hipótesis (3 de 3)</span></div>
         </div>
-        <p class="note">Aprendizaje: la recompensa nueva empeoró a PPO (2 %); al quitarla subió a 9 % y chocó un 30 % menos que en el N6, pero no llegó más veces a la meta. Ver más lejos no basta: con 1 millón de pasos PPO no descubre solo cómo frenar y esquivar. Siguiente paso (N8): que primero imite a las reglas, que completan el 87 %.</p>
+        <p class="note">Aprendizaje: copiar a un maestro funcionó donde aprender solo no (de 9 % a 80 % con menos de la mitad de los pasos). Lo que no salió: practicar con PPO después de imitar no sumó (solo imitando: 83 % y 0,98 choques por vuelta; después de PPO: 80 % y 1,28) y el alumno todavía no supera al maestro (87 %). Con sensores con ruido baja a 51 %. Siguiente paso (N8): que el alumno supere al maestro.</p>
         <div class="links">
-          <a class="btn" href="v7.html">▶ PPO del N6 y del N7 en la misma pista</a>
-          <a class="btn" href="v7.html?escenario=reglas-0">▶ Ver lo que ve la IA (reglas)</a>
-          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v7-n7">Código de esta versión</a>
-          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v7-n7/docs/rally-v7.md">Documentación</a>
+          <a class="btn" href="v7.html">▶ Alumno y maestro en la misma pista</a>
+          <a class="btn" href="v7.html?escenario=antes-despues-0">▶ Antes y después de tener maestro</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v7-n7-maestro">Código de esta versión</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v7-n7-maestro/docs/rally-v7.md">Documentación</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v7-n7-maestro/reports/rally-v7-e0b9ad006c6c410bb827baa0e4dd157e.json">Informe intento 3</a>
           <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v7-n7/reports/rally-v7-cbe8818880ae4d7b9ed50b0c7187d7f6.json">Informe intento 2</a>
           <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v7-n7/reports/rally-v7-b8fac7f9c91042e881552185f989b060.json">Informe intento 1</a>
           <a class="btn" href="modelos/n7/ppo-recomendado/manifest.json">Modelo recomendado</a>
@@ -284,8 +286,8 @@
       <div class="side"><div class="num">N8</div><div class="tag">rally-v8-n8</div><div class="date">próximo</div></div>
       <div>
         <span class="eyebrow">Experimento 8 · en diseño</span>
-        <h2>Aprender de un maestro</h2>
-        <p>La IA primero imita a las reglas escritas a mano (que completan el 87 % de las vueltas) y después mejora sola con PPO. Además: barro en el que el coche se hunde, aquaplaning en el agua y más efectos visuales.</p>
+        <h2>Superar al maestro</h2>
+        <p>El alumno ya maneja casi como las reglas. El siguiente paso es que las supere: practicar también con lluvia y sensores con ruido, y un terreno más difícil (barro en el que el coche se hunde y aquaplaning en el agua).</p>
       </div>
     </article>
   </div>
@@ -300,8 +302,8 @@
         <tr><td>Acciones</td><td>2</td><td>3</td><td>5</td><td>2 continuas</td><td>2 continuas, con volante y pedal graduales</td><td>igual que N5</td><td>igual que N5</td></tr>
         <tr><td>Estados posibles</td><td>11</td><td>528</td><td>43.648</td><td>continuo (134 sensores)</td><td>continuo (140 sensores)</td><td>continuo (146 sensores)</td><td>continuo (250 sensores, mirada por tiempo)</td></tr>
         <tr><td>Obstáculos</td><td>—</td><td>2 curvas</td><td>lodo, agua, pasto, fosos, barriles, rampas, puente</td><td>al azar en cada carrera, con física</td><td>los mismos, con llantas reales: derrapes, trompos y surcos en el barro</td><td>los mismos, con peso que se mueve, suspensión y aterrizajes</td><td>igual que N6</td></tr>
-        <tr><td>Episodios × semillas</td><td>25 × 1</td><td>3.000 × 3</td><td>4.000 × 3 (+ 2 intervenciones)</td><td>1 M pasos × 3 × 2 algoritmos</td><td>1 M pasos × 3 × 2 algoritmos × 2 intentos</td><td>1 M pasos × 3 × 2 algoritmos + pruebas de banco</td><td>1 M pasos × 3 × 2 algoritmos × 2 intentos</td></tr>
-        <tr><td>Comparación con referencias</td><td>—</td><td>—</td><td>reglas y azar</td><td>reglas, azar y Q-learning</td><td>lo mismo + el N4 en las mismas 30 pistas</td><td>lo mismo + el N5 en las mismas 30 pistas</td><td>lo mismo + el N6 en las mismas 30 pistas</td></tr>
+        <tr><td>Episodios × semillas</td><td>25 × 1</td><td>3.000 × 3</td><td>4.000 × 3 (+ 2 intervenciones)</td><td>1 M pasos × 3 × 2 algoritmos</td><td>1 M pasos × 3 × 2 algoritmos × 2 intentos</td><td>1 M pasos × 3 × 2 algoritmos + pruebas de banco</td><td>3 intentos; el aceptado: imitación (114 mil pasos) + 400 mil de PPO × 3 semillas</td></tr>
+        <tr><td>Comparación con referencias</td><td>—</td><td>—</td><td>reglas y azar</td><td>reglas, azar y Q-learning</td><td>lo mismo + el N4 en las mismas 30 pistas</td><td>lo mismo + el N5 en las mismas 30 pistas</td><td>lo mismo + el N6 y los intentos 1 y 2 en las mismas 30 pistas</td></tr>
         <tr><td>Incidente controlado</td><td>—</td><td>—</td><td>lluvia</td><td>lluvia y sensores con ruido</td><td>lluvia y sensores con ruido (ahora también afecta a Q-learning)</td><td>lluvia y sensores con ruido</td><td>lluvia y sensores con ruido</td></tr>
       </tbody>
     </table></div>

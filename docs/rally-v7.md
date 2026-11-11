@@ -1,8 +1,70 @@
-# Experimento 7 · rally-v7 / reward v7 (nivel N7) · "Ver la pista como un piloto"
+# Experimento 7 · rally-v7 (nivel N7) · "Aprender de un maestro"
 
 Código: `race_env_v7.py`, `training_v7.py`, `pipeline_v7.py`, `configs/rally-v7.json`,
 pruebas `tests/test_rally_v7.py`, web `rally-dashboard/dist/v7.html` (+ `scene-v7.js`, `venue.js`).
 Los niveles N4, N5 y N6 siguen intactos (una prueba revisa su huella SHA-256).
+
+## 0. Resumen del intento 3 (11 nov) · el que quedó como N7
+
+**En pocas palabras.** Antes PPO aprendía solo, a punta de chocar, y casi nunca llegaba a la meta
+(N6: 12 %; intentos 1 y 2 de este experimento: 2 % y 9 %). Ahora primero **copia a un maestro** (las
+reglas escritas a mano, que terminan el 87 % de las vueltas) y después practica por su cuenta con PPO.
+La física, la mirada de piloto, la recompensa (v5) y las 30 pistas del examen son las mismas: lo único
+que cambió es la forma de aprender.
+
+### Cómo aprende ahora (4 pasos)
+
+1. **El maestro maneja y el alumno mira.** Las reglas corren 60 carreras; se guarda qué veían los
+   sensores y qué hicieron con el volante y el pedal.
+2. **El alumno maneja y el maestro corrige** (método DAgger, 8 rondas). El alumno conduce; en cada
+   instante se anota qué habría hecho el maestro en ese mismo lugar. Así aprende también a salir de
+   los errores que el maestro nunca comete. Usa pistas distintas a las del examen (semillas 300000+).
+3. **Calentamiento.** Durante los primeros 40 mil pasos de PPO solo aprende la parte de la red que
+   estima "qué tan bien voy" (el crítico); la parte que maneja queda congelada para no dañar lo copiado.
+4. **Práctica propia con PPO** (400 mil pasos, pasos pequeños: tasa 5e-5, recorte 0,1, límite KL 0,02).
+   Cada 40 mil pasos se prueba en 10 pistas de validación y se guarda el mejor punto (el punto cero es
+   "solo imitación").
+
+Detalles técnicos: red 256×256 (antes 64×64); la normalización de los sensores se calcula con los datos
+de la imitación y queda congelada; se desactivó la inicialización ortogonal de SB3 (con ella la
+imitación bajaba de 83 % a 47 %). Código: `imitate_rules` y `train_ppo` en `training_v7.py`;
+parámetros en `configs/rally-v7.json` (`training.imitation`).
+
+### Resultado (3 semillas, mismas 30 pistas del N4 al N6)
+
+| Criterio (fijado antes de entrenar) | Meta | N6 | Intento 2 | **Intento 3** | ¿Cumple? |
+|---|---|---|---|---|---|
+| Vueltas completas · PPO | ≥ 70 % | 12 % | 9 % | **80 %** (77 / 90 / 73) | Sí |
+| Accidentes por vuelta · PPO | < 2,29 | 2,29 | 1,61 | **1,28** | Sí |
+| Vueltas completas · reglas | ≥ 80 % | 87 % | 87 % | **87 %** | Sí |
+
+**Veredicto: ACEPTADO** (3 de 3). Informe: `reports/rally-v7-e0b9ad006c6c410bb827baa0e4dd157e.json`.
+
+| Qué mejoró | Qué no mejoró o falta |
+|---|---|
+| PPO termina 80 % de las vueltas (N6: 12 %) | El alumno no alcanza al maestro: 80 % contra 87 % |
+| Choca 1,28 veces por vuelta (N6: 2,29) | Practicar con PPO después de imitar **no sumó**: solo imitando 83 % y 0,98 choques; después de PPO 80 % y 1,28 |
+| Con lluvia 58 % (N6: 4 %), sin haber practicado con lluvia | Con sensores con ruido baja a 51 % |
+| Vuelta en 70,2 s; el maestro, 70,3 s | Q-learning sigue en 2 % (no recibe maestro) |
+| Usó 514 mil pasos en total (antes 1 millón) | El modelo recomendado (semilla 42, elegido en validación) saca 73 %; la semilla 21 saca 90 % |
+
+Lectura honesta: casi todo el salto viene de imitar. PPO, con pasos tan pequeños, mantuvo lo aprendido
+pero no lo mejoró. Para el N8 la pregunta es cómo lograr que el alumno supere al maestro.
+
+### Lo nuevo en pantalla
+
+* **Ruedas arregladas.** Causa real: el modelo 3D traía las ruedas delanteras ya giradas y cada rueda
+  con una rotación propia guardada; al girarlas sobre eso, se movían hacia todos lados. Ahora se
+  enderezan al cargar y giran según la distancia real recorrida. (También corregido en el N6.)
+* Polvo café al pisar pasto, salpicadura en el barro, humo blanco cuando las llantas patinan.
+* Chispas, humo oscuro y sacudón de cámara al chocar; confeti al cruzar la meta.
+* Luces de freno que se encienden cuando la IA frena.
+* La línea que siguió cada coche (amarilla: alumno; azul: el otro coche). Se puede apagar.
+* Sección "En pocas palabras": qué cambió, qué mejoró y qué no, generada con los datos del informe.
+* Carreras nuevas: alumno contra maestro, y antes contra después de tener maestro (PPO del intento 2).
+
+Las secciones siguientes documentan los intentos 1 y 2 (9 y 10 nov), que quedaron rechazados y
+guardados en la etiqueta `rally-v7-n7`. El intento 3 es la etiqueta `rally-v7-n7-maestro`.
 
 ## 1. Por qué este experimento
 
@@ -78,7 +140,7 @@ yendo y viniendo (la trampa que aprendió el coche del video de Yosh).
 * Cámara de persecución un poco más lejos y más suave.
 * Puntos de la mirada de la IA en 3D (ver arriba).
 
-## 5. Resultados
+## 5. Resultados de los intentos 1 y 2
 
 Corridas sin DVC ni MLflow (`--skip-tracking`), 3 semillas (7, 21, 42), 1 millón de pasos por modelo,
 mejor punto elegido en 10 pistas de validación, evaluadas en las **mismas 30 pistas del N4 al N6**.
@@ -91,7 +153,7 @@ mejor punto elegido en 10 pistas de validación, evaluadas en las **mismas 30 pi
 | Accidentes por vuelta · PPO | < 2,29 | 2,29 | 2,30 | **1,61** | Sí (intento 2) |
 | Vueltas completas · reglas | ≥ 80 % | 87 % | 87 % | **87 %** | Sí |
 
-**Veredicto: RECHAZADO** (2 de 3 en el intento 2). PPO choca menos, pero no llega más veces a la meta.
+**Veredicto de los intentos 1 y 2: RECHAZADO** (2 de 3 en el intento 2; la meta entonces era 25 %). PPO choca menos, pero no llega más veces a la meta.
 
 ### Intento 1 (9 nov · commit `856f0ff` · informe `reports/rally-v7-b8fac7f9….json`)
 
@@ -126,8 +188,7 @@ en la configuración, `accident_per_v2` y `slip_per_deg` valen 0 y `reward_versi
 1. Cambiar una sola cosa por experimento. El intento 1 mezcló dos cambios y hubo que repetir.
 2. Castigar más los choques no enseña a evitarlos: enseña a chocar despacio.
 3. Ver más lejos no basta si el agente tiene que descubrir desde cero qué hacer con esa información.
-   Las reglas, con esa misma física, completan el 87 %. En el **N8** PPO empezará imitando a las reglas
-   (*behavior cloning*) y después mejorará por su cuenta.
+   Las reglas, con esa misma física, completan el 87 %. Eso se hizo en el **intento 3** (sección 0): PPO empieza imitando a las reglas.
 
 Paquetes publicados en la web: `modelos/n7/ppo-recomendado/` (model.zip, policy.onnx,
 normalization.json, manifest.json) y `modelos/n7/qlearning-mejor/` (q_table.npy).
@@ -143,7 +204,7 @@ $env:PYTHONUTF8="1"; $env:PREFECT_SERVER_EPHEMERAL_ENABLED="true"; $env:DVC_NO_A
 Prueba rápida sin DVC ni MLflow: `python pipeline_v7.py --timesteps 20000 --seeds 7 --skip-tracking`.
 
 Para repetir el intento 1 (recompensa v7): `git checkout 856f0ff` y el mismo comando. El intento 2 es
-la etiqueta `rally-v7-n7`.
+la etiqueta `rally-v7-n7`; el intento 3, `rally-v7-n7-maestro`.
 
 ## 7. Límites
 

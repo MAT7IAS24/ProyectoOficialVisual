@@ -506,7 +506,7 @@ try {
   // Nubes: imágenes redondas y suaves que siempre miran a la cámara, crecen y se desvanecen.
   const puffTex = (() => {
     const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
-    const r = g.createRadialGradient(32, 32, 2, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,0.9)'); r.addColorStop(0.5, 'rgba(255,255,255,0.35)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+    const r = g.createRadialGradient(32, 32, 2, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.55, 'rgba(255,255,255,0.6)'); r.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = r; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
   })();
   const PUFFS = 140;
@@ -515,11 +515,11 @@ try {
     sp.visible = false; scene.add(sp); return { sp, life: 0, max: 1, v: new THREE.Vector3(), grow: 1, alpha: 0.5 };
   });
   let puffNext = 0;
-  function puff(pos, color, { size = 0.8, grow = 2.2, life = 1.1, alpha = 0.45, up = 0.6, spread = 0.5 } = {}) {
+  function puff(pos, color, { size = 1.5, grow = 2.4, life = 1.2, alpha = 0.55, up = 0.6, spread = 0.5 } = {}) {
     const q = puffs[puffNext]; puffNext = (puffNext + 1) % PUFFS;
     q.life = q.max = life * (0.7 + Math.random() * 0.6); q.grow = grow; q.alpha = alpha;
     q.sp.position.copy(pos); q.sp.position.x += (Math.random() - 0.5) * spread; q.sp.position.z += (Math.random() - 0.5) * spread;
-    q.sp.scale.setScalar(size); q.sp.material.color.set(color); q.sp.visible = true;
+    q.sp.position.y += size * 0.3; q.sp.scale.setScalar(size); q.sp.material.color.set(color); q.sp.material.opacity = alpha; q.sp.visible = true;
     q.v.set((Math.random() - 0.5) * 0.8, up * (0.6 + Math.random() * 0.8), (Math.random() - 0.5) * 0.8);
   }
   function updatePuffs(dt) {
@@ -541,7 +541,7 @@ try {
   }
   const C_SPARK = new THREE.Color('#ffb53a'), CONFETTI = ['#ffc320', '#ff4d4d', '#4dd2ff', '#7dff7a', '#ffffff', '#d07bff'].map(c => new THREE.Color(c));
   const CRASH = new Set(['sale_de_la_pista', 'hace_un_trompo', 'choca_con_la_valla', 'aterrizaje_duro', 'cae_en_foso', 'cae_del_puente', 'sale_volando_de_la_pista', 'choca_con_el_borde_del_puente']);
-  let shake = 0, lastFxFrame = -1, celebrated = false;
+  let shake = 0, lastFxFrame = -1, celebrated = false, puffAcc = 0;
   // Línea que siguió cada coche: una cinta pegada al piso (amarilla = coche principal, azul = el otro).
   function makeTrail(color) {
     const N = 9000, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 2 * 3), idx = new Uint32Array((N - 1) * 6);
@@ -698,16 +698,18 @@ try {
         else lastMark = null;
         // Polvo y humo detrás del coche: café en pasto, blanco si las llantas patinan, gris suave en asfalto rápido.
         const rear = car.position.clone().addScaledVector(new THREE.Vector3(Math.cos(st.h), 0, -Math.sin(st.h)), -1.7); rear.y += 0.25;
-        if (f?.terrain_here === 'pasto') { if (Math.random() < 0.6) puff(rear, '#a08a5c', { alpha: 0.5, grow: 2.6 }); }
-        else if (f?.terrain_here === 'lodo') { if (Math.random() < 0.3) puff(rear, '#6b4a30', { alpha: 0.4, size: 0.6 }); }
-        else if (sliding && f?.terrain_here !== 'agua') { if (Math.random() < 0.7) puff(rear, '#e8e8e8', { alpha: 0.5, grow: 3 }); }
-        else if (speed > 14 && Math.random() < 0.12) puff(rear, '#b9b4a8', { alpha: 0.16, size: 0.6, grow: 1.6, life: 0.8 });
+        // Cantidad por segundo (no por cuadro): se ve igual en un computador rápido o lento.
+        const emit = (rate, color, o) => { puffAcc += rate * dt; const k = Math.min(3, Math.floor(puffAcc)); puffAcc -= Math.floor(puffAcc); for (let i = 0; i < k; i++) puff(rear, color, o); };
+        if (f?.terrain_here === 'pasto') emit(34, '#a08a5c', { alpha: 0.6, grow: 2.8 });
+        else if (f?.terrain_here === 'lodo') emit(18, '#6b4a30', { alpha: 0.5, size: 1.1 });
+        else if (sliding && f?.terrain_here !== 'agua') emit(40, '#e8e8e8', { alpha: 0.55, grow: 3 });
+        else if (speed > 14) emit(7, '#b9b4a8', { alpha: 0.22, size: 1.0, grow: 1.8, life: 0.9 });
       }
       // Choque: humo oscuro, chispas y un sacudón de cámara. Meta: confeti.
       if (!paused && frame !== lastFxFrame) {
         lastFxFrame = frame;
         if ((f?.events ?? []).some(e => CRASH.has(e))) {
-          for (let k = 0; k < 10; k++) puff(car.position, k % 2 ? '#3a3a3a' : '#8a8378', { size: 1.2, grow: 4, life: 1.6, alpha: 0.6, up: 1.6, spread: 2 });
+          for (let k = 0; k < 10; k++) puff(car.position, k % 2 ? '#3a3a3a' : '#8a8378', { size: 2.4, grow: 4, life: 1.8, alpha: 0.7, up: 1.6, spread: 3.5 });
           burst(car.position, C_SPARK, 30, { speed: 9, up: 4, life: 0.7 }); shake = 0.45;
         }
         if (!celebrated && f?.termination_cause === 'vuelta_completada') {
@@ -728,7 +730,7 @@ try {
     renderer.render(scene, camera);
   });
   world.classList.add('has-3d'); tools.hidden = false;
-  window.rallyV7Scene = { setMode, camera, renderer, scene, controls };
+  window.rallyV7Scene = { setMode, camera, renderer, scene, controls, fx: { puff, burst } };
 } catch (error) {
   host.replaceChildren(); world.classList.remove('has-3d'); tools.hidden = true;
   message.hidden = false; message.textContent = 'Este navegador no pudo iniciar WebGL. La tabla y las curvas siguen disponibles.';

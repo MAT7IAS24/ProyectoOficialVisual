@@ -109,7 +109,7 @@ function fillPlain() {
   say(ppo.lluvia.success_rate > n6.ppo_rain_success_rate, `Con lluvia termina ${pct(ppo.lluvia.success_rate)} de las vueltas. En el N6, ${pct(n6.ppo_rain_success_rate)}.`);
   say(ppo.normal.success_rate >= rules.success_rate, `El alumno ${ppo.normal.success_rate >= rules.success_rate ? 'iguala o supera' : 'todavía no alcanza'} al maestro: PPO ${pct(ppo.normal.success_rate)}, reglas ${pct(rules.success_rate)}.`);
   if (lap?.ppo && lap?.reglas) say(lap.ppo <= lap.reglas, `Vuelta completa en ${lap.ppo.toFixed(1)} s. El maestro tarda ${lap.reglas.toFixed(1)} s.`);
-  if (im) say(ppo.normal.success_rate > im.success_rate + 0.005, `Practicar solo con PPO después de imitar ${ppo.normal.success_rate > im.success_rate + 0.005 ? 'sumó' : 'no sumó'}: solo imitando ${pct(im.success_rate)}, después de PPO ${pct(ppo.normal.success_rate)}.`);
+  if (im) say(ppo.normal.success_rate > im.success_rate + 0.005, `Practicar solo con PPO después de imitar ${ppo.normal.success_rate > im.success_rate + 0.005 ? 'sumó' : 'no sumó'}: solo imitando ${pct(im.success_rate)} y ${im.mean_accidents.toFixed(2)} choques por vuelta; después de PPO ${pct(ppo.normal.success_rate)} y ${ppo.normal.mean_accidents.toFixed(2)}. Casi todo lo aprendió del maestro.`);
   say(ppo.sensor_ruidoso.success_rate >= 0.5, `Con sensores con ruido termina ${pct(ppo.sensor_ruidoso.success_rate)} de las vueltas.`);
   const col = (cls, title, items) => `<div class="plain-col ${cls}"><h3>${title}</h3><ul>${items.map(t => `<li>${t}</li>`).join('')}</ul></div>`;
   $('plainGrid').innerHTML = [

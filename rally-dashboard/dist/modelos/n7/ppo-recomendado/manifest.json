@@ -1,26 +1,26 @@
 {
-  "run_id": "rally-v7-ppo-462db9c95f3445b19e60a249479df80e",
+  "run_id": "rally-v7-ppo-d268569f2d3a497288140a7a1ddaa9cb",
   "level_id": "N7",
   "environment_version": "rally-v7",
   "algorithm": "ppo",
-  "git_commit": "eceb6655ad7098abf3210eafb896cd7ade17e0c7",
-  "config_sha256": "d633e2b08f78eca6e5bc621c31b61591361cc0d57581522dfa2034f1a87b3745",
-  "model_uri": "models/rally-v7-ppo-462db9c95f3445b19e60a249479df80e/model.zip",
-  "model_sha256": "df1395ad8d39ce73ad3e022db694c3cb0ec3aafb2c9cbaf192a3938296bd7c65",
-  "normalization_uri": "models/rally-v7-ppo-462db9c95f3445b19e60a249479df80e/normalization.json",
-  "browser_model_uri": "models/rally-v7-ppo-462db9c95f3445b19e60a249479df80e/policy.onnx",
+  "git_commit": "9bd5ab0d5eb3b8fcd91dc5159113723642024658",
+  "config_sha256": "0afc3fab21fb92bceae5c0715be4fdd24d9a446b63a9a69b51a1aa1ddc47f5d3",
+  "model_uri": "models/rally-v7-ppo-d268569f2d3a497288140a7a1ddaa9cb/model.zip",
+  "model_sha256": "5574750c762d0d8b41bfba8080042979850804eadb968cb6ea96d3e906e1414a",
+  "normalization_uri": "models/rally-v7-ppo-d268569f2d3a497288140a7a1ddaa9cb/normalization.json",
+  "browser_model_uri": "models/rally-v7-ppo-d268569f2d3a497288140a7a1ddaa9cb/policy.onnx",
   "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v7.py en el commit indicado",
   "evaluation_suite_id": "rally-v7-suite-1",
   "seed": 42,
   "parent_run_id": null,
   "training_origin": "desde_cero",
   "budget": {
-    "timesteps": 1001472,
-    "train_seconds": 1090.1
+    "timesteps": 401408,
+    "train_seconds": 668.4
   },
   "chosen_checkpoint": {
     "rule": "mejor_en_validacion",
-    "timesteps": 250000,
+    "timesteps": 400000,
     "validation_layouts": 10,
     "validation_layout_seed_offset": 200000
   },
@@ -305,18 +305,18 @@
     }
   },
   "files_sha256": {
-    "config.json": "d633e2b08f78eca6e5bc621c31b61591361cc0d57581522dfa2034f1a87b3745",
-    "evaluation.json": "c9b72bca959fb9cf1a4ed995f81a9d59ede3a793a85588efc06851955872a8a6",
-    "model.zip": "df1395ad8d39ce73ad3e022db694c3cb0ec3aafb2c9cbaf192a3938296bd7c65",
-    "normalization.json": "a8a001fe948178b47f29547ac51b537d9878933759b47bf828a50c4519206692",
-    "policy.onnx": "a5a0c70aefe60e2bff9f8da125b341af59caccfb93b744a770d8eb55eae24c92",
-    "training_curves.json": "a89835be663b703e21e52e34ebbedc416cba7835bf36125aa3f107fdb4187e43",
-    "vecnormalize.pkl": "1f592dbfd9c5e3e4c2cac872926f565f99d3838cc48a40ccee409c6a3efcec6e"
+    "config.json": "0afc3fab21fb92bceae5c0715be4fdd24d9a446b63a9a69b51a1aa1ddc47f5d3",
+    "evaluation.json": "b38718ed22c81aa5a770ed72c5f71180a4f091789c2de7b286471abc54889b80",
+    "model.zip": "5574750c762d0d8b41bfba8080042979850804eadb968cb6ea96d3e906e1414a",
+    "normalization.json": "a717daabc19292e23b444c06795887a0c4621f6154f83143594ce10240517db7",
+    "policy.onnx": "6a6c40e5d8cf0bdacfc1bf66ff61392967ff5865549890cf1fb1529b7f324b90",
+    "training_curves.json": "3333b7f7261c6fcd1429a68cd132ed25e48fca8703b12d65d3d7f1db604a7f8c",
+    "vecnormalize.pkl": "7558af8fd90eccc69ce7ddd178dde2a7a4b11326d3ae43bc90f356d041899aef"
   },
   "source_sha256": {
     "race_env_v7.py": "84af658ec3b5ecdb55cc3c00a342667a0d18c5a578addbc9b4048460e8fd49b8",
-    "training_v7.py": "33b7fbdc1ce6ffe5bb750e65714bd222a0b3c87f584a7b120d55c153a2a0e5c1",
-    "pipeline_v7.py": "3e5b54e1cc039912c41f7c9697c1f37ff763498d1540a11070edf78f874bb09f",
-    "configs/rally-v7.json": "84827c942564052eaf341e150a046adb8f8188af6a372cd1015980f1cb3eaaa0"
+    "training_v7.py": "3fb553b4d20ec8cd6740a8884bfd0fe862ec0b7c5c30c2828fcdd0c4ddb9b40c",
+    "pipeline_v7.py": "4d6bac662332b4638f3b02c1a2295dce1c029b26e313514e5689d124acd23669",
+    "configs/rally-v7.json": "91112c2261639c0c4a1ee08097e411f4d6395736d2244eb49a7f207fe55568e0"
   }
 }

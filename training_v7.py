@@ -10,7 +10,7 @@ VALIDACIÓN y la tasa de aprendizaje baja hasta 0. Nuevo: la red recibe 250 núm
 carga y suspensión) y se miden cabeceo, balanceo, ruedas levantadas y aterrizajes.
 
 Compara, con el MISMO presupuesto de pasos y en las MISMAS pistas nunca vistas:
-  * PPO (Stable-Baselines3 + PyTorch): red neuronal 64×64 que recibe los 250 números.
+  * PPO (Stable-Baselines3 + PyTorch): red neuronal (256×256 en el intento 3) que recibe los 250 números.
   * Q-learning: tabla de 720 estados × 15 acciones (versión discretizada del ambiente).
   * Referencias: política aleatoria y política de reglas escritas a mano.
 
@@ -606,7 +606,8 @@ def package(result, config, evaluations, extra=None):
                 "optimizer_state": "incluido en model.zip (Adam), se puede continuar con PPO.load(...).learn()" if result["algorithm"] == "ppo" else None,
                 "contract": contract, "files_sha256": files, "source_sha256": sources, **(extra or {})}
     write_json(folder / "manifest.json", manifest)
-    algo = "PPO (Stable-Baselines3, red 64×64)" if result["algorithm"] == "ppo" else "Q-learning tabular discretizado (720×15)"
+    arch = "×".join(str(n) for n in config.get("training", {}).get("ppo", {}).get("net_arch", [64, 64]))
+    algo = f"PPO (Stable-Baselines3, red {arch})" if result["algorithm"] == "ppo" else "Q-learning tabular discretizado (720×15)"
     (folder / "README.md").write_text(
         f"---\ntags:\n- reinforcement-learning\n- {result['algorithm']}\n- gymnasium\n---\n\n# Autonomous Rally N7 · {algo}\n\n"
         f"Semilla {result['seed']}, {result['timesteps']} pasos de entrenamiento. Evaluación en la suite `{EVALUATION_SUITE_ID}` "

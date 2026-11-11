@@ -1,12 +1,12 @@
 {
-  "run_id": "rally-v7-qlearning-91e7e685f42e4d778a2d021112d08edb",
+  "run_id": "rally-v7-qlearning-e7a5d71b76944c26898cd744fe99551a",
   "level_id": "N7",
   "environment_version": "rally-v7",
   "algorithm": "qlearning",
-  "git_commit": "eceb6655ad7098abf3210eafb896cd7ade17e0c7",
-  "config_sha256": "d633e2b08f78eca6e5bc621c31b61591361cc0d57581522dfa2034f1a87b3745",
-  "model_uri": "models/rally-v7-qlearning-91e7e685f42e4d778a2d021112d08edb/q_table.npy",
-  "model_sha256": "01b21aa26e9199a41c411dd38e7a49a5b2179e8357258d8c9b6297f49c0dd2f1",
+  "git_commit": "9bd5ab0d5eb3b8fcd91dc5159113723642024658",
+  "config_sha256": "0afc3fab21fb92bceae5c0715be4fdd24d9a446b63a9a69b51a1aa1ddc47f5d3",
+  "model_uri": "models/rally-v7-qlearning-e7a5d71b76944c26898cd744fe99551a/q_table.npy",
+  "model_sha256": "c15449c98e34742eb49c731bf7ed2b22f5dac7678ba26ffcc041bb3ec671211f",
   "normalization_uri": null,
   "browser_model_uri": null,
   "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v7.py en el commit indicado",
@@ -15,12 +15,12 @@
   "parent_run_id": null,
   "training_origin": "desde_cero",
   "budget": {
-    "timesteps": 1000103,
-    "train_seconds": 823.4
+    "timesteps": 400258,
+    "train_seconds": 399.7
   },
   "chosen_checkpoint": {
     "rule": "mejor_en_validacion",
-    "timesteps": 916926,
+    "timesteps": 333382,
     "validation_layouts": 10,
     "validation_layout_seed_offset": 200000
   },
@@ -333,15 +333,15 @@
     }
   },
   "files_sha256": {
-    "config.json": "d633e2b08f78eca6e5bc621c31b61591361cc0d57581522dfa2034f1a87b3745",
-    "evaluation.json": "5decbc22c3b67219fcae5cad9f384b2614ff45a6230f1dff04b18737f03269e2",
-    "q_table.npy": "01b21aa26e9199a41c411dd38e7a49a5b2179e8357258d8c9b6297f49c0dd2f1",
-    "training_curves.json": "365279cac619ccd8257bddf49a4bdd5f24e8fb54ac1bb821ad63d6ad402b2d5c"
+    "config.json": "0afc3fab21fb92bceae5c0715be4fdd24d9a446b63a9a69b51a1aa1ddc47f5d3",
+    "evaluation.json": "4be803ce1ca51e3190e45bb509ecb11bb857561da6d9fd7502436a898dfc06d4",
+    "q_table.npy": "c15449c98e34742eb49c731bf7ed2b22f5dac7678ba26ffcc041bb3ec671211f",
+    "training_curves.json": "bf950078384b843047d2bc101e223e64bdc54dcc85bdf1f3422cf7f1cb0f0a7f"
   },
   "source_sha256": {
     "race_env_v7.py": "84af658ec3b5ecdb55cc3c00a342667a0d18c5a578addbc9b4048460e8fd49b8",
-    "training_v7.py": "33b7fbdc1ce6ffe5bb750e65714bd222a0b3c87f584a7b120d55c153a2a0e5c1",
-    "pipeline_v7.py": "3e5b54e1cc039912c41f7c9697c1f37ff763498d1540a11070edf78f874bb09f",
-    "configs/rally-v7.json": "84827c942564052eaf341e150a046adb8f8188af6a372cd1015980f1cb3eaaa0"
+    "training_v7.py": "3fb553b4d20ec8cd6740a8884bfd0fe862ec0b7c5c30c2828fcdd0c4ddb9b40c",
+    "pipeline_v7.py": "4d6bac662332b4638f3b02c1a2295dce1c029b26e313514e5689d124acd23669",
+    "configs/rally-v7.json": "91112c2261639c0c4a1ee08097e411f4d6395736d2244eb49a7f207fe55568e0"
   }
 }
