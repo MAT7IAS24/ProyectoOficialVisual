@@ -21,7 +21,7 @@ const QUIET = new Set(['pisa_lodo', 'pisa_agua', 'pisa_pasto', 'derrapa', 'patin
 const CAUSES = { en_curso: 'EN CARRERA', vuelta_completada: 'VUELTA COMPLETA', demasiados_accidentes: 'DEMASIADOS ACCIDENTES', atascado: 'ATASCADO (10 s sin avanzar)', limite_pasos: 'LÍMITE DE TIEMPO' };
 const MODES = {
   evaluation: 'EVALUACIÓN · política congelada en una pista que nunca vio', baseline: 'REFERENCIA · reglas escritas a mano (no aprende)',
-  incident: 'CONDICIÓN DIFÍCIL · evaluación con una perturbación', compare: 'ANTES Y AHORA · misma pista y misma física: PPO del N6 (azul) y PPO del N7 con mirada de piloto (amarillo)',
+  incident: 'CONDICIÓN DIFÍCIL · evaluación con una perturbación', compare: 'MISMA PISTA Y MISMA FÍSICA · el coche amarillo y el azul salen juntos; las líneas muestran por dónde pasó cada uno',
 };
 
 function toast(text) { const el = $('eventToast'); el.textContent = text; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 1600); }
@@ -99,44 +99,70 @@ window.addEventListener('rally7:tick', e => {
   if (e.detail.end && playing) { clearTimeout(window.__loop); window.__loop = setTimeout(() => startScenario(selected), 2500); }
 });
 
+function fillPlain() {
+  const sel = data.selection, n6 = sel.n6_reference, ppo = data.summary.ppo, rules = data.baselines.reglas, im = sel.imitation_only;
+  const prev = (sel.previous_attempts ?? []).at(-1), lap = sel.lap_time_s;
+  const better = [], worse = [];
+  const say = (ok, text) => (ok ? better : worse).push(text);
+  say(ppo.normal.success_rate > n6.ppo_success_rate, `PPO termina ${pct(ppo.normal.success_rate)} de las vueltas. En el N6 terminaba ${pct(n6.ppo_success_rate)}${prev ? ` y sin maestro (intento 2), ${pct(prev.ppo_success_rate)}` : ''}.`);
+  say(ppo.normal.mean_accidents < n6.ppo_mean_accidents, `Choca ${ppo.normal.mean_accidents.toFixed(2)} veces por vuelta. En el N6 chocaba ${n6.ppo_mean_accidents.toFixed(2)}.`);
+  say(ppo.lluvia.success_rate > n6.ppo_rain_success_rate, `Con lluvia termina ${pct(ppo.lluvia.success_rate)} de las vueltas. En el N6, ${pct(n6.ppo_rain_success_rate)}.`);
+  say(ppo.normal.success_rate >= rules.success_rate, `El alumno ${ppo.normal.success_rate >= rules.success_rate ? 'iguala o supera' : 'todavía no alcanza'} al maestro: PPO ${pct(ppo.normal.success_rate)}, reglas ${pct(rules.success_rate)}.`);
+  if (lap?.ppo && lap?.reglas) say(lap.ppo <= lap.reglas, `Vuelta completa en ${lap.ppo.toFixed(1)} s. El maestro tarda ${lap.reglas.toFixed(1)} s.`);
+  if (im) say(ppo.normal.success_rate > im.success_rate + 0.005, `Practicar solo con PPO después de imitar ${ppo.normal.success_rate > im.success_rate + 0.005 ? 'sumó' : 'no sumó'}: solo imitando ${pct(im.success_rate)}, después de PPO ${pct(ppo.normal.success_rate)}.`);
+  say(ppo.sensor_ruidoso.success_rate >= 0.5, `Con sensores con ruido termina ${pct(ppo.sensor_ruidoso.success_rate)} de las vueltas.`);
+  const col = (cls, title, items) => `<div class="plain-col ${cls}"><h3>${title}</h3><ul>${items.map(t => `<li>${t}</li>`).join('')}</ul></div>`;
+  $('plainGrid').innerHTML = [
+    col('what', 'Qué cambió', [
+      'Antes PPO aprendía solo, a punta de chocar. Ahora primero <b>copia a un maestro</b>: las reglas escritas a mano, que terminan 87 % de las vueltas.',
+      'Después de copiar, <b>practica por su cuenta</b> con PPO para pulir lo aprendido.',
+      'La física, las 30 pistas del examen y la recompensa son las mismas. Solo cambió la forma de aprender.',
+      'En pantalla: ruedas arregladas, polvo y humo, chispas al chocar, confeti en la meta, luces de freno y la línea que siguió cada coche.',
+    ]),
+    col('good', 'Qué mejoró', better.length ? better : ['Nada mejoró en este intento.']),
+    col('bad', 'Qué no mejoró o falta', worse.length ? worse : ['Nada empeoró.']),
+  ].join('');
+}
+
 function fillBench() {
-  const sel = data.selection, n6 = sel.n6_reference, rules = data.baselines.reglas, crit = sel.criteria;
+  const sel = data.selection, n6 = sel.n6_reference, rules = data.baselines.reglas, crit = sel.criteria, im = sel.imitation_only;
   const ppo = data.summary.ppo.normal, ppoRain = data.summary.ppo.lluvia;
   const card = (label, before, after, ok, note) => `<div class="mud-card"><div class="label">${label}</div><div class="vals">${before ? `<span class="before">${before}</span>` : ''}<span class="after${ok ? '' : ' bad'}">${after}</span></div><small>${note}</small></div>`;
   $('mudCompare').innerHTML = [
     card('Vueltas completas · PPO', pct(n6.ppo_success_rate), pct(ppo.success_rate), sel.checks.ppo_llega_a_la_meta,
-      `Con la mirada de piloto y la recompensa ${data.reward_version}${data.config.experiment.attempt ? ` (intento ${data.config.experiment.attempt})` : ''}. Meta: al menos ${pct(crit.min_success_rate_ppo)}.`),
+      `Tachado: N6. Meta: al menos ${pct(crit.min_success_rate_ppo)}.${im ? ` Solo imitando, antes de PPO: ${pct(im.success_rate)}.` : ''}`),
     card('Accidentes por vuelta · PPO', n6.ppo_mean_accidents.toFixed(2), ppo.mean_accidents.toFixed(2), sel.checks.ppo_choca_menos_que_n6,
       `Meta: menos que el N6. Velocidad media al chocar: ${ppo.mean_crash_kmh == null ? '—' : Math.round(ppo.mean_crash_kmh) + ' km/h'}.`),
     card('Vueltas completas · reglas', pct(n6.rules_success_rate), pct(rules.success_rate), sel.checks.reglas_conservan_exito,
       `Misma física que el N6: las reglas no deberían cambiar. Meta: al menos ${pct(crit.min_success_rate_rules)}.`),
     card('PPO con lluvia', pct(n6.ppo_rain_success_rate), pct(ppoRain.success_rate), ppoRain.success_rate >= n6.ppo_rain_success_rate,
-      'No es parte de la hipótesis: se muestra para ver si mirar más lejos también ayuda con menos agarre.'),
+      'No es parte de la hipótesis. PPO nunca practicó con lluvia; el maestro termina ' + pct(data.baselines.reglas_lluvia.success_rate) + '.'),
   ].join('');
   $('selection').textContent = sel.accepted ? 'HIPÓTESIS CONFIRMADA' : 'HIPÓTESIS NO CONFIRMADA (ver cada criterio)';
   $('selection').className = sel.accepted ? 'ok' : 'bad';
-  $('hypothesis').textContent = `Hipótesis (escrita antes de entrenar): ${data.config.experiment.hypothesis}` +
+  $('hypothesis').textContent = `Hipótesis: ${data.config.experiment.hypothesis}` +
     (data.tracking.startsWith('omitido') ? ' Nota: datos generados sin DVC ni MLflow; la corrida oficial se repite con tracking.' : '');
 }
 
 function fillAttempts() {
-  const e = data.config.experiment, prev = e.previous_attempt;
-  if (!prev) return;
+  const e = data.config.experiment, prevs = e.previous_attempts ?? [];
+  if (!prevs.length) return;
   const ppo = data.summary.ppo.normal, q = data.summary.qlearning.normal, sel = data.selection;
   const box = (title, ok, okLabel, items, big) => `<div class="attempt"><h3>${title}<em class="${ok ? 'ok' : ''}">${okLabel}</em></h3><div class="big">${big}</div><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
   $('attemptGrid').innerHTML = [
-    box(`Intento 1 · ${prev.date} · recompensa ${prev.reward_version}`, false, 'RECHAZADO', [
-      `PPO ${pct(prev.ppo_success_rate)} (semillas ${prev.ppo_by_seed.map(pct).join(' / ')}) · Q-learning ${pct(prev.qlearning_success_rate)} · reglas ${pct(prev.rules_success_rate)}`,
-      `${prev.ppo_mean_accidents.toFixed(2)} accidentes por vuelta, a ${Math.round(prev.ppo_mean_crash_kmh)} km/h en promedio`,
-      ...prev.diagnosis,
-    ], `PPO ${pct(prev.ppo_success_rate)}`),
-    box(`Intento ${e.attempt} · misma mirada, recompensa ${data.reward_version}`, sel.accepted, sel.accepted ? 'ACEPTADO' : 'RECHAZADO', [
-      `PPO ${pct(ppo.success_rate)} · Q-learning ${pct(q.success_rate)} · reglas ${pct(sel.rules_success_rate)}`,
+    ...prevs.map((p, i) => box(`Intento ${i + 1} · ${p.date}`, false, 'RECHAZADO', [
+      p.what,
+      `PPO ${pct(p.ppo_success_rate)} (semillas ${p.ppo_by_seed.map(pct).join(' / ')}) · Q-learning ${pct(p.qlearning_success_rate)} · reglas ${pct(p.rules_success_rate)}`,
+      `${p.ppo_mean_accidents.toFixed(2)} accidentes por vuelta, a ${Math.round(p.ppo_mean_crash_kmh)} km/h en promedio`,
+      ...(p.diagnosis ?? []),
+    ], `PPO ${pct(p.ppo_success_rate)}`)),
+    box(`Intento ${e.attempt} · con maestro`, sel.accepted, sel.accepted ? 'ACEPTADO' : 'RECHAZADO', [
+      `PPO ${pct(ppo.success_rate)} (semillas ${data.runs.filter(r => r.algorithm === 'ppo').map(r => pct(r.evaluation.normal.success_rate)).join(' / ')}) · Q-learning ${pct(q.success_rate)} · reglas ${pct(sel.rules_success_rate)}`,
       `${ppo.mean_accidents.toFixed(2)} accidentes por vuelta${ppo.mean_crash_kmh == null ? '' : `, a ${Math.round(ppo.mean_crash_kmh)} km/h en promedio`}`,
-      ...e.changes_vs_attempt_1,
+      ...(e.changes_vs_attempt_2 ?? []),
     ], `PPO ${pct(ppo.success_rate)}`),
   ].join('');
-  $('attemptNote').textContent = `El intento 1 sigue guardado: código en el commit ${prev.commit}, informe ${prev.report}. Entre los dos intentos solo cambió la recompensa; la mirada, la física y las 30 pistas son las mismas.`;
+  $('attemptNote').textContent = `Los intentos rechazados siguen guardados: ${prevs.map((p, i) => `intento ${i + 1}, informe ${p.report}${p.commit ? ` (commit ${p.commit})` : ''}`).join('; ')}. En los tres la física, la mirada de piloto y las 30 pistas son las mismas.`;
   $('attempts').hidden = false;
 }
 
@@ -160,16 +186,35 @@ function fillTable() {
 }
 
 function fillExplainer() {
-  const sn = data.config.sensors ?? {}, rw = data.config.reward;
+  const ic = data.config.training.imitation ?? {}, pc = data.config.training.ppo, rw = data.config.reward;
   const items = [
-    ['Mirar por segundos, no por metros', `Los pilotos miran "a dónde voy a estar en 2 segundos". La red recibe 8 puntos de la pista a ${(sn.course_times_s ?? [0.5, 5]).join(', ')} s adelante, a su velocidad actual: a 100 km/h ve 140 m; a 30 km/h, 42 m. Actívalo con "Ver lo que ve la IA" (verde = recta, naranja = curva).`],
-    ['Qué sabe de cada punto', 'Cuántos metros adelante queda, cuánto se corre hacia un lado (si la pista dobla) y cuánto se curva ahí. Es la misma idea de Gran Turismo Sophy (Sony AI, revista Nature 2022), que le ganó a los mejores pilotos humanos.'],
-    ['Obstáculos más lejos', `Las celdas de barro, agua, rampas y vallas llegan a ${(data.config.sensors?.lookahead_cells ?? 10) * 10} m (antes 60 m). A 100 km/h el coche necesita unos 45 m para frenar.`],
-    ['Chocar rápido cuesta más (intento 1)', `En el intento 1 cada choque costaba 5 + 0,01 × velocidad² (m/s): a 30 km/h unos 5,7 puntos; a 90 km/h, 11,3. ${rw.accident_per_v2 ? 'Sigue activo.' : 'En el intento 2 se volvió a −5 fijo (como el N6) para ver si esto era lo que empeoraba a PPO.'}`],
-    ['Derrapar sin control (intento 1)', `En el intento 1, si el deslizamiento medio de un paso pasaba de 6°, se restaba 0,002 por cada grado de más. ${rw.slip_per_deg ? 'Sigue activo.' : 'En el intento 2 se quitó.'} Avanzar es lo que más suma (${rw.per_meter} por metro).`],
-    ['Lo que NO cambió', 'La física es la del N6 (llantas, peso, suspensión), las mismas 30 pistas del examen, 1 millón de pasos y 3 semillas. Así la diferencia se le puede atribuir a la mirada y a la recompensa.'],
+    ['1. El maestro maneja', `Las reglas escritas a mano dan ${ic.episodes_per_round ?? 60} vueltas en pistas de práctica. En cada instante (4 veces por segundo) se anota qué veía el coche y qué hizo el maestro con el pedal y el volante.`],
+    ['2. El alumno maneja y el maestro corrige', `En las ${(ic.rounds ?? 8) - 1} rondas siguientes maneja la red. Cuando se equivoca y queda en un lugar raro, el maestro anota qué habría hecho él ahí. Así el alumno aprende a corregirse, no solo a copiar vueltas perfectas. Esta técnica se llama DAgger.`],
+    ['3. La red estudia las notas', `Después de cada ronda la red (${pc.net_arch.join(' × ')} neuronas; antes 64 × 64) repasa todas las notas ${ic.epochs ?? 30} veces hasta que su pedal y su volante se parecen a los del maestro.`],
+    ['4. Práctica libre con PPO', `Ya sabiendo manejar, practica ${Math.round(pc.total_timesteps / 1000)} mil pasos con la recompensa de siempre (+${rw.per_meter} por metro, ${rw.accident} por accidente, +${rw.finish} al terminar). Da pasos pequeños para no dañar lo aprendido y se guarda el mejor momento.`],
+    ['Lo que NO cambió', 'La física es la del N6, la mirada de piloto es la de los intentos 1 y 2, y el examen son las mismas 30 pistas que ningún modelo usó para entrenar. Por eso la diferencia se le puede atribuir a la forma de aprender.'],
+    ['Nuevo en pantalla', 'Línea amarilla y azul: por dónde pasó cada coche. Polvo en el pasto, humo blanco cuando las llantas patinan, humo oscuro y chispas en cada choque, confeti al cruzar la meta y luces rojas al frenar. Las ruedas ya no bambolean: el modelo 3D las traía torcidas.'],
   ];
   $('explainGrid').innerHTML = items.map(([h, b]) => `<div><b>${h}</b>${b}</div>`).join('');
+}
+
+function drawImitation() {
+  const svg = $('imitationChart'), NS = 'http://www.w3.org/2000/svg';
+  const runs = data.runs.filter(r => r.imitation?.curve?.length);
+  if (!runs.length) { svg.remove(); return; }
+  const W = 720, H = 220, m = { l: 46, r: 16, t: 14, b: 34 }, n = runs[0].imitation.curve.length;
+  const x = v => m.l + (W - m.l - m.r) * v / (n - 1), y = v => H - m.b - (H - m.t - m.b) * v;
+  const el = (t, a) => { const node = document.createElementNS(NS, t); for (const k in a) node.setAttribute(k, a[k]); svg.appendChild(node); return node; };
+  svg.replaceChildren();
+  for (const v of [0, 0.25, 0.5, 0.75, 1]) { el('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: '#2d3a46' }); el('text', { x: 8, y: y(v) + 4 }).textContent = `${v * 100}%`; }
+  for (let i = 0; i < n; i++) el('text', { x: x(i) - 22, y: H - 10 }).textContent = `ronda ${i}`;
+  runs.forEach((r, k) => {
+    const pts = r.imitation.curve;
+    el('path', { d: pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(p.validation_success_rate ?? 0).toFixed(1)}`).join(' '), fill: 'none', stroke: '#ffc320', 'stroke-width': 2.2, opacity: 1 - k * 0.25 });
+    pts.forEach((p, i) => el('circle', { cx: x(i), cy: y(p.validation_success_rate ?? 0), r: 3.5, fill: '#ffc320', opacity: 1 - k * 0.25 }));
+  });
+  el('line', { x1: m.l, x2: W - m.r, y1: y(data.baselines.reglas.success_rate), y2: y(data.baselines.reglas.success_rate), stroke: '#5a8ee8', 'stroke-dasharray': '6 5', 'stroke-width': 1.6 });
+  el('text', { x: W - 250, y: y(data.baselines.reglas.success_rate) - 6, style: 'fill:#5a8ee8' }).textContent = 'el maestro en las 30 pistas del examen';
 }
 
 function drawCurves() {
@@ -209,10 +254,10 @@ try {
   $('modelInfo').textContent = rec ? `Modelo recomendado: PPO semilla ${rec.seed} · ${rec.run_id} · SHA-256 ${rec.model_sha256.slice(0, 12)}… · paquete en modelos/n7/ppo-recomendado/ (model.zip, policy.onnx, normalization.json, manifest.json)` : '';
   $('replaySelect').replaceChildren(...scenarios.map((s, i) => new Option(s.label, String(i))));
   $('replaySelect').disabled = $('toggle').disabled = false;
-  fillBench(); fillAttempts(); fillTable(); fillExplainer(); drawCurves();
+  fillPlain(); fillBench(); fillAttempts(); fillTable(); fillExplainer(); drawCurves(); drawImitation();
   const params = new URLSearchParams(location.search);
   let wanted = scenarios.findIndex(s => s.id === params.get('escenario'));
-  if (wanted < 0) wanted = scenarios.findIndex(s => s.id === 'antes-despues-0');
+  if (wanted < 0) wanted = scenarios.findIndex(s => s.id === 'alumno-maestro-0');
   window.rallyV7Scenario = null;
   await import('./scene-v7.js');
   startScenario(wanted >= 0 ? wanted : 0);
@@ -222,6 +267,7 @@ try {
   $('reset').onclick = () => startScenario(selected);
   $('speed').onchange = () => { stepMs = Number($('speed').value); startScenario(selected); };
   $('exaggerate').onchange = () => window.dispatchEvent(new CustomEvent('rally7:exaggerate', { detail: $('exaggerate').checked ? 3 : 1 }));
+  $('trailToggle').onchange = () => window.dispatchEvent(new CustomEvent('rally7:trails', { detail: $('trailToggle').checked }));
   $('lookToggle').onchange = () => window.dispatchEvent(new CustomEvent('rally7:look', { detail: $('lookToggle').checked }));
   setTimeout(() => window.dispatchEvent(new CustomEvent('rally7:look', { detail: $('lookToggle').checked })), 1500);
 } catch (error) {

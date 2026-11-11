@@ -426,6 +426,44 @@ class AgentTests(unittest.TestCase):
         worse = {"success_rate": 0.1, "mean_progress_pct": 90.0, "mean_return": 9.0}
         self.assertGreater(score_of(better), score_of(worse))   # primero cuentan las vueltas completas
 
+    def test_frozen_normalization_does_not_move(self):
+        """Intento 3: la normalización calculada con los datos de la imitación no cambia durante PPO."""
+        from training_v7 import FrozenRMS
+        rms = FrozenRMS(np.ones(4), np.full(4, 2.0), 100)
+        rms.update(np.random.default_rng(0).normal(50, 9, size=(64, 4)))
+        np.testing.assert_allclose(rms.mean, 1.0)
+        np.testing.assert_allclose(rms.var, 2.0)
+        np.testing.assert_allclose(rms.copy().mean, 1.0)
+
+    def test_imitation_teaches_the_net_and_never_uses_exam_tracks(self):
+        """Intento 3: después de imitar, la red se parece al maestro (pérdida baja) y las pistas usadas
+        para imitar no son ni las del examen ni las de validación."""
+        import copy as _copy
+        from stable_baselines3 import PPO
+        from training_v7 import imitate_rules, make_vec, evaluation_layouts, validation_layouts
+        cfg = _copy.deepcopy(load_config())
+        cfg["training"]["imitation"].update({"rounds": 2, "episodes_per_round": 3, "epochs": 8})
+        venv = make_vec(cfg, 7, 1)
+        model = PPO("MlpPolicy", venv, seed=7, policy_kwargs={"net_arch": [64, 64], "ortho_init": False}, device="cpu")
+        out = imitate_rules(model, venv, cfg, 7, [], log=lambda *_: None)
+        self.assertEqual([p["driver"] for p in out["curve"]], ["maestro", "alumno"])
+        self.assertLess(out["curve"][-1]["loss"], 0.2)
+        self.assertEqual(out["env_steps"], out["samples"])
+        first = cfg["training"]["imitation"]["layout_seed_offset"] + 7 * 10000
+        used = set(range(first, first + 6))
+        exam = {l["seed"] for l in evaluation_layouts(cfg)} | {l["seed"] for l in validation_layouts(cfg)}
+        self.assertFalse(used & exam)
+
+    def test_attempt_3_keeps_physics_reward_and_sensors(self):
+        """Intento 3: solo cambia cómo aprende PPO. Recompensa v5, mirada de 250 números y criterio de 70 %."""
+        cfg = load_config()
+        self.assertEqual(cfg["reward_version"], "v5")
+        self.assertEqual(cfg["reward"]["accident_per_v2"], 0.0)
+        self.assertEqual(RallyV7Env(cfg).observation_space.shape[0], 250)
+        self.assertEqual(cfg["experiment"]["attempt"], 3)
+        self.assertEqual(cfg["experiment"]["selection_criteria"]["min_success_rate_ppo"], 0.7)
+        self.assertEqual(len(cfg["experiment"]["previous_attempts"]), 2)
+
     def test_previous_levels_are_untouched(self):
         expected = {
             "race_env_v4.py": "dda8c908029f24fbb1be99737084bffed0dc5a3bcfed14cafff9e2ceb7f4486b",

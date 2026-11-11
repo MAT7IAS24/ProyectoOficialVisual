@@ -27,7 +27,7 @@
       <section class="workspace">
         <article class="stage">
           <div class="stage-title">
-            <div><span class="eyebrow">RALLY-V7 · MIRADA DE PILOTO (TIPO GRAN TURISMO SOPHY) · RECOMPENSA V7</span><h1>Ver la pista como un piloto.</h1></div>
+            <div><span class="eyebrow">RALLY-V7 · INTENTO 3 · PPO APRENDE DE LAS REGLAS Y LUEGO PRACTICA SOLO</span><h1>Aprender de un maestro.</h1></div>
             <div class="episode-chip">PISTA <strong id="episode">—</strong></div>
           </div>
           <div class="mode-banner" id="modeBanner">CARGANDO…</div>
@@ -47,16 +47,21 @@
           </div>
           <div id="replaySelectors" class="replay-selectors"><label>Escenario <select id="replaySelect" disabled></select></label></div>
           <p id="loadStatus" role="status">Cargando las corridas registradas…</p>
-          <div class="controls"><button id="toggle" class="primary" disabled>Pausar</button><label class="exag"><input type="checkbox" id="lookToggle" checked /> Ver lo que ve la IA</label><label class="exag"><input type="checkbox" id="exaggerate" /> Exagerar inclinación ×3</label><label>Velocidad <select id="speed"><option value="500">0,5×</option><option value="250" selected>1× (tiempo real)</option><option value="125">2×</option><option value="62">4×</option></select></label></div>
+          <div class="controls"><button id="toggle" class="primary" disabled>Pausar</button><label class="exag"><input type="checkbox" id="trailToggle" checked /> Línea que siguió cada coche</label><label class="exag"><input type="checkbox" id="lookToggle" /> Ver lo que ve la IA</label><label class="exag"><input type="checkbox" id="exaggerate" /> Exagerar inclinación ×3</label><label>Velocidad <select id="speed"><option value="500">0,5×</option><option value="250" selected>1× (tiempo real)</option><option value="125">2×</option><option value="62">4×</option></select></label></div>
+
+          <section class="compare plain" id="plain">
+            <div class="q-head"><span class="eyebrow">EN POCAS PALABRAS</span></div>
+            <div class="plain-grid" id="plainGrid"></div>
+          </section>
 
           <section class="compare">
-            <div class="q-head"><span class="eyebrow">LO QUE DICE LA HIPÓTESIS · PPO DEL N6 TACHADO, N7 EN GRANDE</span><span id="selection"></span></div>
+            <div class="q-head"><span class="eyebrow">LO QUE DICE LA HIPÓTESIS · ANTES TACHADO, AHORA EN GRANDE</span><span id="selection"></span></div>
             <div class="mud-compare" id="mudCompare"></div>
             <p class="note" id="hypothesis"></p>
           </section>
 
           <section class="compare attempts" id="attempts" hidden>
-            <div class="q-head"><span class="eyebrow">DOS INTENTOS · EL PRIMERO SE RECHAZÓ Y QUEDÓ GUARDADO</span></div>
+            <div class="q-head"><span class="eyebrow">TRES INTENTOS · LOS DOS PRIMEROS SE RECHAZARON Y QUEDARON GUARDADOS</span></div>
             <div class="attempt-grid" id="attemptGrid"></div>
             <p class="note" id="attemptNote"></p>
           </section>
@@ -67,12 +72,15 @@
             <div class="curves">
               <div class="q-head"><span class="eyebrow">CURVAS DE APRENDIZAJE · ÉXITO EN PISTAS DE PRUEBA (SIN EXPLORACIÓN) VS ENTRENAMIENTO (CON EXPLORACIÓN)</span></div>
               <svg id="curveChart" viewBox="0 0 720 260" role="img" aria-label="Curvas de aprendizaje de PPO y Q-learning"></svg>
-              <p class="note">Línea continua: evaluación sin exploración en 5 pistas de la suite. Punteada: episodios de entrenamiento (con exploración). Eje horizontal: pasos de simulación (0,25 s cada uno).</p>
+              <p class="note">Línea continua: evaluación sin exploración en 5 pistas de la suite. Punteada: episodios de entrenamiento (con exploración). Eje horizontal: pasos de simulación (0,25 s cada uno). PPO empieza arriba porque ya viene de imitar al maestro.</p>
+              <div class="q-head"><span class="eyebrow">LA CLASE CON EL MAESTRO · VUELTAS COMPLETAS EN 10 PISTAS DE VALIDACIÓN DESPUÉS DE CADA RONDA</span></div>
+              <svg id="imitationChart" viewBox="0 0 720 220" role="img" aria-label="Avance de la imitación por ronda"></svg>
+              <p class="note">Ronda 0: maneja el maestro y la red solo mira. Desde la ronda 1 maneja la red y el maestro le dice qué habría hecho él en cada momento. Una línea por semilla.</p>
             </div>
           </section>
 
           <section class="compare physics-explainer">
-            <div class="q-head"><span class="eyebrow">QUÉ VE Y QUÉ BUSCA AHORA LA IA</span></div>
+            <div class="q-head"><span class="eyebrow">CÓMO APRENDE AHORA LA IA Y QUÉ HAY NUEVO EN PANTALLA</span></div>
             <div class="explain-grid" id="explainGrid"></div>
           </section>
         </article>
@@ -99,7 +107,7 @@
         </aside>
       </section>
     </main>
-    <script>window.RALLY_AD = "N7 · MIRADA DE PILOTO";</script>
+    <script>window.RALLY_AD = "N7 · APRENDER DE UN MAESTRO";</script>
     <script type="module" src="app-v7.js"></script>
   </body>
 </html>

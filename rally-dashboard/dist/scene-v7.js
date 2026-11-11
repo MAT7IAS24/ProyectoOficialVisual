@@ -549,19 +549,25 @@ try {
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.setDrawRange(0, 0);
     const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide }));
     mesh.frustumCulled = false; mesh.renderOrder = 2; scene.add(mesh);
-    return { mesh, pos, n: 0, N, last: null };
+    return { mesh, pos, n: 0, N, last: null, idx: 0 };
   }
   const trailCar = makeTrail('#ffc320'), trailGhost = makeTrail('#5a8ee8');
   let showTrails = true;
-  function clearTrail(t) { t.n = 0; t.last = null; t.mesh.geometry.setDrawRange(0, 0); }
-  function addTrail(t, obj, h) {
-    if (!showTrails || t.n >= t.N) return;
-    if (t.last && t.last.distanceTo(obj.position) < 0.5) return;
-    if (t.last && t.last.distanceTo(obj.position) > 30) { clearTrail(t); }
-    t.last = obj.position.clone();
-    const lx = -Math.sin(h) * 0.16, lz = -Math.cos(h) * 0.16, y = obj.position.y + 0.05, i = t.n * 6;
-    t.pos.set([obj.position.x + lx, y, obj.position.z + lz, obj.position.x - lx, y, obj.position.z - lz], i);
-    t.n++; t.mesh.geometry.attributes.position.needsUpdate = true; t.mesh.geometry.setDrawRange(0, Math.max(0, (t.n - 1) * 6));
+  function clearTrail(t) { t.n = 0; t.last = null; t.idx = 0; t.mesh.geometry.setDrawRange(0, 0); }
+  // La cinta se arma con los datos de la reproducción (no con los cuadros dibujados): así queda igual
+  // de lisa en un computador lento. `upto` = hasta qué dato ya pasó el coche.
+  const trailTmp = new THREE.Vector3();
+  function addTrail(t, list, upto) {
+    if (upto + 1 < (t.idx ?? 0)) clearTrail(t);
+    for (let k = t.idx ?? 0; k <= upto && t.n < t.N; k++) {
+      const a = list[k]; trailTmp.set(a[0], a[2], -a[1]);
+      if (t.last && t.last.distanceTo(trailTmp) < 0.5) continue;
+      t.last = (t.last ?? new THREE.Vector3()).copy(trailTmp);
+      const lx = -Math.sin(a[3]) * 0.16, lz = -Math.cos(a[3]) * 0.16, y = a[2] + 0.05;
+      t.pos.set([a[0] + lx, y, -a[1] + lz, a[0] - lx, y, -a[1] - lz], t.n * 6); t.n++;
+    }
+    t.idx = upto + 1;
+    t.mesh.geometry.attributes.position.needsUpdate = true; t.mesh.geometry.setDrawRange(0, Math.max(0, (t.n - 1) * 6));
   }
   window.addEventListener('rally7:trails', e => { showTrails = e.detail; trailCar.mesh.visible = trailGhost.mesh.visible = showTrails; });
   const C_MARK = new THREE.Color('#141414'), C_MUD_MARK = new THREE.Color('#3b2716'), C_MUD = new THREE.Color('#5a3b24'), C_WATER = new THREE.Color('#cfe8ff');
@@ -677,8 +683,9 @@ try {
     if (current) {
       const t = elapsed();
       const st = sample(current.poses, t); place(car, st);
-      addTrail(trailCar, car, st.h);
-      if (current.ghostPoses) { const gs = sample(current.ghostPoses, t); place(ghost, gs); if (!gs.end) addTrail(trailGhost, ghost, gs.h); }
+      const upto = (ps, tt) => Math.min(ps.list.length - 1, Math.max(0, Math.floor(tt / stepMs * ps.sub)));
+      if (showTrails) addTrail(trailCar, current.poses.list, upto(current.poses, t));
+      if (current.ghostPoses) { place(ghost, sample(current.ghostPoses, t)); if (showTrails) addTrail(trailGhost, current.ghostPoses.list, upto(current.ghostPoses, t)); }
       const frame = Math.min(current.frames.length - 1, Math.floor(t / stepMs) + 1);
       const f = current.frames[frame];
       const speed = f?.speed_mps ?? 0, ground = st.z < 0.1 && !f?.airborne;

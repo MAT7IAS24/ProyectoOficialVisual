@@ -1,1 +1,10 @@
 .controls .exag + .exag { margin-left: 4px; }
+
+/* Intento 3 · "En pocas palabras": qué cambió, qué mejoró y qué falta */
+.plain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.plain-col { border: 1px solid #2d3a46; border-radius: 12px; padding: 12px 14px; background: #131c25; }
+.plain-col h3 { margin: 0 0 8px; font-size: 15px; letter-spacing: .02em; }
+.plain-col ul { margin: 0; padding-left: 18px; display: grid; gap: 7px; font-size: 14px; line-height: 1.45; color: #d5dee6; }
+.plain-col.what { border-color: #3d5a80; } .plain-col.what h3 { color: #9cc4ff; }
+.plain-col.good { border-color: #2f7d58; } .plain-col.good h3 { color: #47df9a; }
+.plain-col.bad { border-color: #8a5a2b; } .plain-col.bad h3 { color: #ffb45a; }
