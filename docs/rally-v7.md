@@ -48,7 +48,7 @@ Las celdas de 10 m con peligro, rampa, frenado, agarre y puente pasan de 6 a 10 
 ### Observación: de 146 a 250 números
 26 del coche (como el N6) + 24 de la mirada (8 puntos × 3) + 200 de celdas (4 carriles × 10 celdas × 5).
 
-### Recompensa v7
+### Recompensa v7 (solo el intento 1; el intento 2 volvió a la v5)
 | Componente | v5 (N5 y N6) | v7 (N7) |
 |---|---|---|
 | Avance | +0,05 por metro nuevo | igual |
@@ -80,7 +80,57 @@ yendo y viniendo (la trampa que aprendió el coche del video de Yosh).
 
 ## 5. Resultados
 
-RESULTADOS_N7
+Corridas sin DVC ni MLflow (`--skip-tracking`), 3 semillas (7, 21, 42), 1 millón de pasos por modelo,
+mejor punto elegido en 10 pistas de validación, evaluadas en las **mismas 30 pistas del N4 al N6**.
+
+### Resultado de la hipótesis
+
+| Criterio (fijado antes de entrenar) | Meta | N6 | Intento 1 | Intento 2 | ¿Cumple? |
+|---|---|---|---|---|---|
+| Vueltas completas · PPO (media de 3 semillas) | ≥ 25 % | 12 % | 2 % | **9 %** | No |
+| Accidentes por vuelta · PPO | < 2,29 | 2,29 | 2,30 | **1,61** | Sí (intento 2) |
+| Vueltas completas · reglas | ≥ 80 % | 87 % | 87 % | **87 %** | Sí |
+
+**Veredicto: RECHAZADO** (2 de 3 en el intento 2). PPO choca menos, pero no llega más veces a la meta.
+
+### Intento 1 (9 nov · commit `856f0ff` · informe `reports/rally-v7-b8fac7f9….json`)
+
+Mirada de piloto **y** recompensa v7 al mismo tiempo. PPO 2 % (0 / 7 / 0), Q-learning 4 %.
+
+* PPO **no se quedó quieto**: avanzó en promedio el 34 % de la vuelta y siguió chocando (37 vallas,
+  21 salidas de pista y 5 trompos por cada 30 pistas).
+* Chocó más despacio (32 km/h en promedio): la recompensa v7 sí le enseñó a bajar la velocidad, pero
+  no a esquivar.
+* Error de método: se cambiaron dos cosas a la vez, así que no se podía saber cuál empeoró a PPO.
+
+### Intento 2 (10 nov · informe `reports/rally-v7-cbe88188….json`)
+
+Misma mirada de piloto, pero con la **recompensa del N6** (accidente −5 fijo, sin castigo por derrape;
+en la configuración, `accident_per_v2` y `slip_per_deg` valen 0 y `reward_version` es `v5`).
+
+| Política | Normal | Lluvia | Sensores con ruido | Accidentes por vuelta | Velocidad al chocar |
+|---|---|---|---|---|---|
+| Reglas a mano | 87 % | 87 % | — | 0,70 | 32 km/h |
+| PPO (semillas 7 / 21 / 42) | 9 % (0 / 17 / 10) | 1 % | 0 % | 1,61 (N6: 2,29) | 36 km/h |
+| Q-learning | 2 % (0 / 0 / 7) | 6 % | 16 % | 2,61 | 42 km/h |
+
+* **La recompensa v7 era lo que más perjudicaba**: al quitarla, PPO pasó de 2 % a 9 %.
+* **La mirada sola no alcanza**: 9 % queda por debajo del 12 % del N6. Con 250 números de entrada
+  (antes 146) y el mismo millón de pasos, la red tiene más que aprender con la misma experiencia.
+* Lo bueno: PPO choca **un 30 % menos** que en el N6 (1,61 contra 2,29 por vuelta).
+* Mucha diferencia entre semillas (0 %, 17 %, 10 %): el resultado todavía depende de la suerte.
+* El modelo recomendado es **PPO semilla 42** (el mejor en validación; en el examen la 21 sacó más).
+
+### Qué aprendimos y qué sigue
+
+1. Cambiar una sola cosa por experimento. El intento 1 mezcló dos cambios y hubo que repetir.
+2. Castigar más los choques no enseña a evitarlos: enseña a chocar despacio.
+3. Ver más lejos no basta si el agente tiene que descubrir desde cero qué hacer con esa información.
+   Las reglas, con esa misma física, completan el 87 %. En el **N8** PPO empezará imitando a las reglas
+   (*behavior cloning*) y después mejorará por su cuenta.
+
+Paquetes publicados en la web: `modelos/n7/ppo-recomendado/` (model.zip, policy.onnx,
+normalization.json, manifest.json) y `modelos/n7/qlearning-mejor/` (q_table.npy).
 
 ## 6. Cómo ejecutarlo
 
@@ -91,6 +141,9 @@ $env:PYTHONUTF8="1"; $env:PREFECT_SERVER_EPHEMERAL_ENABLED="true"; $env:DVC_NO_A
 ```
 
 Prueba rápida sin DVC ni MLflow: `python pipeline_v7.py --timesteps 20000 --seeds 7 --skip-tracking`.
+
+Para repetir el intento 1 (recompensa v7): `git checkout 856f0ff` y el mismo comando. El intento 2 es
+la etiqueta `rally-v7-n7`.
 
 ## 7. Límites
 

@@ -248,12 +248,44 @@
       </div>
     </article>
 
-    <article class="card next">
-      <div class="side"><div class="num">N7</div><div class="tag">rally-v7-n7</div><div class="date">próximo</div></div>
+    <article class="card">
+      <div class="side"><div class="num">N7</div><div class="tag">rally-v7-n7</div><div class="date">10 nov 2026</div></div>
       <div>
-        <span class="eyebrow">Experimento 7 · en diseño</span>
+        <span class="eyebrow">Experimento 7 · mirada de piloto · 2 intentos</span>
         <h2>Ver la pista como un piloto</h2>
-        <p>Sensores tipo Gran Turismo Sophy (curvatura y ancho de la pista adelante según la velocidad), recompensa revisada sin trampas, cielo y luz más realistas, y DagsHub para compartir MLflow y DVC.</p>
+        <p>La física no cambia. La IA ahora mira como un piloto (idea de Gran Turismo Sophy): 8 puntos de la pista a 0,5–5 segundos adelante según su velocidad, y obstáculos hasta 100 m. En la web se puede ver lo que ve la IA, las ruedas ya no tiemblan, y las vallas y el arco de SALIDA · META quedaron cruzados sobre la pista.</p>
+        <dl class="kv">
+          <dt>Ambiente</dt><dd>250 sensores (24 de mirada por tiempo, celdas de obstáculos de 60 a 100 m); misma física del N6</dd>
+          <dt>Hipótesis</dt><dd>PPO ≥ 25 % (N6: 12 %), menos accidentes que el N6 (2,29 por vuelta) y reglas ≥ 80 %</dd>
+          <dt>Intento 1</dt><dd>Mirada + recompensa nueva (chocar rápido cuesta más, castigo por derrape): PPO 2 %. Rechazado y guardado</dd>
+          <dt>Intento 2</dt><dd>Misma mirada con la recompensa del N6, para saber cuál de los dos cambios falló: PPO 9 %</dd>
+        </dl>
+        <div class="result">
+          <div class="stat"><b>9 %</b><span>PPO (intento 1: 2 %)</span></div>
+          <div class="stat"><b>1,61</b><span>Accidentes (N6: 2,29)</span></div>
+          <div class="stat"><b>87 %</b><span>Reglas</span></div>
+          <div class="stat"><b>2 %</b><span>Q-learning</span></div>
+          <div class="stat"><b class="bad">No</b><span>Hipótesis (2 de 3)</span></div>
+        </div>
+        <p class="note">Aprendizaje: la recompensa nueva empeoró a PPO (2 %); al quitarla subió a 9 % y chocó un 30 % menos que en el N6, pero no llegó más veces a la meta. Ver más lejos no basta: con 1 millón de pasos PPO no descubre solo cómo frenar y esquivar. Siguiente paso (N8): que primero imite a las reglas, que completan el 87 %.</p>
+        <div class="links">
+          <a class="btn" href="v7.html">▶ PPO del N6 y del N7 en la misma pista</a>
+          <a class="btn" href="v7.html?escenario=reglas-0">▶ Ver lo que ve la IA (reglas)</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v7-n7">Código de esta versión</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v7-n7/docs/rally-v7.md">Documentación</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v7-n7/reports/rally-v7-cbe8818880ae4d7b9ed50b0c7187d7f6.json">Informe intento 2</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v7-n7/reports/rally-v7-b8fac7f9c91042e881552185f989b060.json">Informe intento 1</a>
+          <a class="btn" href="modelos/n7/ppo-recomendado/manifest.json">Modelo recomendado</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="card next">
+      <div class="side"><div class="num">N8</div><div class="tag">rally-v8-n8</div><div class="date">próximo</div></div>
+      <div>
+        <span class="eyebrow">Experimento 8 · en diseño</span>
+        <h2>Aprender de un maestro</h2>
+        <p>La IA primero imita a las reglas escritas a mano (que completan el 87 % de las vueltas) y después mejora sola con PPO. Además: barro en el que el coche se hunde, aquaplaning en el agua y más efectos visuales.</p>
       </div>
     </article>
   </div>
@@ -261,16 +293,16 @@
   <section>
     <h2>Cómo creció el problema</h2>
     <div class="table-wrap"><table>
-      <thead><tr><th></th><th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th></tr></thead>
+      <thead><tr><th></th><th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>N5</th><th>N6</th><th>N7</th></tr></thead>
       <tbody>
-        <tr><td>Largo de la pista</td><td>1 km</td><td>1 km</td><td>3 km</td><td>1,1 km (óvalo)</td><td>1,1 km, asfalto</td><td>1,1 km, asfalto</td></tr>
-        <tr><td>Carriles</td><td>1</td><td>1</td><td>4</td><td>4 (posición continua)</td><td>4 (posición continua)</td><td>4 (posición continua)</td></tr>
-        <tr><td>Acciones</td><td>2</td><td>3</td><td>5</td><td>2 continuas</td><td>2 continuas, con volante y pedal graduales</td><td>igual que N5</td></tr>
-        <tr><td>Estados posibles</td><td>11</td><td>528</td><td>43.648</td><td>continuo (134 sensores)</td><td>continuo (140 sensores)</td><td>continuo (146 sensores)</td></tr>
-        <tr><td>Obstáculos</td><td>—</td><td>2 curvas</td><td>lodo, agua, pasto, fosos, barriles, rampas, puente</td><td>al azar en cada carrera, con física</td><td>los mismos, con llantas reales: derrapes, trompos y surcos en el barro</td><td>los mismos, con peso que se mueve, suspensión y aterrizajes</td></tr>
-        <tr><td>Episodios × semillas</td><td>25 × 1</td><td>3.000 × 3</td><td>4.000 × 3 (+ 2 intervenciones)</td><td>1 M pasos × 3 × 2 algoritmos</td><td>1 M pasos × 3 × 2 algoritmos × 2 intentos</td><td>1 M pasos × 3 × 2 algoritmos + pruebas de banco</td></tr>
-        <tr><td>Comparación con referencias</td><td>—</td><td>—</td><td>reglas y azar</td><td>reglas, azar y Q-learning</td><td>lo mismo + el N4 en las mismas 30 pistas</td><td>lo mismo + el N5 en las mismas 30 pistas</td></tr>
-        <tr><td>Incidente controlado</td><td>—</td><td>—</td><td>lluvia</td><td>lluvia y sensores con ruido</td><td>lluvia y sensores con ruido (ahora también afecta a Q-learning)</td><td>lluvia y sensores con ruido</td></tr>
+        <tr><td>Largo de la pista</td><td>1 km</td><td>1 km</td><td>3 km</td><td>1,1 km (óvalo)</td><td>1,1 km, asfalto</td><td>1,1 km, asfalto</td><td>1,1 km, asfalto</td></tr>
+        <tr><td>Carriles</td><td>1</td><td>1</td><td>4</td><td>4 (posición continua)</td><td>4 (posición continua)</td><td>4 (posición continua)</td><td>4 (posición continua)</td></tr>
+        <tr><td>Acciones</td><td>2</td><td>3</td><td>5</td><td>2 continuas</td><td>2 continuas, con volante y pedal graduales</td><td>igual que N5</td><td>igual que N5</td></tr>
+        <tr><td>Estados posibles</td><td>11</td><td>528</td><td>43.648</td><td>continuo (134 sensores)</td><td>continuo (140 sensores)</td><td>continuo (146 sensores)</td><td>continuo (250 sensores, mirada por tiempo)</td></tr>
+        <tr><td>Obstáculos</td><td>—</td><td>2 curvas</td><td>lodo, agua, pasto, fosos, barriles, rampas, puente</td><td>al azar en cada carrera, con física</td><td>los mismos, con llantas reales: derrapes, trompos y surcos en el barro</td><td>los mismos, con peso que se mueve, suspensión y aterrizajes</td><td>igual que N6</td></tr>
+        <tr><td>Episodios × semillas</td><td>25 × 1</td><td>3.000 × 3</td><td>4.000 × 3 (+ 2 intervenciones)</td><td>1 M pasos × 3 × 2 algoritmos</td><td>1 M pasos × 3 × 2 algoritmos × 2 intentos</td><td>1 M pasos × 3 × 2 algoritmos + pruebas de banco</td><td>1 M pasos × 3 × 2 algoritmos × 2 intentos</td></tr>
+        <tr><td>Comparación con referencias</td><td>—</td><td>—</td><td>reglas y azar</td><td>reglas, azar y Q-learning</td><td>lo mismo + el N4 en las mismas 30 pistas</td><td>lo mismo + el N5 en las mismas 30 pistas</td><td>lo mismo + el N6 en las mismas 30 pistas</td></tr>
+        <tr><td>Incidente controlado</td><td>—</td><td>—</td><td>lluvia</td><td>lluvia y sensores con ruido</td><td>lluvia y sensores con ruido (ahora también afecta a Q-learning)</td><td>lluvia y sensores con ruido</td><td>lluvia y sensores con ruido</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -280,11 +312,11 @@
     <div class="table-wrap"><table>
       <thead><tr><th>Componente</th><th>Dónde</th><th>Cómo verlo</th></tr></thead>
       <tbody>
-        <tr><td>Código, configuración y pipeline de cada versión</td><td>GitHub, una etiqueta por experimento (<code>rally-v1-n1</code> … <code>rally-v6-n6</code>); <code>main</code> contiene los seis</td><td><a href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tags">Lista de versiones</a></td></tr>
+        <tr><td>Código, configuración y pipeline de cada versión</td><td>GitHub, una etiqueta por experimento (<code>rally-v1-n1</code> … <code>rally-v7-n7</code>); <code>main</code> contiene los siete</td><td><a href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tags">Lista de versiones</a></td></tr>
         <tr><td>Esta web</td><td>Vercel, publicada desde <code>rally-dashboard/dist</code></td><td><a href="https://autonomous-rally-lake.vercel.app">autonomous-rally-lake.vercel.app</a></td></tr>
         <tr><td>Datos de entrenamiento</td><td>DVC: los punteros <code>.dvc</code> están en Git; los CSV en la caché local de quien entrenó</td><td><code>data/experiments/</code> en cada versión</td></tr>
-        <tr><td>Corridas, métricas y artefactos</td><td>MLflow local (<code>autonomous-rally</code>, <code>-v2</code> … <code>-v6</code>)</td><td>Resumen en el informe JSON de cada versión</td></tr>
-        <tr><td>Modelos</td><td>N2 en Hugging Face (privado); N4, N5 y N6 publicados en esta web (<code>modelos/n4/</code> … <code>modelos/n6/</code>); N1 y N3 como artefactos de MLflow</td><td>Enlace en cada tarjeta</td></tr>
+        <tr><td>Corridas, métricas y artefactos</td><td>MLflow local (<code>autonomous-rally</code>, <code>-v2</code> … <code>-v7</code>)</td><td>Resumen en el informe JSON de cada versión</td></tr>
+        <tr><td>Modelos</td><td>N2 en Hugging Face (privado); N4 a N7 publicados en esta web (<code>modelos/n4/</code> … <code>modelos/n7/</code>); N1 y N3 como artefactos de MLflow</td><td>Enlace en cada tarjeta</td></tr>
       </tbody>
     </table></div>
     <p class="note">Pendiente: almacenamiento remoto compartido para DVC y MLflow, para que cualquier persona pueda recuperar los datos y el historial completo con <code>dvc pull</code>.</p>

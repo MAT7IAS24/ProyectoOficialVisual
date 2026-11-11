@@ -105,7 +105,7 @@ function fillBench() {
   const card = (label, before, after, ok, note) => `<div class="mud-card"><div class="label">${label}</div><div class="vals">${before ? `<span class="before">${before}</span>` : ''}<span class="after${ok ? '' : ' bad'}">${after}</span></div><small>${note}</small></div>`;
   $('mudCompare').innerHTML = [
     card('Vueltas completas · PPO', pct(n6.ppo_success_rate), pct(ppo.success_rate), sel.checks.ppo_llega_a_la_meta,
-      `Con la mirada de piloto y la recompensa nueva. Meta: al menos ${pct(crit.min_success_rate_ppo)}.`),
+      `Con la mirada de piloto y la recompensa ${data.reward_version}${data.config.experiment.attempt ? ` (intento ${data.config.experiment.attempt})` : ''}. Meta: al menos ${pct(crit.min_success_rate_ppo)}.`),
     card('Accidentes por vuelta · PPO', n6.ppo_mean_accidents.toFixed(2), ppo.mean_accidents.toFixed(2), sel.checks.ppo_choca_menos_que_n6,
       `Meta: menos que el N6. Velocidad media al chocar: ${ppo.mean_crash_kmh == null ? '—' : Math.round(ppo.mean_crash_kmh) + ' km/h'}.`),
     card('Vueltas completas · reglas', pct(n6.rules_success_rate), pct(rules.success_rate), sel.checks.reglas_conservan_exito,
