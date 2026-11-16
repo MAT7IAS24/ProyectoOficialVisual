@@ -55,7 +55,24 @@ def add_clean_stats(ev):
 
 
 def evaluate_v8(policy_factory, config, layouts, perturbation=None, keep=(), seed=0):
-    return add_clean_stats(evaluate(policy_factory, config, layouts, perturbation=perturbation, keep=keep, seed=seed))
+    """Como el examen del N7, más dos datos: vueltas limpias y "zigzag del volante" (cuánto cambia el volante pedido
+    de una decisión a la siguiente, en promedio; 0 = perfectamente suave, 2 = de tope a tope en cada decisión)."""
+    changes = []
+
+    def wrapped(env):
+        act, prev = policy_factory(env), [None]
+
+        def run(obs):
+            a = act(obs)
+            s = float(np.clip(np.asarray(a, dtype=np.float64).reshape(-1)[1], -1, 1))
+            if prev[0] is not None:
+                changes.append(abs(s - prev[0]))
+            prev[0] = s
+            return a
+        return run
+    ev = add_clean_stats(evaluate(wrapped, config, layouts, perturbation=perturbation, keep=keep, seed=seed))
+    ev["summary"]["steer_zigzag"] = float(np.mean(changes)) if changes else 0.0
+    return ev
 
 
 def score_v8(summary):
@@ -93,13 +110,26 @@ class Ledger:
 
 
 class TrainingCut(gym.Wrapper):
-    """Solo para ENTRENAR: corta la carrera a los `cut_steps` pasos. No cambia el examen (que sigue con 600)."""
-    def __init__(self, env, cut_steps):
+    """Solo para ENTRENAR: corta la carrera a los `cut_steps` pasos. No cambia el examen (que sigue con 600).
+    Intento 3: además cobra un poco por mover el volante de golpe entre una decisión y la siguiente
+    (`steer_change_penalty` × cambio del volante pedido). Así la IA aprende a manejar suave en vez de en zigzag.
+    Solo afecta el entrenamiento: el examen y la recompensa del ambiente no cambian."""
+    def __init__(self, env, cut_steps, steer_change_penalty=0.0):
         super().__init__(env)
         self.cut_steps = cut_steps
+        self.steer_change_penalty = steer_change_penalty
+        self._prev_steer = None
+
+    def reset(self, **kwargs):
+        self._prev_steer = None
+        return self.env.reset(**kwargs)
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
+        steer = float(np.clip(np.asarray(action, dtype=np.float64).reshape(-1)[1], -1, 1))
+        if self.steer_change_penalty and self._prev_steer is not None:
+            reward -= self.steer_change_penalty * abs(steer - self._prev_steer)
+        self._prev_steer = steer
         if not terminated and not truncated and info["steps"] >= self.cut_steps:
             truncated = True
             info["termination_cause"] = "corte_de_entrenamiento"
@@ -201,7 +231,7 @@ def make_vec(config, seed):
         def make():
             env = RallyV7Env(config, None if cond == "normal" else cond)
             if pc.get("episode_cut_steps"):
-                env = TrainingCut(env, pc["episode_cut_steps"])
+                env = TrainingCut(env, pc["episode_cut_steps"], pc.get("steer_change_penalty", 0.0))
             env = Monitor(env)
             env.reset(seed=seed + i)
             return env
