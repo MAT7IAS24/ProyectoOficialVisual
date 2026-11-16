@@ -282,12 +282,32 @@
       </div>
     </article>
 
-    <article class="card next">
-      <div class="side"><div class="num">N8</div><div class="tag">rally-v8-n8</div><div class="date">próximo</div></div>
+    <article class="card">
+      <div class="side"><div class="num">N8</div><div class="tag">rally-v8-n8-intento1</div><div class="date">16 nov 2026</div></div>
       <div>
-        <span class="eyebrow">Experimento 8 · en diseño</span>
+        <span class="eyebrow">Experimento 8 · superar al maestro · intento 1 terminado, intento 2 entrenando</span>
         <h2>Superar al maestro</h2>
-        <p>El alumno ya maneja casi como las reglas. El siguiente paso es que las supere: practicar también con lluvia y sensores con ruido, y un terreno más difícil (barro en el que el coche se hunde y aquaplaning en el agua).</p>
+        <p>Mismo coche, misma pista y mismas 30 pistas de examen. Cambia <b>cómo se entrena</b>: mucho más tiempo (hasta 2 millones de pasos por modelo), con parada temprana, practicando también con lluvia y con sensores con ruido, cortando las carreras que ya no enseñan y contando cada episodio. La página es nueva: pantalla completa, pits y lago en el centro del óvalo, imagen más fluida y pestañas con los modelos, las versiones y los episodios de todos los experimentos.</p>
+        <dl class="kv">
+          <dt>Ambiente</dt><dd>El mismo del N7 (250 sensores); recompensa v8: cada paso cuesta 0,1 y cada accidente 10, para premiar la vuelta rápida y limpia</dd>
+          <dt>Hipótesis</dt><dd>Vueltas sin ningún choque ≥ 84 % (el maestro: 83 %), vuelta ≤ 70,3 s (el maestro) y ≥ 70 % de vueltas con lluvia</dd>
+          <dt>Entrenamiento</dt><dd>20.795 episodios y 5,7 millones de pasos en 3 modelos; la parada temprana detuvo 2 de 3 y ahorró 900 mil pasos</dd>
+          <dt>Intento 2</dt><dd>En curso: cada modelo continúa desde su mejor punto, hasta 3 millones de pasos más, con examen de 60 pistas</dd>
+        </dl>
+        <div class="result">
+          <div class="stat"><b class="bad">70 %</b><span>Vueltas limpias (maestro 83 %)</span></div>
+          <div class="stat"><b class="ok">68,5 s</b><span>Vuelta (maestro 70,3 s)</span></div>
+          <div class="stat"><b class="ok">82 %</b><span>Con lluvia (N7: 58 %)</span></div>
+          <div class="stat"><b>79 %</b><span>Vueltas completas (N7: 80 %)</span></div>
+          <div class="stat"><b class="bad">No</b><span>Hipótesis (2 de 3)</span></div>
+        </div>
+        <p class="note">Aprendizaje del intento 1: entrenar más sí sirvió para ir más rápido que el maestro y para aguantar la lluvia, y practicar con PPO ahora sí suma (solo imitando: 64 % de vueltas limpias; después: 70 %). Lo que falta: todavía choca más que el maestro.</p>
+        <div class="links">
+          <a class="btn" href="v8.html">▶ Ver la carrera y el entrenamiento</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v8-n8-intento1">Código de esta versión</a>
+          <a class="btn" href="https://github.com/MAT7IAS24/ProyectoOficialVisual/blob/rally-v8-n8-intento1/reports/rally-v8-a5d037b4e06e4b049278b510db965bb0.json">Informe intento 1</a>
+          <a class="btn" href="modelos/n8/ppo-recomendado/manifest.json">Modelo recomendado</a>
+        </div>
       </div>
     </article>
   </div>
