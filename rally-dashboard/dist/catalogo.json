@@ -1,0 +1,207 @@
+{
+ "experiments": [
+  {
+   "id": "N1",
+   "tag": "rally-v1-n1",
+   "date": "28 oct",
+   "page": "index.html",
+   "title": "Pista de 1 km",
+   "tested": "Montar el ciclo completo: entrenar, versionar datos y registrar",
+   "model_type": "Q-learning en tabla (11 estados × 2 acciones)",
+   "models": 1,
+   "episodes": 25,
+   "episodes_exact": true,
+   "steps": 639,
+   "steps_exact": true,
+   "best": "100 % de vueltas",
+   "hypothesis": "—"
+  },
+  {
+   "id": "N2",
+   "tag": "rally-v2-n2",
+   "date": "4 nov",
+   "page": "v2.html",
+   "title": "Velocidad, combustible y curvas",
+   "tested": "Que el agente aprenda cuándo frenar",
+   "model_type": "Q-learning en tabla (528 × 3)",
+   "models": 3,
+   "episodes": 9000,
+   "episodes_exact": true,
+   "steps": 100475,
+   "steps_exact": true,
+   "best": "100 % de vueltas",
+   "hypothesis": "—"
+  },
+  {
+   "id": "N3",
+   "tag": "rally-v3-n3",
+   "date": "4 nov",
+   "page": "v3.html",
+   "title": "4 carriles, rampas y lluvia",
+   "tested": "Elegir carril y sobrevivir a un incidente de lluvia (2 intervenciones)",
+   "model_type": "Q-learning en tabla (43.648 × 5)",
+   "models": 9,
+   "episodes": 36000,
+   "episodes_exact": true,
+   "steps": 871119,
+   "steps_exact": true,
+   "best": "100 % (reglas: 53 %)",
+   "hypothesis": "Sí"
+  },
+  {
+   "id": "N4",
+   "tag": "rally-v4-n4",
+   "date": "6 nov",
+   "page": "v4.html",
+   "title": "Física continua y red neuronal",
+   "tested": "PPO contra la tabla en pistas nuevas en cada carrera",
+   "model_type": "PPO, red 64×64 · Q-learning discretizado (720 × 15)",
+   "models": 6,
+   "episodes": 29809,
+   "episodes_exact": false,
+   "steps": 6000000,
+   "steps_exact": true,
+   "best": "PPO 20 % (reglas: 87 %)",
+   "hypothesis": "No"
+  },
+  {
+   "id": "N5",
+   "tag": "rally-v5-n5",
+   "date": "7 nov",
+   "page": "v5.html",
+   "title": "Llantas reales",
+   "tested": "Física de dos ejes y llantas de Pacejka (2 intentos)",
+   "model_type": "PPO, red 64×64 · Q-learning discretizado",
+   "models": 12,
+   "episodes": 50537,
+   "episodes_exact": false,
+   "steps": 12000000,
+   "steps_exact": true,
+   "best": "PPO 10 %",
+   "hypothesis": "No"
+  },
+  {
+   "id": "N6",
+   "tag": "rally-v6-n6",
+   "date": "8 nov",
+   "page": "v6.html",
+   "title": "Peso y suspensión",
+   "tested": "Transferencia de peso, suspensión y pruebas de banco",
+   "model_type": "PPO, red 64×64 · Q-learning discretizado",
+   "models": 6,
+   "episodes": 22992,
+   "episodes_exact": false,
+   "steps": 6000000,
+   "steps_exact": true,
+   "best": "PPO 12 %",
+   "hypothesis": "No (3 de 4)"
+  },
+  {
+   "id": "N7",
+   "tag": "rally-v7-n7-maestro",
+   "date": "11 nov",
+   "page": "v7.html",
+   "title": "Aprender de un maestro",
+   "tested": "Mirada de piloto y, en el intento 3, imitar a las reglas antes de PPO (3 intentos)",
+   "model_type": "PPO, red 256×256 con imitación (DAgger) · Q-learning discretizado",
+   "models": 18,
+   "episodes": 56745,
+   "episodes_exact": false,
+   "steps": 14746221,
+   "steps_exact": true,
+   "best": "PPO 80 %",
+   "hypothesis": "Sí (intento 3)"
+  },
+  {
+   "id": "N8",
+   "tag": "rally-v8-n8",
+   "date": "15 nov",
+   "page": "v8.html",
+   "title": "Superar al maestro",
+   "tested": "Entrenar más y mejor: parada temprana, práctica con lluvia y ruido, libro de episodios",
+   "model_type": "PPO, red 256×256 con imitación (DAgger)",
+   "models": 3,
+   "episodes": 20795,
+   "episodes_exact": true,
+   "steps": 5711901,
+   "steps_exact": true,
+   "best": "PPO 79% completas, 70% limpias",
+   "hypothesis": "No (2 de 3)"
+  }
+ ],
+ "totals": {
+  "experiments": 8,
+  "models": 58,
+  "episodes": 225903,
+  "episodes_exact": 65820,
+  "steps": 45430355,
+  "tags": 9,
+  "planned": 12
+ },
+ "notes": {
+  "episodes": "N1–N3 y N8: conteo exacto. N4–N7: aproximado (pasos ÷ duración media de una carrera del modelo final); en esos experimentos el entrenamiento se midió en pasos y no se guardó el número de episodios.",
+  "steps": "N1–N3: recontados repitiendo el entrenamiento con las mismas semillas. N4–N8: exactos."
+ },
+ "versioning": [
+  {
+   "what": "Código, configuración y documentación",
+   "where": "GitHub (https://github.com/MAT7IAS24/ProyectoOficialVisual)",
+   "how": "Una rama y una etiqueta por experimento: rally-v1-n1 … rally-v8-n8. Volver a una versión: git checkout <etiqueta>"
+  },
+  {
+   "what": "Configuración de cada experimento",
+   "where": "configs/rally-vN.json",
+   "how": "Cada modelo guarda el SHA-256 de la configuración con la que se entrenó"
+  },
+  {
+   "what": "Modelos",
+   "where": "Paquete por modelo: pesos, normalización, ONNX, manifiesto. N4–N8 publicados en esta web (modelos/nN/)",
+   "how": "run_id único + SHA-256 de cada archivo + commit de Git + semilla, en manifest.json"
+  },
+  {
+   "what": "Datos (pistas del examen y resultados por caso)",
+   "where": "DVC: punteros .dvc en Git",
+   "how": "Hash del contenido; el examen es siempre la suite rally-v7-suite-1 (30 pistas, semillas 100000–100029)"
+  },
+  {
+   "what": "Corridas y métricas",
+   "where": "MLflow (un experimento por nivel) e informe JSON en reports/",
+   "how": "Un informe por corrida con su identificador; los intentos rechazados no se borran"
+  },
+  {
+   "what": "Esta web",
+   "where": "Vercel, publicada desde rally-dashboard/dist",
+   "how": "Una página por experimento (index, v2 … v8) y el historial"
+  }
+ ],
+ "model_types": [
+  {
+   "name": "Reglas escritas a mano",
+   "what": "Un programa con «si pasa esto, haz aquello». No aprende.",
+   "where": "Referencia desde el N3; maestro en N7 y N8",
+   "why": "Sirve de vara de medir: si la IA no le gana a unas reglas simples, todavía no aprendió.",
+   "limit": "Solo mira los carriles vecinos; no mejora con la práctica."
+  },
+  {
+   "name": "Q-learning en tabla",
+   "what": "Una tabla con una fila por situación y una columna por acción; cada casilla guarda qué tan buena resultó esa acción.",
+   "where": "N1 a N7",
+   "why": "Es el método más simple de aprendizaje por refuerzo y se puede leer la tabla entera. Perfecto para pistas pequeñas (N1–N3: 100 %).",
+   "limit": "No generaliza: con física continua hay infinitas situaciones y la tabla se queda en 2–6 %."
+  },
+  {
+   "name": "PPO con red neuronal (MLP)",
+   "what": "Una red de 2 capas de 256 neuronas recibe los 250 sensores. Tiene dos salidas: el actor decide pedal y volante; el crítico estima cuánto falta por ganar.",
+   "where": "N4 a N8 (Stable-Baselines3 + PyTorch)",
+   "why": "Acciones continuas (cuánto girar, no solo izquierda/derecha), generaliza a pistas que nunca vio y es la referencia que pide la guía del curso.",
+   "limit": "Desde cero necesita muchísima práctica: con 1 millón de pasos se quedó en 10–20 %."
+  },
+  {
+   "name": "Imitación (DAgger) + PPO",
+   "what": "La misma red, pero primero copia al maestro (aprendizaje supervisado) y luego practica sola con PPO.",
+   "where": "N7 (intento 3) y N8",
+   "why": "Empieza sabiendo manejar en vez de chocar al azar: pasó de 9 % a 80 % con la mitad de los pasos.",
+   "limit": "Copiando solo se llega al nivel del maestro; para superarlo hace falta la práctica propia."
+  }
+ ]
+}

@@ -1,0 +1,271 @@
+{
+  "environment_version": "rally-v8",
+  "reward_version": "v8",
+  "level_id": "N8",
+  "experiment": {
+    "title": "Superar al maestro",
+    "attempt": 1,
+    "hypothesis": "Si el alumno imita al maestro con parada temprana y después practica más tiempo con PPO (hasta 2 millones de pasos por modelo, con lluvia y ruido incluidos, cortando las carreras que ya no enseñan y deteniéndose solo cuando deja de mejorar), entonces supera al maestro: al menos 84 % de vueltas limpias (el maestro: 83 %), vuelta en 70,3 s o menos (el maestro: 70,3 s) y al menos 70 % de vueltas completas con lluvia (N7: 58 %).",
+    "change_vs_previous": "Misma física, mismos 250 sensores y mismas 30 pistas del N7. Cambia cómo se entrena: (1) parada temprana en la imitación y en PPO; (2) hasta 2 millones de pasos de PPO por modelo (N7: 400 mil); (3) practica también con lluvia y con sensores con ruido; (4) corte de episodios a 400 pasos en el entrenamiento; (5) libro de episodios: se cuenta cada carrera y cómo terminó; (6) recompensa v8: cada paso cuesta 0,1 (antes 0,02) y cada accidente 10 (antes 5), para premiar la vuelta rápida y limpia; (7) el mejor punto se elige por vueltas limpias, luego completas, luego tiempo.",
+    "selection_criteria": {
+      "min_clean_rate_ppo": 0.84,
+      "max_lap_time_s_ppo": 70.3,
+      "min_success_rate_rain_ppo": 0.7
+    },
+    "n7_reference": {
+      "report": "reports/rally-v7-e0b9ad006c6c410bb827baa0e4dd157e.json",
+      "ppo_success_rate": 0.8,
+      "ppo_mean_accidents": 1.28,
+      "ppo_rain_success_rate": 0.578,
+      "ppo_noise_success_rate": 0.511,
+      "ppo_lap_time_s": 70.2,
+      "imitation_only_success_rate": 0.833,
+      "rules_success_rate": 0.867,
+      "rules_clean_rate": 0.833,
+      "rules_lap_time_s": 70.3
+    }
+  },
+  "track": {
+    "straight_m": 300,
+    "radius_m": 80,
+    "lanes": 4,
+    "lane_width_m": 4.0,
+    "cell_m": 10,
+    "checkpoint_every_m": 50,
+    "start_clear_m": 40,
+    "finish_clear_m": 30
+  },
+  "physics": {
+    "dt_s": 0.25,
+    "substeps": 10,
+    "gravity_mps2": 9.81,
+    "max_speed_mps": 35,
+    "max_accel_mps2": 6.0,
+    "max_brake_mps2": 9.0,
+    "drag_per_v2": 0.0008,
+    "wheelbase_m": 2.7,
+    "cg_to_front_m": 1.25,
+    "cg_to_rear_m": 1.45,
+    "mass_kg": 1250,
+    "yaw_inertia_kgm2": 1900,
+    "cg_height_m": 0.5,
+    "track_width_m": 1.55,
+    "pitch_per_accel_rad": 0.0035,
+    "roll_per_accel_rad": 0.007,
+    "pitch_freq_hz": 1.5,
+    "roll_freq_hz": 1.3,
+    "suspension_damping_ratio": 0.6,
+    "front_roll_share": 0.55,
+    "heave_freq_hz": 1.6,
+    "heave_damping": 0.5,
+    "suspension_travel_m": 0.3,
+    "load_sensitivity": 0.15,
+    "wheel_lift_fraction": 0.05,
+    "max_steer_rad": 0.4,
+    "steer_rate_rad_s": 1.2,
+    "pedal_rate_per_s": 5.0,
+    "drive_front_share": 0.5,
+    "brake_front_share": 0.6,
+    "brake_follows_load": true,
+    "tire_B_front": 9.0,
+    "tire_B_rear": 11.0,
+    "tire_C": 1.8,
+    "tire_E": 0.95,
+    "kinematic_below_mps": 1.5,
+    "slide_event_deg": 6.0,
+    "spin_deg": 70.0,
+    "ramp_angle_deg": 20,
+    "ramp_height_m": 1.2,
+    "deck_height_m": 3.0,
+    "landing_lip_m": 0.6,
+    "hard_landing_vz_mps": 12.0,
+    "barrier_length_m": 2.0,
+    "barrier_crash_speed_mps": 6.0,
+    "fall_accident_drop_m": 2.0,
+    "initial_fuel_l": 40,
+    "fuel_idle_l_per_s": 0.08,
+    "fuel_throttle_l_per_s": 0.32
+  },
+  "terrains": {
+    "asfalto": {
+      "code": ".",
+      "grip": 1.0,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#3b3f45"
+    },
+    "lodo": {
+      "code": "L",
+      "grip": 0.45,
+      "rolling": 0.22,
+      "plow": 0.55,
+      "color": "#5a3b24"
+    },
+    "agua": {
+      "code": "A",
+      "grip": 0.35,
+      "rolling": 0.04,
+      "plow": 0.0,
+      "color": "#2f86d6"
+    },
+    "pasto": {
+      "code": "S",
+      "grip": 0.55,
+      "rolling": 0.08,
+      "plow": 0.1,
+      "color": "#6f9a2e"
+    },
+    "foso": {
+      "code": "F",
+      "grip": 0.0,
+      "rolling": 0.0,
+      "plow": 0.0,
+      "color": "#17110e"
+    },
+    "rampa": {
+      "code": "R",
+      "grip": 0.9,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#b9622f"
+    },
+    "valla": {
+      "code": "B",
+      "grip": 1.0,
+      "rolling": 0.015,
+      "plow": 0.0,
+      "color": "#d8332a"
+    }
+  },
+  "generator": {
+    "section_m": 100,
+    "min_free_lanes_per_section": 1,
+    "patch_probabilities": {
+      "lodo": 0.22,
+      "agua": 0.18,
+      "pasto": 0.15,
+      "valla": 0.16,
+      "rampa_foso": 0.1,
+      "nada": 0.19
+    },
+    "patch_length_cells": [
+      1,
+      3
+    ],
+    "bridge_probability": 0.6,
+    "bridge_length_cells": [
+      6,
+      9
+    ],
+    "bridge_gap_m": 6
+  },
+  "sensors": {
+    "lookahead_cells": 10,
+    "features_per_cell": [
+      "peligro",
+      "rampa",
+      "frena",
+      "agarre",
+      "puente"
+    ],
+    "base_features": 26,
+    "course_times_s": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      4.0,
+      5.0
+    ],
+    "course_min_speed_mps": 5.0,
+    "course_max_m": 200.0
+  },
+  "perturbations": {
+    "lluvia": {
+      "descripcion": "Lluvia: todo el agarre baja un 30% y el lodo frena un 30% más.",
+      "grip_factor": 0.7,
+      "rolling_factor": 1.3
+    },
+    "sensor_ruidoso": {
+      "descripcion": "Sensores con ruido gaussiano (desviación 0,1) en cada lectura. Desde el N5 también afecta a Q-learning.",
+      "obs_noise_std": 0.1
+    }
+  },
+  "reward": {
+    "per_meter": 0.05,
+    "checkpoint": 0.5,
+    "step": -0.1,
+    "accident": -10.0,
+    "accident_per_v2": 0.0,
+    "slip_per_deg": 0.0,
+    "slip_free_deg": 6.0,
+    "stalled": -10.0,
+    "finish": 30.0,
+    "remaining_fuel_per_l": 0.0
+  },
+  "episode": {
+    "max_steps": 600,
+    "max_accidents": 5,
+    "stall_steps": 40
+  },
+  "training": {
+    "seeds": [
+      7,
+      21,
+      42
+    ],
+    "ppo": {
+      "total_timesteps": 2000000,
+      "min_timesteps": 600000,
+      "patience_evals": 8,
+      "eval_every_steps": 100000,
+      "env_mix": {
+        "normal": 4,
+        "lluvia": 2,
+        "sensor_ruidoso": 2
+      },
+      "episode_cut_steps": 400,
+      "n_steps": 512,
+      "batch_size": 512,
+      "n_epochs": 6,
+      "learning_rate": 0.0001,
+      "lr_schedule": "linear",
+      "gamma": 0.995,
+      "gae_lambda": 0.95,
+      "clip_range": 0.15,
+      "ent_coef": 0.0,
+      "log_std_init": -1.8,
+      "net_arch": [
+        256,
+        256
+      ],
+      "target_kl": 0.03,
+      "critic_warmup_steps": 80000,
+      "ortho_init": false
+    },
+    "train_layout_seed_offset": 0,
+    "evaluation_episodes": 30,
+    "validation_episodes": 30,
+    "validation_layout_seed_offset": 200000,
+    "evaluation_layout_seed_offset": 100000,
+    "imitation": {
+      "method": "DAgger",
+      "max_rounds": 14,
+      "min_rounds": 8,
+      "patience_rounds": 4,
+      "episodes_per_round": 60,
+      "conditions": [
+        "normal"
+      ],
+      "epochs": 30,
+      "learning_rate": 0.001,
+      "batch_size": 512,
+      "layout_seed_offset": 300000
+    }
+  },
+  "tracking": {
+    "experiment_name": "autonomous-rally-v7"
+  }
+}

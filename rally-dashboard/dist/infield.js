@@ -94,11 +94,11 @@ export function buildInfield({ scene, S, R, HALF, makeCar }) {
 
   // ---------- 5. lago en el centro ----------
   const lake = P(8, 12, 0);
-  disc(M.sand, lake.x, -lake.z, 66, 26, 0.0);
-  const water = new THREE.Mesh(new THREE.CircleGeometry(1, 64).rotateX(-Math.PI / 2).scale(62, 1, 23.5).translate(lake.x, 0.04, lake.z),
-    new THREE.MeshStandardMaterial({ color: '#2f7fb8', roughness: 0.08, metalness: 0.35, transparent: true, opacity: 0.9 }));
+  disc(M.sand, lake.x, -lake.z, 66, 26, 0.05);
+  const water = new THREE.Mesh(new THREE.CircleGeometry(1, 64).rotateX(-Math.PI / 2).scale(62, 1, 23.5).translate(lake.x, 0.16, lake.z),
+    new THREE.MeshStandardMaterial({ color: '#2f7fb8', roughness: 0.12, metalness: 0.3, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 }));
   water.receiveShadow = true; scene.add(water);
-  disc(std('#6f9a2e', { roughness: 1 }), lake.x + 14, -lake.z + 2, 9, 5, 0.08, 24);                              // islote
+  disc(std('#6f9a2e', { roughness: 1 }), lake.x + 14, -lake.z + 2, 9, 5, 0.3, 24);                              // islote
 
   // ---------- 6. helipuerto con helicóptero (el rotor gira) ----------
   const heli = new THREE.Group(), hp = P(X0 + 52, 12, 0);
