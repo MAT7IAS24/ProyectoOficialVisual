@@ -128,7 +128,7 @@ try {
   sun.shadow.normalBias = 0.04;
   scene.add(sun, sun.target);
   const SUN_DIR = new THREE.Vector3(-0.45, 0.8, 0.4).normalize();
-  const headlights = [];
+  const headlights = [], snapC = new THREE.Vector3();
 
   const mats = {};
   const mat = (color, o = {}) => (mats[color + JSON.stringify(o)] ??= new THREE.MeshStandardMaterial({ color, roughness: 0.85, side: THREE.DoubleSide, ...o }));
@@ -240,16 +240,15 @@ try {
 
   // ---------- hora del día: día, atardecer y noche ----------
   // Solo cambia la luz y el cielo: la carrera, la física y los datos son los mismos.
-  const nightLights = [];
-  for (const p of venue.lamps.positions) {
-    const l = new THREE.PointLight('#fff1cc', 0, 260, 1.1); l.position.copy(p).add(new THREE.Vector3(0, -2, 0)); scene.add(l); nightLights.push(l);
-  }
+  // Importante para la fluidez: la cantidad de luces NUNCA cambia. Si cambiara, el navegador tendría que recompilar
+  // todos los materiales (eso era la "trabada" larga al pasar a noche). De noche los reflectores se simulan con el
+  // mismo sol (luz blanca desde arriba) y los faros son una sola luz que siempre existe y de día queda en 0.
   const TIMES = {
     dia: { sun: new THREE.Vector3(-0.45, 0.8, 0.4), sunColor: '#fff1d6', sunI: 4.3, sky: '#dfefff', ground: '#5d7f33', hemiI: 1.2,
            turbidity: 2.6, rayleigh: 2.2, fog: '#b9cfe2', exposure: 0.78, env: 0.4, lamps: 1.6, towers: 0, heads: false, skyOn: true },
     atardecer: { sun: new THREE.Vector3(-0.85, 0.06, 0.5), sunColor: '#ff9a4d', sunI: 3.2, sky: '#ffb27a', ground: '#3d3324', hemiI: 0.7,
            turbidity: 10, rayleigh: 3.6, fog: '#e08a5c', exposure: 0.95, env: 0.22, lamps: 2.4, towers: 0, heads: false, skyOn: true },
-    noche: { sun: new THREE.Vector3(0.3, 0.75, -0.4), sunColor: '#a9bcff', sunI: 0.55, sky: '#26324d', ground: '#0d130c', hemiI: 0.22,
+    noche: { sun: new THREE.Vector3(0.15, 0.95, -0.2), sunColor: '#dfe6ff', sunI: 1.25, sky: '#26324d', ground: '#0d130c', hemiI: 0.22,
            turbidity: 1, rayleigh: 0.2, fog: '#070b14', exposure: 1.0, env: 0.05, lamps: 6, towers: 1, heads: true, skyOn: false },
   };
   let timeOfDay = 'dia';
@@ -267,8 +266,7 @@ try {
     renderer.toneMappingExposure = t.exposure;
     scene.environmentIntensity = t.env;
     if (venue.lamps.material) venue.lamps.material.emissiveIntensity = t.lamps;
-    nightLights.forEach(l => { l.intensity = t.towers * 170; });
-    headlights.forEach(h => { h.visible = t.heads; });
+    headlights.forEach(h => { h.lamps.visible = t.heads; if (h.beam) h.beam.intensity = t.heads ? 60 : 0; });
     stars.visible = name === 'noche';
   }
   // Estrellas para la noche (un solo objeto de puntos).
@@ -282,6 +280,33 @@ try {
     const p = new THREE.Points(g, new THREE.PointsMaterial({ color: '#ffffff', size: 2.2, sizeAttenuation: false, fog: false }));
     p.visible = false; scene.add(p); return p;
   })();
+  // ---------- mapa en vivo y distancia entre los dos coches ----------
+  const mini = document.getElementById('minimap'), gapChip = document.getElementById('gapChip');
+  const miniCtx = mini?.getContext('2d');
+  const miniPts = []; for (let s = 0; s < L; s += 6) { const c = center(s); miniPts.push([c[0], c[1]]); }
+  const mb = miniPts.reduce((b, [x, y]) => [Math.min(b[0], x), Math.max(b[1], x), Math.min(b[2], y), Math.max(b[3], y)], [1e9, -1e9, 1e9, -1e9]);
+  const pad = 2 * HALF + 10, mScale = mini ? Math.min((mini.width - 24) / (mb[1] - mb[0] + pad), (mini.height - 24) / (mb[3] - mb[2] + pad)) : 1;
+  const toMini = (x, y) => [mini.width / 2 + (x - (mb[0] + mb[1]) / 2) * mScale, mini.height / 2 - (y - (mb[2] + mb[3]) / 2) * mScale];
+  let miniLast = 0;
+  function drawMini(now, frame) {
+    if (!miniCtx || now - miniLast < 66) return;           // 15 veces por segundo es suficiente
+    miniLast = now;
+    const g = miniCtx; g.clearRect(0, 0, mini.width, mini.height);
+    g.lineJoin = 'round'; g.beginPath(); miniPts.forEach(([x, y], k) => { const [u, v] = toMini(x, y); k ? g.lineTo(u, v) : g.moveTo(u, v); }); g.closePath();
+    g.strokeStyle = '#3a4653'; g.lineWidth = 2 * HALF * mScale + 4; g.stroke();
+    g.strokeStyle = '#59677433'; g.lineWidth = 1; g.stroke();
+    const [sx, sy] = toMini(...center(0)); g.fillStyle = '#e9eef2'; g.fillRect(sx - 1.5, sy - 7, 3, 14);   // línea de salida
+    const dot = (obj, color) => { if (!obj.visible) return; const [u, v] = toMini(obj.position.x, -obj.position.z); g.beginPath(); g.arc(u, v, 5, 0, Math.PI * 2); g.fillStyle = color; g.fill(); g.lineWidth = 2; g.strokeStyle = '#0b1016'; g.stroke(); };
+    dot(ghost, '#5a8ee8'); dot(car, '#ffcc1a');
+    if (gapChip) {
+      const gf = current?.ghost?.frames;
+      if (!gf) { gapChip.hidden = true; return; }
+      const a = current.frames[Math.min(frame, current.frames.length - 1)]?.s ?? 0, b = gf[Math.min(frame, gf.length - 1)]?.s ?? 0, d = a - b;
+      gapChip.hidden = false;
+      gapChip.classList.toggle('behind', d < 0);
+      gapChip.innerHTML = Math.abs(d) < 1 ? 'Empatados' : d > 0 ? `PPO <b>+${d.toFixed(0)} m</b> adelante` : `Maestro <b>+${(-d).toFixed(0)} m</b> adelante`;
+    }
+  }
   window.addEventListener('rally8:time', e => setTimeOfDay(e.detail));
   try { const v = new URLSearchParams(location.search).get('hora') || localStorage.getItem('rally-hora'); if (v) setTimeOfDay(v); } catch {}
   const infield = buildInfield({ scene, S, R, HALF, makeCar: color => (models.coche ? prepCar(models.coche, 1, color) : null) });
@@ -394,9 +419,13 @@ try {
     if (!plain) {
       const lights = new THREE.Group(), hm = new THREE.MeshBasicMaterial({ color: '#fffbe8', transparent: opacity < 1, opacity });
       for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.1, 0.06), hm); m.position.set(sx * 0.6, bb.max.y * 0.5, bb.max.z - 0.05); lights.add(m); }
-      const beam = new THREE.SpotLight('#fff4dc', opacity < 1 ? 0 : 60, 70, 0.5, 0.45, 1.2);
-      beam.position.set(0, bb.max.y * 0.55, bb.max.z); beam.target.position.set(0, 0, bb.max.z + 20);
-      lights.add(beam, beam.target); lights.visible = false; body.add(lights); headlights.push(lights);
+      let beam = null;
+      if (opacity >= 1 && !headlights.some(h => h.beam)) {     // un solo cono de luz (el coche de la IA): una luz fija, siempre presente
+        beam = new THREE.SpotLight('#fff4dc', 0, 70, 0.5, 0.45, 1.2);
+        beam.position.set(0, bb.max.y * 0.55, bb.max.z); beam.target.position.set(0, 0, bb.max.z + 20);
+        body.add(beam, beam.target);
+      }
+      lights.visible = false; body.add(lights); headlights.push({ lamps: lights, beam });
     }
     g.userData = { wheels, body, brake };
     g.rotation.order = 'YXZ'; body.rotation.order = 'YXZ';
@@ -705,19 +734,24 @@ try {
              dist: Math.hypot(b[0] - a[0], b[1] - a[1]), end: pos >= list.length - 1 };
   }
   // "Exagerar": multiplica cabeceo y balanceo para verlos mejor en una exposición (los datos no cambian).
-  let exag = 1;
+  let exag = 1, drawDt = 1 / 60;
   window.addEventListener('rally8:exaggerate', e => { exag = e.detail; });
   function place(obj, st) {
     obj.position.set(st.x, st.z, -st.y);
     obj.rotation.y = yawOf(st.h);
     const body = obj.userData.body;
-    body.rotation.x = st.pitch * exag;                             // + = trompa abajo (al frenar)
-    body.rotation.z = st.roll * exag;                              // + = se inclina a la derecha (curva a la izquierda)
-    body.position.y = -st.heave * 0.6 * Math.min(exag, 2);         // se hunde al aterrizar, se estira en el aire
+    // Temblor: la física guarda la suspensión cada 0,025 s y vibra muy rápido (rebotes de 10–20 por segundo).
+    // Para el dibujo se filtra (≈0,15 s) y así la carrocería se mueve suave; los datos y el examen no cambian.
+    const sm = obj.userData.smooth ??= { pitch: st.pitch, roll: st.roll, heave: st.heave };
+    const a = 1 - Math.exp(-drawDt / 0.15);
+    sm.pitch += (st.pitch - sm.pitch) * a; sm.roll += (st.roll - sm.roll) * a; sm.heave += (st.heave - sm.heave) * a;
+    body.rotation.x = sm.pitch * exag;                             // + = trompa abajo (al frenar)
+    body.rotation.z = sm.roll * exag;                              // + = se inclina a la derecha (curva a la izquierda)
+    body.position.y = -sm.heave * 0.6 * Math.min(exag, 2);         // se hunde al aterrizar, se estira en el aire
     // Ruedas (N7): una rueda real a 100 km/h da ~12 vueltas por segundo; dibujada a 60 cuadros por segundo
     // parece temblar o girar al revés (efecto "rueda de carreta"). Se limita el giro dibujado por cuadro.
     // El ángulo del volante se suaviza un poco SOLO en el dibujo (≈0,1 s); los datos no cambian.
-    obj.userData.steerShown = (obj.userData.steerShown ?? 0) + (st.steer - (obj.userData.steerShown ?? 0)) * 0.35;
+    obj.userData.steerShown = (obj.userData.steerShown ?? 0) + (st.steer - (obj.userData.steerShown ?? 0)) * (1 - Math.exp(-drawDt / 0.1));
     // Metros recorridos desde el cuadro anterior (antes se sumaba la distancia entre dos datos en cada cuadro).
     const u = obj.userData, moved = u.px === undefined ? 0 : Math.hypot(st.x - u.px, st.y - u.py);
     u.px = st.x; u.py = st.y;
@@ -782,7 +816,7 @@ try {
   let last = performance.now(), fpsShown = 0;
   renderer.setAnimationLoop(now => {
     const raw = (now - last) / 1000;
-    const dt = Math.min(0.1, raw); last = now;
+    const dt = Math.min(0.1, raw); last = now; drawDt = dt;
     tune(raw);
     if (now - fpsShown > 500) { fpsShown = now; window.dispatchEvent(new CustomEvent('rally8:fps', { detail: { fps: Math.round(fps), pixelRatio, shadows: sun.castShadow, quality } })); }
     if (current) {
@@ -826,6 +860,7 @@ try {
       // El sol (y su sombra) acompaña al coche para que la sombra sea nítida donde se mira.
       sun.position.copy(car.position).addScaledVector(SUN_DIR, 150); sun.target.position.copy(car.position);
       stars.position.copy(camera.position);
+      drawMini(now, frame);
       venue.update(now / 1000, car.position); infield.update(now / 1000);
       const prevF = current.frames[Math.max(0, frame - 1)], frac = Math.min(1, (t % stepMs) / stepMs);
       updateLook((prevF?.s ?? 0) + ((f?.s ?? 0) - (prevF?.s ?? 0)) * frac, speed, car.position);

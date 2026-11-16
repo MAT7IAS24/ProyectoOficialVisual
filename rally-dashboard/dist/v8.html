@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rally v8 · N8</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Inter:wght@400;500;600;700;800&display=swap" />
     <link rel="stylesheet" href="v8.css" />
     <script type="importmap">
       {"imports":{"three":"./vendor/three/three.module.js"}}
@@ -17,14 +20,17 @@
           <a href="historial.html">Historial</a><a href="index.html">N1</a><a href="v2.html">N2</a><a href="v3.html">N3</a><a href="v4.html">N4</a><a href="v5.html">N5</a><a href="v6.html">N6</a><a href="v7.html">N7</a><a href="v8.html" aria-current="page">N8</a>
         </nav>
       </header>
+      <div class="checker" aria-hidden="true"></div>
 
       <section class="hero">
         <div class="title">
-          <div>
+          <div class="race-no" aria-hidden="true">08</div>
+          <div class="title-text">
             <span class="eyebrow">EXPERIMENTO 8 · RALLY-V8 · MISMA PISTA Y MISMA FÍSICA, MÁS ENTRENAMIENTO</span>
-            <h1>Superar al maestro.</h1>
+            <h1>Superar al maestro<span class="dot">.</span></h1>
+            <p class="one-line" id="oneLine">Cargando…</p>
           </div>
-          <p class="one-line" id="oneLine">Cargando…</p>
+          <div class="kpis" id="kpis" aria-label="Resultado del modelo en el examen"></div>
         </div>
 
         <div class="world" id="world">
@@ -32,6 +38,10 @@
           <div class="hud-top">
             <span class="mode" id="modeBanner">CARGANDO…</span>
             <span class="legend" id="legendCars"></span>
+          </div>
+          <div class="race-side" aria-hidden="true">
+            <div class="gap-chip" id="gapChip" hidden></div>
+            <figure class="minimap"><canvas id="minimap" width="220" height="140"></canvas><figcaption>Mapa en vivo</figcaption></figure>
           </div>
           <div class="event-toast" id="eventToast" aria-live="polite"></div>
           <div class="hud-strip" aria-label="Telemetría en vivo">

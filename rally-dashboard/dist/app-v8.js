@@ -107,10 +107,38 @@ function lineChart(svg, { series, yMax = 1, yMin = 0, yFmt = v => `${Math.round(
 }
 
 // ---------- pestaña Resumen ----------
+// Tarjetas grandes arriba: el resultado del modelo contra el maestro, con números que cuentan hacia arriba
+// y una barra que marca dónde está el maestro (la línea blanca).
+function fillKpis(n, rules) {
+  const k = [
+    { label: 'Vueltas completas', v: n.success_rate * 100, unit: ' %', ref: rules.success_rate * 100, max: 100, good: n.success_rate >= rules.success_rate, note: `maestro ${pct(rules.success_rate)}` },
+    { label: 'Vueltas sin choques', v: n.clean_rate * 100, unit: ' %', ref: rules.clean_rate * 100, max: 100, good: n.clean_rate >= rules.clean_rate, note: `maestro ${pct(rules.clean_rate)}` },
+    { label: 'Tiempo de vuelta', v: n.mean_time_s_success, unit: ' s', dec: 1, ref: rules.mean_time_s_success, max: 90, good: n.mean_time_s_success <= rules.mean_time_s_success, note: `maestro ${secs(rules.mean_time_s_success)} · menos es mejor` },
+    { label: 'Choques por vuelta', v: n.mean_accidents, unit: '', dec: 2, ref: rules.mean_accidents, max: 2, good: n.mean_accidents <= rules.mean_accidents, note: `maestro ${rules.mean_accidents.toFixed(2)} · menos es mejor` },
+  ];
+  $('kpis').innerHTML = k.map((x, i) => `<div class="kpi" style="--c:${x.good ? 'var(--ok)' : 'var(--accent)'}"><span>${x.label}</span><b data-to="${x.v}" data-dec="${x.dec ?? 0}" data-unit="${x.unit}">0${x.unit}</b><small>${x.note}</small><i class="vs"><i data-w="${Math.min(100, x.v / x.max * 100)}" style="width:0"></i><em style="left:${Math.min(100, x.ref / x.max * 100)}%"></em></i></div>`).join('');
+  const t0 = performance.now(), els = [...$('kpis').querySelectorAll('b[data-to]')];
+  const tick = now => {
+    const f = Math.min(1, (now - t0) / 1100), e = 1 - Math.pow(1 - f, 3);
+    for (const b of els) { const to = +b.dataset.to, d = +b.dataset.dec; b.textContent = (to * e).toFixed(d).replace('.', ',') + b.dataset.unit; }
+    if (f < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+  requestAnimationFrame(() => $('kpis').querySelectorAll('.vs > i').forEach(i => { i.style.width = i.dataset.w + '%'; }));
+}
+// Las secciones aparecen suavemente al bajar con el scroll.
+function revealOnScroll() {
+  if (!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.08 });
+  document.querySelectorAll('.panel .plain-col, .panel .card, .panel .stat, .panel figure, .panel .table-wrap, .panel .steps > div, .panel .gloss > div').forEach(el => { if (!el.classList.contains('reveal')) { el.classList.add('reveal'); io.observe(el); } });
+  // Seguro: si algo no se vio (por ejemplo al imprimir o en una captura), a los 4 s aparece igual.
+  setTimeout(() => document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in')), 4000);
+}
 function fillSummary() {
   const sel = data.selection, n7 = sel.n7_reference, ppo = data.summary.ppo, rules = sel.rules, im = sel.imitation_only, tt = data.training_totals;
   const n = ppo.normal, pc = data.config.training.ppo;
   $('oneLine').innerHTML = `PPO termina <b>${pct(n.success_rate)}</b> de las vueltas y <b>${pct(n.clean_rate)}</b> sin un solo choque, en <b>${secs(n.mean_time_s_success)}</b> por vuelta. El maestro: ${pct(rules.success_rate)}, ${pct(rules.clean_rate)} y ${secs(rules.mean_time_s_success)}.`;
+  fillKpis(n, rules);
   const better = [], worse = [];
   const say = (ok, text) => (ok ? better : worse).push(text);
   say(n.clean_rate > rules.clean_rate, `Vueltas limpias (sin ningún choque): PPO ${pct(n.clean_rate)}, el maestro ${pct(rules.clean_rate)}.`);
@@ -294,6 +322,7 @@ try {
   $('replaySelect').replaceChildren(...scenarios.map((s, i) => new Option(s.label, String(i))));
   $('replaySelect').disabled = $('toggle').disabled = false;
   for (const fill of [fillSummary, fillTraining, fillCatalog, fillGlossary]) { try { fill(); } catch (err) { console.error(fill.name, err); } }
+  revealOnScroll();
   const params = new URLSearchParams(location.search);
   let wanted = scenarios.findIndex(s => s.id === params.get('escenario'));
   if (wanted < 0) wanted = 0;
