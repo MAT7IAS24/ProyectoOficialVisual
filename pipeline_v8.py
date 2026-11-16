@@ -12,6 +12,7 @@
 Con --skip-tracking no usa DVC ni MLflow (prueba); el informe lo indica.
 """
 import argparse
+import json
 from pathlib import Path
 import uuid
 
@@ -173,6 +174,19 @@ def rally_v8_pipeline(config_path=str(DEFAULT_CONFIG), timesteps=None, seeds=Non
                        "steps_saved_by_early_stopping": sum(r["early_stopping"]["steps_saved"] for r in results),
                        "early_stopped_runs": sum(r["early_stopping"]["stopped_early"] for r in results),
                        "train_seconds": round(sum(r["train_seconds"] for r in results), 1)}
+    prev_report = config["experiment"].get("continues_report")
+    if prev_report:   # intento de continuación: el libro de episodios suma lo que ya se había entrenado en el intento anterior
+        before = json.loads((ROOT / prev_report).read_text(encoding="utf-8"))["training_totals"]
+        this_attempt = {k: training_totals[k] for k in ("episodes", "steps", "steps_saved_by_early_stopping", "early_stopped_runs", "train_seconds", "budget_steps_ppo")}
+        for phase, v in before["by_phase"].items():
+            mine = totals.setdefault(phase, {"episodes": 0, "steps": 0, "by_cause": {c: 0 for c in CAUSES}})
+            mine["episodes"] += v["episodes"]; mine["steps"] += v["steps"]
+            mine["by_cause"] = {c: mine["by_cause"].get(c, 0) + v["by_cause"].get(c, 0) for c in CAUSES}
+            mine["mean_steps_per_episode"] = round(mine["steps"] / max(1, mine["episodes"]), 1)
+        training_totals.update(by_phase=totals, episodes=sum(v["episodes"] for v in totals.values()), steps=sum(v["steps"] for v in totals.values()),
+                               by_cause={c: sum(v["by_cause"].get(c, 0) for v in totals.values()) for c in CAUSES},
+                               models=len(results) + before["models"], train_seconds=round(training_totals["train_seconds"] + before["train_seconds"], 1),
+                               this_attempt=this_attempt, previous_attempt={k: before[k] for k in ("episodes", "steps", "models", "train_seconds")})
 
     data_dir = output_root / "data" / "experiments" / suite_id
     write_json(data_dir / "escenarios_evaluacion.json", {"suite": "rally-v7-suite-1", "layouts": layouts})

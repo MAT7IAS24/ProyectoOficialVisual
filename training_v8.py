@@ -25,6 +25,7 @@ La recompensa v8 usa los mismos términos que la v5 con tres números distintos:
 from __future__ import annotations
 
 import copy
+import json
 import time
 import uuid
 from pathlib import Path
@@ -235,10 +236,29 @@ def train_ppo(config, seed, output_root=ROOT, log=print):
     best = {"score": None, "timesteps": None, "path": folder / "_mejor_punto.zip"}
     train_curve, eval_curve = [], []
 
-    torch.set_num_threads(max(1, min(4, __import__('os').cpu_count() or 1)))   # la imitación es puro cálculo de la red: usa todos los núcleos
-    imitation = imitate_rules(model, venv, config, seed, valid, ledger, log)
-    torch.set_num_threads(1)                                                    # en PPO los núcleos son para las copias del ambiente
-    frozen_policy, frozen_rms = copy.deepcopy(model.policy), venv.obs_rms.copy()
+    previous = None
+    if pc.get("continue_from"):
+        # Intento de continuación: no se vuelve a imitar. Se parte del mejor punto que dejó el intento anterior
+        # (pesos, optimizador y normalización) y solo se sigue practicando con PPO.
+        from stable_baselines3.common.vec_env import VecNormalize
+        prev_dir = Path(output_root) / pc["continue_from"] / f"semilla-{seed}"
+        previous = json.loads((prev_dir / "resultado.json").read_text(encoding="utf-8"))
+        venv = VecNormalize.load(str(Path(previous["folder"]) / "vecnormalize.pkl"), venv.venv)
+        venv.training = True
+        model.set_env(venv)
+        model.set_parameters(str(Path(previous["folder"]) / "model.zip"), exact_match=True, device="cpu")
+        saved = torch.load(prev_dir / "imitacion.pt", weights_only=False)
+        frozen_policy = copy.deepcopy(model.policy)
+        frozen_policy.load_state_dict(saved["policy"])
+        frozen_rms = venv.obs_rms.copy()
+        frozen_rms.mean, frozen_rms.var, frozen_rms.count = saved["mean"], saved["var"], saved["count"]
+        imitation = {**previous["imitation"], "reused_from_run": previous["run_id"]}
+        log(f"   Semilla {seed}: continúa desde {previous['run_id']} ({previous['ppo_timesteps']} pasos de PPO ya hechos); no se repite la imitación.")
+    else:
+        torch.set_num_threads(max(1, min(4, __import__('os').cpu_count() or 1)))   # la imitación es puro cálculo de la red: usa todos los núcleos
+        imitation = imitate_rules(model, venv, config, seed, valid, ledger, log)
+        torch.set_num_threads(1)                                                    # en PPO los núcleos son para las copias del ambiente
+        frozen_policy, frozen_rms = copy.deepcopy(model.policy), venv.obs_rms.copy()
 
     def imitation_factory(env):
         def act(obs):
@@ -328,9 +348,12 @@ def train_ppo(config, seed, output_root=ROOT, log=print):
     venv.venv.close() if hasattr(venv.venv, "close") and len(conds) > 1 else None
     plain = {"algorithm": "ppo", "run_id": run_id, "seed": seed, "imitation": imitation,
              "train_curve": train_curve, "eval_curve": eval_curve, "train_seconds": train_seconds,
-             "timesteps": int(model.num_timesteps) + imitation["env_steps"], "ppo_timesteps": int(model.num_timesteps),
+             "timesteps": int(model.num_timesteps) + (0 if previous else imitation["env_steps"]), "ppo_timesteps": int(model.num_timesteps),
              "onnx_max_abs_error": onnx_error, "chosen_checkpoint": chosen, "early_stopping": early, "episodes": ledger.as_dict(),
              "env_mix": pc["env_mix"]}
+    if previous:
+        plain["continued_from"] = {"run_id": previous["run_id"], "ppo_timesteps": previous["ppo_timesteps"],
+                                   "episodes": previous["episodes"]["total"]["episodes"], "steps": previous["episodes"]["total"]["steps"]}
     # Se guarda todo lo necesario para no repetir el entrenamiento si el pipeline se corre por partes (una semilla a la vez).
     cache = _cache_dir(output_root, seed)
     cache.mkdir(parents=True, exist_ok=True)

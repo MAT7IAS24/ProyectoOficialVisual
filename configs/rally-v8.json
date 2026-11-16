@@ -4,7 +4,7 @@
   "level_id": "N8",
   "experiment": {
     "title": "Superar al maestro",
-    "attempt": 1,
+    "attempt": 2,
     "hypothesis": "Si el alumno imita al maestro con parada temprana y después practica más tiempo con PPO (hasta 2 millones de pasos por modelo, con lluvia y ruido incluidos, cortando las carreras que ya no enseñan y deteniéndose solo cuando deja de mejorar), entonces supera al maestro: al menos 84 % de vueltas limpias (el maestro: 83 %), vuelta en 70,3 s o menos (el maestro: 70,3 s) y al menos 70 % de vueltas completas con lluvia (N7: 58 %).",
     "change_vs_previous": "Misma física, mismos 250 sensores y mismas 30 pistas del N7. Cambia cómo se entrena: (1) parada temprana en la imitación y en PPO; (2) hasta 2 millones de pasos de PPO por modelo (N7: 400 mil); (3) practica también con lluvia y con sensores con ruido; (4) corte de episodios a 400 pasos en el entrenamiento; (5) libro de episodios: se cuenta cada carrera y cómo terminó; (6) recompensa v8: cada paso cuesta 0,1 (antes 0,02) y cada accidente 10 (antes 5), para premiar la vuelta rápida y limpia; (7) el mejor punto se elige por vueltas limpias, luego completas, luego tiempo.",
     "selection_criteria": {
@@ -23,7 +23,34 @@
       "rules_success_rate": 0.867,
       "rules_clean_rate": 0.833,
       "rules_lap_time_s": 70.3
-    }
+    },
+    "continues_report": "reports/rally-v8-a5d037b4e06e4b049278b510db965bb0.json",
+    "previous_attempts": [
+      {
+        "attempt": 1,
+        "date": "16 nov",
+        "title": "Imitar con parada temprana y practicar hasta 2 millones de pasos",
+        "report": "reports/rally-v8-a5d037b4e06e4b049278b510db965bb0.json",
+        "clean_rate": 0.6999999999999998,
+        "success_rate": 0.7888888888888889,
+        "lap_time_s": 68.53479853479854,
+        "rain_success_rate": 0.8222222222222223,
+        "mean_accidents": 1.0333333333333334,
+        "episodes": 20795,
+        "steps": 5711901,
+        "accepted": false,
+        "checks_passed": "2 de 3",
+        "lesson": "Bajó el tiempo de vuelta y aguanta la lluvia, pero las vueltas limpias quedaron en 70 %. Una semilla seguía mejorando cuando se acabó el presupuesto y los exámenes de 30 pistas eran muy ruidosos para decidir cuándo parar."
+      }
+    ],
+    "changes_vs_attempt_1": [
+      "No se empieza de cero: cada modelo continúa desde su mejor punto del intento 1 (no se repite la imitación)",
+      "Hasta 3 millones de pasos más de práctica por modelo",
+      "Examen de validación con 60 pistas en vez de 30 (decisiones menos ruidosas)",
+      "Paciencia de 10 exámenes sin mejorar (antes 8)",
+      "Pasos de aprendizaje más pequeños: tasa 5e-5 (antes 1e-4), para pulir sin dañar",
+      "Misma hipótesis, misma recompensa v8, mismas 30 pistas de examen"
+    ]
   },
   "track": {
     "straight_m": 300,
@@ -217,9 +244,9 @@
       42
     ],
     "ppo": {
-      "total_timesteps": 2000000,
-      "min_timesteps": 600000,
-      "patience_evals": 8,
+      "total_timesteps": 3000000,
+      "min_timesteps": 800000,
+      "patience_evals": 10,
       "eval_every_steps": 100000,
       "env_mix": {
         "normal": 4,
@@ -230,7 +257,7 @@
       "n_steps": 512,
       "batch_size": 512,
       "n_epochs": 6,
-      "learning_rate": 0.0001,
+      "learning_rate": 5e-05,
       "lr_schedule": "linear",
       "gamma": 0.995,
       "gae_lambda": 0.95,
@@ -242,12 +269,13 @@
         256
       ],
       "target_kl": 0.03,
-      "critic_warmup_steps": 80000,
-      "ortho_init": false
+      "critic_warmup_steps": 0,
+      "ortho_init": false,
+      "continue_from": "entrenados-v8-intento1"
     },
     "train_layout_seed_offset": 0,
     "evaluation_episodes": 30,
-    "validation_episodes": 30,
+    "validation_episodes": 60,
     "validation_layout_seed_offset": 200000,
     "evaluation_layout_seed_offset": 100000,
     "imitation": {
