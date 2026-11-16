@@ -43,10 +43,19 @@ maestro: 0,70), sensores con ruido 57 %.
 
 Total del experimento: **41.345 episodios y 11,4 millones de pasos**, 6 modelos.
 
+* **Intento 3** (etiqueta `rally-v8-n8-intento3`, informe `reports/rally-v8-5b00709a…json`): continúa desde el intento 2
+  con dos cambios solo en el entrenamiento: cada accidente cuesta 25 (antes 10) y se cobra 0,3 × el cambio del volante
+  entre decisiones, para que maneje suave (el coche se veía temblar por el volante en zigzag). Resultado: 68 % limpias,
+  83 % completas, 68,5 s, 0,78 choques, lluvia 82 %; zigzag del volante 0,47. Dos de tres modelos no encontraron un
+  punto mejor que el de partida y el tercero empeoró un poco. **No mejoró: el resultado oficial del N8 sigue siendo
+  el intento 2.** 12.513 episodios más.
+
+Total del experimento con los tres intentos: **53.858 episodios y 14,9 millones de pasos**, 9 modelos.
+
 ## Lectura honesta
 
 Practicar más bajó el tiempo de vuelta, los choques y mejoró mucho la lluvia, pero las vueltas sin ningún choque se
-quedaron en 70 % en las tres semillas y en los dos intentos. Más práctica con el mismo método ya no las sube. Para el
+quedaron en 70 % en las tres semillas y en los tres intentos. Ni más práctica ni castigar más los choques las sube. Para el
 N9 hay que cambiar el método (por ejemplo, castigar más los roces leves o mezclar imitación y práctica), no solo el tiempo.
 
 ## Página web (`v8.html`)
