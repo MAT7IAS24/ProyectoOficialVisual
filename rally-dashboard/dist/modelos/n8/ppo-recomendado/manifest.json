@@ -1,30 +1,30 @@
 {
-  "run_id": "rally-v8-ppo-ee8a340551be46ba866f6814e1cd40b6",
+  "run_id": "rally-v8-ppo-4af197cc74ad4f74baddb6020d2eaaa7",
   "level_id": "N8",
   "environment_version": "rally-v8",
   "algorithm": "ppo",
-  "git_commit": "be57fb3fb9d262e6089e4223e57e7fe8bdf48a9f",
-  "config_sha256": "2c173145950ce62be1a3e25e8d0de63e95c63b10aff02612e95e222be1c593fa",
-  "model_uri": "models/rally-v8-ppo-ee8a340551be46ba866f6814e1cd40b6/model.zip",
-  "model_sha256": "4b92f0484e3b9cc081e2c08edb8a078c185d2ee3e12e82b1e1fb76df4ba90de3",
-  "normalization_uri": "models/rally-v8-ppo-ee8a340551be46ba866f6814e1cd40b6/normalization.json",
-  "browser_model_uri": "models/rally-v8-ppo-ee8a340551be46ba866f6814e1cd40b6/policy.onnx",
+  "git_commit": "e536563a9588bf09c529ac6a2fb340bed852c16c",
+  "config_sha256": "3abbb554050493ca4d62d4bcd9a297e68d833cc3be0d35c272d75ad6dbd0066a",
+  "model_uri": "models/rally-v8-ppo-4af197cc74ad4f74baddb6020d2eaaa7/model.zip",
+  "model_sha256": "f385c140a46c92274714f4d6bf7ec50d9f3f15494df913896fd5a57120d41d06",
+  "normalization_uri": "models/rally-v8-ppo-4af197cc74ad4f74baddb6020d2eaaa7/normalization.json",
+  "browser_model_uri": "models/rally-v8-ppo-4af197cc74ad4f74baddb6020d2eaaa7/policy.onnx",
   "runtime_ref": "requirements.txt (torch, stable-baselines3, gymnasium) + race_env_v7.py (física, sin cambios) y training_v8.py en el commit indicado",
   "evaluation_suite_id": "rally-v7-suite-1",
-  "seed": 21,
+  "seed": 42,
   "parent_run_id": null,
   "training_origin": "imitación de las reglas (DAgger) + práctica con PPO",
   "budget": {
-    "timesteps": 2196303,
-    "ppo_timesteps": 2002944,
-    "imitation_steps": 193359,
-    "episodes": 7934,
-    "train_seconds": 1667.2
+    "timesteps": 2500000,
+    "ppo_timesteps": 2500000,
+    "imitation_steps": 211335,
+    "episodes": 8936,
+    "train_seconds": 3428.0
   },
   "chosen_checkpoint": {
     "rule": "mejor_en_validacion",
-    "timesteps": 1600000,
-    "validation_layouts": 30,
+    "timesteps": 1500000,
+    "validation_layouts": 60,
     "validation_layout_seed_offset": 200000,
     "score_order": [
       "vueltas limpias",
@@ -314,77 +314,66 @@
     }
   },
   "files_sha256": {
-    "config.json": "2c173145950ce62be1a3e25e8d0de63e95c63b10aff02612e95e222be1c593fa",
-    "evaluation.json": "1e8e0b4280aaf75f9c8682fcd4639dc8330410e92874342b3aa45e496dbea74d",
-    "model.zip": "4b92f0484e3b9cc081e2c08edb8a078c185d2ee3e12e82b1e1fb76df4ba90de3",
-    "normalization.json": "a544dedbc7afad170753df0801d3360fa25e1ce9d9c3154d302ca357da123664",
-    "policy.onnx": "5dd6b450d363c6f7584c68809f12c122da0f644bc8222200c99bc8b02fb5553b",
-    "training_curves.json": "c2f973dddca7c09db129862945465325164f66770b1376b1fdd4f83c7737423d",
-    "vecnormalize.pkl": "09943e2bcf6b226aa0039308e71b0261e4433593cf299d1a2932a2d5d2e58deb",
-    "README.md": "83fb6466e2852bd70bacdc73f0c31f047579aa591b83b12b8f476e56254f1c21"
+    "config.json": "3abbb554050493ca4d62d4bcd9a297e68d833cc3be0d35c272d75ad6dbd0066a",
+    "evaluation.json": "d6a06a833e80e66db5c2ba0c14e51928f1cc92318f48455df74a0c15de04b3cc",
+    "model.zip": "f385c140a46c92274714f4d6bf7ec50d9f3f15494df913896fd5a57120d41d06",
+    "normalization.json": "3de3d6155e52bde9049e694dd26d608952ec73ba8c400c364f599c00e9152875",
+    "policy.onnx": "c829d5191f3a45832ad5652bcdab82452933de06c99746e9f9f38648b8c77be8",
+    "training_curves.json": "a0655c77460beb35bb1e173684b111e3bea80b5f4901c015cdb7f421f3ea7e9b",
+    "vecnormalize.pkl": "5bfc07167a33fa195632e6588b8600d689c486ad05b918fbb912861574639a2d",
+    "README.md": "b4c8316111debdf099df6b33131c37cadb5f40fad0020858f2e13e7fda9b35ab"
   },
   "source_sha256": {
     "race_env_v7.py": "477eda62d3511c31f4e3630a4b6550ccd1095378ee38db252190449b2986a5f6",
     "race_env_v8.py": "36f3fb7d3f584fd6647b6a751c233353a53181808979323a5f7233fa1166196b",
     "training_v7.py": "ac9225caf2b5ad51edde853bedb2bb69550f3d832f2c2a8b15c6824b8fb61077",
-    "training_v8.py": "a268de29f4ae6662511d219d7ee473f9a5b770658f0fae28a3cebe8fed2668b5",
-    "pipeline_v8.py": "ec0aa07f40748ba823c32727ca5274cec80acaa7a10f0ed73fcb41c0f28831e8",
-    "configs/rally-v8.json": "4242de29ef0654792addcbe558913d4ce8e22b8dd8b04e06210363d9c3d844ae"
+    "training_v8.py": "1c27a61bc1ee5d931c95576b0fc75fd16573589e6ac3653fefda650fe384ffa1",
+    "pipeline_v8.py": "db52814e51dc12008b5166cfd1c5f80206f263c81095253571509cffa3d429ed",
+    "configs/rally-v8.json": "321e6f5927cb10f5e6d1ab2e63f1931047b0f53ae49340700389be48ee1dc0a8"
   },
   "early_stopping": {
-    "stopped_early": false,
-    "reason": "se agotó el presupuesto de pasos",
-    "timesteps_run": 2002944,
-    "timesteps_budget": 2000000,
-    "patience_evals": 8,
-    "min_timesteps": 600000,
-    "steps_saved": 0
+    "stopped_early": true,
+    "reason": "10 exámenes de validación seguidos sin mejorar",
+    "timesteps_run": 2500000,
+    "timesteps_budget": 3000000,
+    "patience_evals": 10,
+    "min_timesteps": 800000,
+    "steps_saved": 500000
   },
   "training_episodes": {
-    "imitacion": {
-      "episodes": 780,
-      "steps": 193359,
-      "by_cause": {
-        "vuelta_completada": 512,
-        "demasiados_accidentes": 233,
-        "atascado": 35,
-        "limite_pasos": 0,
-        "corte_de_entrenamiento": 0
-      },
-      "mean_steps_per_episode": 247.9
-    },
     "practica_ppo": {
-      "episodes": 7154,
-      "steps": 2001944,
+      "episodes": 8936,
+      "steps": 2498980,
       "by_cause": {
-        "vuelta_completada": 5510,
-        "demasiados_accidentes": 869,
-        "atascado": 742,
+        "vuelta_completada": 6707,
+        "demasiados_accidentes": 686,
+        "atascado": 1516,
         "limite_pasos": 0,
-        "corte_de_entrenamiento": 33
+        "corte_de_entrenamiento": 27
       },
-      "mean_steps_per_episode": 279.8
+      "mean_steps_per_episode": 279.7
     },
     "total": {
-      "episodes": 7934,
-      "steps": 2195303,
+      "episodes": 8936,
+      "steps": 2498980,
       "by_cause": {
-        "vuelta_completada": 6022,
-        "demasiados_accidentes": 1102,
-        "atascado": 777,
+        "vuelta_completada": 6707,
+        "demasiados_accidentes": 686,
+        "atascado": 1516,
         "limite_pasos": 0,
-        "corte_de_entrenamiento": 33
+        "corte_de_entrenamiento": 27
       }
     }
   },
   "imitation": {
-    "env_steps": 193359,
-    "episodes": 780,
-    "samples": 193359,
-    "rounds_run": 13,
+    "env_steps": 211335,
+    "episodes": 840,
+    "samples": 211335,
+    "rounds_run": 14,
     "max_rounds": 14,
-    "best_round": 8,
-    "stopped_early": true,
-    "patience_rounds": 4
+    "best_round": 13,
+    "stopped_early": false,
+    "patience_rounds": 4,
+    "reused_from_run": "rally-v8-ppo-0c0d4d207fe743c8a01de1fe57d9dee2"
   }
 }
