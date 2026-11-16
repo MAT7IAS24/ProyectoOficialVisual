@@ -525,6 +525,7 @@ try {
     holder.traverse(o => { if (o.isMesh) o.receiveShadow = true; });
     scene.add(holder);
   }
+  const startLamps = [];
   const startGate = new THREE.Group(); {
     // Arco de salida y meta, CRUZADO sobre la pista (N7: antes quedaba de lado).
     const gc = document.createElement('canvas'); gc.width = 1024; gc.height = 128; const gg = gc.getContext('2d');
@@ -536,7 +537,7 @@ try {
     const banner = new THREE.Mesh(new THREE.BoxGeometry(2 * HALF + 2, 1.6, 0.5), bannerMat); banner.position.y = 6.2; banner.castShadow = true; startGate.add(banner);
     for (const x of [-(HALF + 1), HALF + 1]) { const post = new THREE.Mesh(new THREE.BoxGeometry(0.6, 7, 0.6), mat('#2a2f36', { metalness: 0.6, roughness: 0.4 })); post.position.set(x, 3.5, 0); post.castShadow = true; startGate.add(post); }
     const lampG = new THREE.SphereGeometry(0.22, 12, 8);
-    for (let i = 0; i < 5; i++) { const l = new THREE.Mesh(lampG, new THREE.MeshStandardMaterial({ color: '#ff3b30', emissive: '#ff3b30', emissiveIntensity: 1.5 })); l.position.set(-2 + i, 5.1, 0.3); startGate.add(l); }
+    for (let i = 0; i < 5; i++) { const m = new THREE.MeshStandardMaterial({ color: '#3a1010', emissive: '#ff2a1a', emissiveIntensity: 0 }); startLamps.push(m); const l = new THREE.Mesh(lampG, m); l.scale.setScalar(1.6); l.position.set(-2 + i, 5.1, 0.3); startGate.add(l); }
     startGate.position.copy(at(1.2, 0, 0)); startGate.rotation.y = yawOf(center(1.2)[2]); scene.add(startGate);
   }
 
@@ -716,12 +717,100 @@ try {
     ghost.visible = !!d.ghost;
     clearMarks(); clearTrail(trailCar); clearTrail(trailGhost); lastFxFrame = -1; celebrated = false;
     stepMs = d.stepMs; playStart = performance.now() - (d.frameIndex * stepMs); paused = d.paused; pausedAt = d.frameIndex * stepMs;
+    lead = d.frameIndex === 0 ? COUNTDOWN_MS : 0; lastLights = -1;   // cuenta regresiva solo al empezar la carrera desde la salida
   }
   window.addEventListener('rally8:scenario', e => receive(e.detail));
   window.addEventListener('rally8:control', e => {
     const c = e.detail;
     if ('paused' in c) { if (c.paused) { pausedAt = elapsed(); paused = true; } else { paused = false; playStart = performance.now() - pausedAt; } }
+    if ('seekMs' in c) { pausedAt = c.seekMs; playStart = performance.now() - c.seekMs; }   // para pruebas y capturas
   });
+  // ---------- semáforo de salida: 5 luces rojas que se encienden una por una y luego todas en verde ----------
+  const COUNTDOWN_MS = 3400;
+  let lead = 0, lastLights = -1;
+  const overlay = document.getElementById('startLights'), dots = overlay ? [...overlay.querySelectorAll('i')] : [];
+  function startLights(tAll) {
+    // 0: apagado · 1..5: rojas encendidas · 6: verde · 7: terminado
+    let k = 7;
+    if (lead) { if (tAll < 400) k = 0; else if (tAll < 2900) k = 1 + Math.min(4, Math.floor((tAll - 400) / 500)); else if (tAll < lead + 1300) k = 6; }
+    if (k === lastLights) return;
+    const prev = lastLights; lastLights = k;
+    startLamps.forEach((m, j) => {
+      const on = (k >= 1 && k <= 5 && j < k) || k === 6;
+      m.emissive.set(k === 6 ? '#2bff6a' : '#ff2a1a'); m.color.set(on ? (k === 6 ? '#0f3a1c' : '#3a1010') : '#151515'); m.emissiveIntensity = on ? 3.2 : 0;
+    });
+    if (overlay) {
+      overlay.hidden = k === 7 || !lead;
+      overlay.classList.toggle('go', k === 6);
+      dots.forEach((d, j) => d.classList.toggle('on', (k >= 1 && k <= 5 && j < k) || k === 6));
+    }
+    if (k >= 1 && k <= 5 && k !== prev) sound.beep(false);
+    if (k === 6 && prev !== 6) { sound.beep(true); sound.cheer(0.6); }
+  }
+
+  // ---------- sonido: motores y estadio, hechos con Web Audio (sin archivos) ----------
+  // El navegador solo deja sonar después de un clic, por eso hay un botón "Activar sonido".
+  const sound = (() => {
+    let ctx = null, master, engineBus, crowdBus, cars = [], crowd, crowdGain, on = false;
+    const vol = { engine: 0.6, crowd: 0.5 };
+    try { const v = JSON.parse(localStorage.getItem('rally-sonido') || '{}'); Object.assign(vol, v); } catch {}
+    function noiseBuffer() {
+      const b = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = b.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < d.length; i++) { const w = Math.random() * 2 - 1; b0 = 0.997 * b0 + w * 0.029; b1 = 0.985 * b1 + w * 0.032; b2 = 0.95 * b2 + w * 0.048; d[i] = (b0 + b1 + b2 + w * 0.02) * 0.9; }
+      return b;
+    }
+    function makeEngine(level) {
+      const o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      o1.type = 'sawtooth'; o2.type = 'square'; o2.detune.value = -1200 + 7;
+      f.type = 'lowpass'; f.frequency.value = 600; f.Q.value = 3; g.gain.value = 0;
+      const m2 = ctx.createGain(); m2.gain.value = 0.35;
+      o1.connect(f); o2.connect(m2).connect(f); f.connect(g).connect(engineBus); o1.start(); o2.start();
+      return { o1, o2, f, g, level };
+    }
+    function start() {
+      if (ctx) return;
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+      engineBus = ctx.createGain(); engineBus.gain.value = vol.engine * 0.35; engineBus.connect(master);
+      crowdBus = ctx.createGain(); crowdBus.gain.value = vol.crowd; crowdBus.connect(master);
+      cars = [makeEngine(1), makeEngine(0.45)];
+      crowd = ctx.createBufferSource(); crowd.buffer = noiseBuffer(); crowd.loop = true;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = 0.6;
+      crowdGain = ctx.createGain(); crowdGain.gain.value = 0.25;
+      crowd.connect(bp).connect(crowdGain).connect(crowdBus); crowd.start();
+    }
+    return {
+      get on() { return on; },
+      setOn(v) { if (v) start(); on = v; if (ctx) { v ? ctx.resume() : ctx.suspend(); } },
+      setVol(k, v) { vol[k] = v; try { localStorage.setItem('rally-sonido', JSON.stringify(vol)); } catch {} if (!ctx) return; (k === 'engine' ? engineBus : crowdBus).gain.setTargetAtTime(k === 'engine' ? v * 0.35 : v, ctx.currentTime, 0.05); },
+      vol,
+      // speed en m/s, pedal de −1 a 1; visible = si ese coche está en la carrera
+      engine(i, speed, pedal, visible, paused) {
+        const c = cars[i]; if (!ctx || !on || !c) return;
+        const now = ctx.currentTime, gear = Math.min(5, Math.floor(speed / 9)), inGear = (speed - gear * 9) / 9;
+        const rpm = 0.25 + 0.75 * Math.max(0, Math.min(1, inGear)) + (speed > 1 ? 0 : 0);
+        const hz = 38 + rpm * 70 + gear * 6;
+        c.o1.frequency.setTargetAtTime(hz, now, 0.06); c.o2.frequency.setTargetAtTime(hz, now, 0.06);
+        c.f.frequency.setTargetAtTime(380 + 1600 * Math.max(0, pedal) * rpm + speed * 10, now, 0.08);
+        c.g.gain.setTargetAtTime(visible && !paused ? c.level * (0.35 + 0.65 * Math.max(0.15, pedal)) : 0, now, 0.1);
+      },
+      crowdLevel(x) { if (ctx && on) crowdGain.gain.setTargetAtTime(x, ctx.currentTime, 0.4); },
+      cheer(amount = 1) { if (!ctx || !on) return; const now = ctx.currentTime; crowdGain.gain.cancelScheduledValues(now); crowdGain.gain.setTargetAtTime(0.25 + 0.9 * amount, now, 0.15); crowdGain.gain.setTargetAtTime(0.25, now + 1.6, 1.2); },
+      beep(go) {
+        if (!ctx || !on) return; const o = ctx.createOscillator(), g = ctx.createGain(), now = ctx.currentTime;
+        o.type = 'square'; o.frequency.value = go ? 1046 : 523; g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.18, now + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, now + (go ? 0.6 : 0.18));
+        o.connect(g).connect(master); o.start(now); o.stop(now + 0.7);
+      },
+      crash() {
+        if (!ctx || !on) return; const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), now = ctx.currentTime;
+        s.buffer = noiseBuffer(); f.type = 'lowpass'; f.frequency.value = 700; g.gain.setValueAtTime(0.8 * vol.engine + 0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        s.connect(f).connect(g).connect(master); s.start(now); s.stop(now + 0.7);
+      },
+    };
+  })();
+  window.addEventListener('rally8:sound', e => { const d = e.detail; if ('on' in d) sound.setOn(d.on); if ('engine' in d) sound.setVol('engine', d.engine); if ('crowd' in d) sound.setVol('crowd', d.crowd); });
+  window.rallyV8Sound = sound;
   function elapsed() { return paused ? pausedAt : performance.now() - playStart; }
   function sample({ list, sub }, t) {
     const pos = t / stepMs * sub;
@@ -820,7 +909,8 @@ try {
     tune(raw);
     if (now - fpsShown > 500) { fpsShown = now; window.dispatchEvent(new CustomEvent('rally8:fps', { detail: { fps: Math.round(fps), pixelRatio, shadows: sun.castShadow, quality } })); }
     if (current) {
-      const t = elapsed();
+      const tAll = elapsed(), t = Math.max(0, tAll - lead);
+      startLights(tAll);
       const st = sample(current.poses, t); place(car, st);
       const upto = (ps, tt) => Math.min(ps.list.length - 1, Math.max(0, Math.floor(tt / stepMs * ps.sub)));
       if (showTrails) addTrail(trailCar, current.poses.list, upto(current.poses, t));
@@ -829,6 +919,10 @@ try {
       const f = current.frames[frame];
       const speed = f?.speed_mps ?? 0, ground = st.z < 0.1 && !f?.airborne;
       if (car.userData.brake) car.userData.brake.visible = (f?.pedal ?? 0) < -0.15;
+      const counting = lead && tAll < lead;
+      sound.engine(0, counting ? 0 : speed, counting ? 0.25 : (f?.pedal ?? 0), true, paused);
+      const gfr = current.ghost?.frames?.[Math.min(frame, (current.ghost?.frames?.length ?? 1) - 1)];
+      sound.engine(1, counting ? 0 : (gfr?.speed_mps ?? 0), counting ? 0.25 : (gfr?.pedal ?? 0), ghost.visible, paused);
       if (!paused && ground && speed > 2) {
         const sliding = Math.abs(st.slip) > 0.1 || f?.wheelspin;
         if (f?.terrain_here === 'lodo') { addMarks(car.position, st.h, C_MUD_MARK); splash(car.position, st.h, speed, C_MUD); }
@@ -849,10 +943,10 @@ try {
         lastFxFrame = frame;
         if ((f?.events ?? []).some(e => CRASH.has(e))) {
           for (let k = 0; k < 10; k++) puff(car.position, k % 2 ? '#3a3a3a' : '#8a8378', { size: 2.4, grow: 4, life: 1.8, alpha: 0.7, up: 1.6, spread: 3.5 });
-          burst(car.position, C_SPARK, 30, { speed: 9, up: 4, life: 0.7 }); shake = 0.45;
+          burst(car.position, C_SPARK, 30, { speed: 9, up: 4, life: 0.7 }); shake = 0.45; sound.crash(); sound.cheer(0.35);
         }
         if (!celebrated && f?.termination_cause === 'vuelta_completada') {
-          celebrated = true; burst(car.position, () => CONFETTI[Math.floor(Math.random() * CONFETTI.length)], 200, { speed: 12, up: 11, life: 3.2, g: 4 });
+          sound.cheer(1); celebrated = true; burst(car.position, () => CONFETTI[Math.floor(Math.random() * CONFETTI.length)], 200, { speed: 12, up: 11, life: 3.2, g: 4 });
         }
       }
       updatePuffs(paused ? 0 : dt);

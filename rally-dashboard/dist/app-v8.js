@@ -338,6 +338,16 @@ try {
   $('exaggerate').onchange = () => window.dispatchEvent(new CustomEvent('rally8:exaggerate', { detail: $('exaggerate').checked ? 3 : 1 }));
   $('timeOfDay').onchange = () => { const v = $('timeOfDay').value; window.dispatchEvent(new CustomEvent('rally8:time', { detail: v })); try { localStorage.setItem('rally-hora', v); } catch {} };
   try { const v = new URLSearchParams(location.search).get('hora') || localStorage.getItem('rally-hora'); if (v && $('timeOfDay').querySelector(`option[value="${v}"]`)) { $('timeOfDay').value = v; setTimeout(() => window.dispatchEvent(new CustomEvent('rally8:time', { detail: v })), 0); } } catch {}
+  // Sonido: botón para activarlo (el navegador lo exige) y dos volúmenes, motores y estadio.
+  const snd = window.rallyV8Sound;
+  try { const v = JSON.parse(localStorage.getItem('rally-sonido') || '{}'); if (v.engine != null) $('volEngine').value = Math.round(v.engine * 100); if (v.crowd != null) $('volCrowd').value = Math.round(v.crowd * 100); } catch {}
+  $('soundBtn').onclick = () => {
+    const on = $('soundBtn').getAttribute('aria-pressed') !== 'true';
+    $('soundBtn').setAttribute('aria-pressed', String(on)); $('soundBtn').textContent = on ? '🔊 Sonido activado' : '🔇 Activar sonido';
+    window.dispatchEvent(new CustomEvent('rally8:sound', { detail: { on, engine: $('volEngine').value / 100, crowd: $('volCrowd').value / 100 } }));
+  };
+  $('volEngine').oninput = () => window.dispatchEvent(new CustomEvent('rally8:sound', { detail: { engine: $('volEngine').value / 100 } }));
+  $('volCrowd').oninput = () => window.dispatchEvent(new CustomEvent('rally8:sound', { detail: { crowd: $('volCrowd').value / 100 } }));
   $('trailToggle').onchange = () => window.dispatchEvent(new CustomEvent('rally8:trails', { detail: $('trailToggle').checked }));
   $('lookToggle').onchange = () => window.dispatchEvent(new CustomEvent('rally8:look', { detail: $('lookToggle').checked }));
 } catch (error) {
