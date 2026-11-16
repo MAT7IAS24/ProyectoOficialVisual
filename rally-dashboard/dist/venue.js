@@ -14,7 +14,7 @@ function canvasTex(w, h, paint) {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
 }
 
-export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, HALF, mat }) {
+export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, HALF, mat, infield = true }) {
   const updaters = [];
   const uniforms = { uTime: { value: 0 }, uCar: { value: new THREE.Vector3() } };
 
@@ -129,9 +129,10 @@ export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, 
         if (r() < fill) spots.push([s + (r() - 0.5) * 0.3, d + (r() - 0.5) * 0.15, h]);
       }
     }
-    const N = spots.length;
-    const bodyG = new THREE.CylinderGeometry(0.2, 0.24, 0.62, 7).translate(0, 0.36, 0);
-    const headG = new THREE.IcosahedronGeometry(0.12, 1).translate(0, 0.8, 0);
+    // Rendimiento (N8): el público se reparte en sectores a lo largo de la pista. Cada sector es un solo dibujo
+    // y el navegador se salta los que la cámara no ve (antes se dibujaban las ~15 mil personas en cada cuadro).
+    const bodyG = new THREE.CylinderGeometry(0.2, 0.24, 0.62, 5).translate(0, 0.36, 0);
+    const headG = new THREE.IcosahedronGeometry(0.12, 0).translate(0, 0.8, 0);
     const shirts = ['#d32f2f', '#1976d2', '#fbc02d', '#388e3c', '#f5f5f5', '#212121', '#7b1fa2', '#ff7043', '#00838f', '#c2185b'].map(c => new THREE.Color(c));
     const skins = ['#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#ffdbac'].map(c => new THREE.Color(c));
     const animate = m => {
@@ -145,17 +146,23 @@ export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, 
       };
       return m;
     };
-    const bodies = new THREE.InstancedMesh(bodyG, animate(new THREE.MeshStandardMaterial({ roughness: 0.85 })), N);
-    const heads = new THREE.InstancedMesh(headG, animate(new THREE.MeshStandardMaterial({ roughness: 0.7 })), N);
-    const o = new THREE.Object3D();
-    spots.forEach(([s, d, h], i) => {
-      o.position.copy(at(s, OUT * d, h)); o.rotation.y = Math.atan2(-(at(s, 0, 0).x - o.position.x), -(at(s, 0, 0).z - o.position.z)) + Math.PI;
-      const sc = 0.9 + r() * 0.25; o.scale.set(sc, sc, sc); o.updateMatrix();
-      bodies.setMatrixAt(i, o.matrix); heads.setMatrixAt(i, o.matrix);
-      bodies.setColorAt(i, shirts[Math.floor(r() * shirts.length)]); heads.setColorAt(i, skins[Math.floor(r() * skins.length)]);
-    });
-    bodies.frustumCulled = heads.frustumCulled = false;
-    scene.add(bodies, heads);
+    const bodyM = animate(new THREE.MeshStandardMaterial({ roughness: 0.85 })), headM = animate(new THREE.MeshStandardMaterial({ roughness: 0.7 }));
+    const SECTORS = 28, o = new THREE.Object3D();
+    const groups = Array.from({ length: SECTORS }, () => []);
+    spots.forEach(sp => groups[Math.min(SECTORS - 1, Math.floor(((sp[0] % L) + L) % L / L * SECTORS))].push(sp));
+    for (const list of groups) {
+      if (!list.length) continue;
+      const bodies = new THREE.InstancedMesh(bodyG, bodyM, list.length), heads = new THREE.InstancedMesh(headG, headM, list.length);
+      list.forEach(([s, d, h], i) => {
+        o.position.copy(at(s, OUT * d, h)); o.rotation.y = Math.atan2(-(at(s, 0, 0).x - o.position.x), -(at(s, 0, 0).z - o.position.z)) + Math.PI;
+        const sc = 0.9 + r() * 0.25; o.scale.set(sc, sc, sc); o.updateMatrix();
+        bodies.setMatrixAt(i, o.matrix); heads.setMatrixAt(i, o.matrix);
+        bodies.setColorAt(i, shirts[Math.floor(r() * shirts.length)]); heads.setColorAt(i, skins[Math.floor(r() * skins.length)]);
+      });
+      bodies.computeBoundingSphere(); heads.computeBoundingSphere();
+      bodies.boundingSphere.radius += 1; heads.boundingSphere.radius += 1;
+      scene.add(bodies, heads);
+    }
   }
 
   // ---------- banderas que ondean en lo alto de las tribunas ----------
@@ -197,7 +204,7 @@ export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, 
       const s = r() * L, d = ring + r() * 160;
       const p = at(s, OUT * d, 0); trees.push([p.x, p.z, 7 + r() * 9]);
     }
-    for (let i = 0; i < 90; i++) { const s = r() * L, d = -(HALF + 20 + r() * (R - HALF - 35)); const p = at(s, OUT * d, 0); trees.push([p.x, p.z, 5 + r() * 6]); }
+    if (infield) for (let i = 0; i < 90; i++) { const s = r() * L, d = -(HALF + 20 + r() * (R - HALF - 35)); const p = at(s, OUT * d, 0); trees.push([p.x, p.z, 5 + r() * 6]); }
     const crown = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 1, 8).translate(0, 0.5, 0), new THREE.MeshStandardMaterial({ color: '#2f5e2b', roughness: 0.95 }), trees.length);
     const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.12, 0.18, 1, 6).translate(0, 0.5, 0), mat('#5b3d24'), trees.length);
     const o = new THREE.Object3D(), tint = new THREE.Color();
@@ -217,7 +224,8 @@ export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, 
   }
 
   // ---------- adentro del óvalo: pantalla gigante, carpas y edificio de boxes ----------
-  {
+  // (desde el N8 el centro lo arma infield.js: calle de pits, garajes, paddock, lago y helipuerto)
+  if (infield) {
     const IN = -OUT;
     const screenTex = canvasTex(1024, 512, (g, w, h) => {
       const grd = g.createLinearGradient(0, 0, 0, h); grd.addColorStop(0, '#0b1a2a'); grd.addColorStop(1, '#13324d'); g.fillStyle = grd; g.fillRect(0, 0, w, h);
@@ -243,6 +251,7 @@ export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, 
   }
 
   return {
+    OUT, sweep, rng, canvasTex,
     update(time, carPos) { uniforms.uTime.value = time; if (carPos) uniforms.uCar.value.copy(carPos); },
   };
 }

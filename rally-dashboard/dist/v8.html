@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rally v8 · N8</title>
+    <link rel="stylesheet" href="v8.css" />
+    <script type="importmap">
+      {"imports":{"three":"./vendor/three/three.module.js"}}
+    </script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="top">
+        <a class="brand" href="historial.html"><span>⌁</span> AUTONOMOUS RALLY</a>
+        <nav class="exp-nav" aria-label="Experimento">
+          <a href="historial.html">Historial</a><a href="index.html">N1</a><a href="v2.html">N2</a><a href="v3.html">N3</a><a href="v4.html">N4</a><a href="v5.html">N5</a><a href="v6.html">N6</a><a href="v7.html">N7</a><a href="v8.html" aria-current="page">N8</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div class="title">
+          <div>
+            <span class="eyebrow">EXPERIMENTO 8 · RALLY-V8 · MISMA PISTA Y MISMA FÍSICA, MÁS ENTRENAMIENTO</span>
+            <h1>Superar al maestro.</h1>
+          </div>
+          <p class="one-line" id="oneLine">Cargando…</p>
+        </div>
+
+        <div class="world" id="world">
+          <div id="scene3d" aria-label="Pista 3D: usa los botones de cámara"></div>
+          <div class="hud-top">
+            <span class="mode" id="modeBanner">CARGANDO…</span>
+            <span class="legend" id="legendCars"></span>
+          </div>
+          <div class="event-toast" id="eventToast" aria-live="polite"></div>
+          <div class="hud-strip" aria-label="Telemetría en vivo">
+            <div class="hud-tile big"><span>Velocidad</span><strong><b id="speedKmh">0</b> km/h</strong></div>
+            <div class="hud-tile wide"><span>Progreso · <i id="distance">0 m</i></span><div class="meter"><i id="progressBar"></i></div><strong><b id="progress">0</b> %</strong></div>
+            <div class="hud-tile"><span>Tiempo</span><strong id="time">0.0 s</strong></div>
+            <div class="hud-tile"><span>Accidentes</span><strong id="accidents">0</strong></div>
+            <div class="hud-tile"><span>Pisa</span><strong id="here">—</strong></div>
+            <div class="hud-tile bars"><span>Pedal</span><div class="bar"><i id="pedalBar"></i></div><span>Volante</span><div class="bar"><i id="steerRealBar"></i></div></div>
+            <div class="hud-tile state"><span id="policyName">—</span><strong id="status">EN CARRERA</strong></div>
+          </div>
+          <div class="view-tools" aria-label="Cámara" hidden>
+            <button type="button" data-cam="follow" aria-pressed="true">Seguir coche</button>
+            <button type="button" data-cam="side" aria-pressed="false">Lateral</button>
+            <button type="button" data-cam="top" aria-pressed="false">Vista aérea</button>
+            <button type="button" data-cam="free" aria-pressed="false">Libre</button>
+            <span class="grow"></span>
+            <span class="perf" id="perf" title="Cuadros por segundo y resolución interna">— fps</span>
+            <button type="button" id="fsBtn" class="fs" aria-pressed="false">⛶ Pantalla completa</button>
+          </div>
+          <p id="sceneStatus" role="status">Cargando estadio, público, pits y coche…</p>
+        </div>
+
+        <div class="controls">
+          <label class="pick">Carrera <select id="replaySelect" disabled></select></label>
+          <button id="toggle" class="primary" disabled>Pausar</button>
+          <button id="reset" title="Reiniciar la carrera">↻ Reiniciar</button>
+          <label>Velocidad <select id="speed"><option value="500">0,5×</option><option value="250" selected>1× (tiempo real)</option><option value="125">2×</option><option value="62">4×</option></select></label>
+          <label>Calidad <select id="quality"><option value="auto" selected>Automática</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja (más fluido)</option></select></label>
+          <label class="chk"><input type="checkbox" id="trailToggle" checked /> Línea de cada coche</label>
+          <label class="chk"><input type="checkbox" id="lookToggle" /> Ver lo que ve la IA</label>
+          <label class="chk"><input type="checkbox" id="exaggerate" /> Exagerar inclinación ×3</label>
+        </div>
+        <p class="load" id="loadStatus" role="status">Cargando las corridas registradas…</p>
+
+        <details class="tele">
+          <summary>Telemetría completa del coche</summary>
+          <div class="tele-grid">
+            <div><span>Velocidad</span><strong id="speedMs">—</strong></div>
+            <div><span>Agarre del piso</span><strong id="grip">—</strong></div>
+            <div><span>Deslizamiento</span><strong id="slipDeg">—</strong></div>
+            <div><span>Volante real</span><strong id="steerDeg">—</strong></div>
+            <div><span>Giro</span><strong id="yaw">—</strong></div>
+            <div><span>Cabeceo</span><strong id="pitchDeg">—</strong></div>
+            <div><span>Balanceo</span><strong id="rollDeg">—</strong></div>
+            <div><span>Suspensión</span><strong id="heave">—</strong></div>
+            <div><span>Altura</span><strong id="height">—</strong></div>
+            <div><span>Carril</span><strong id="lane">—</strong></div>
+            <div><span>Checkpoints</span><strong id="cps">—</strong></div>
+            <div><span>Peso adelante / derecha</span><strong id="loadText">—</strong></div>
+            <div><span>Recompensa del paso</span><strong id="reward">—</strong></div>
+            <div><span>Puntos acumulados</span><strong id="trackScore">—</strong></div>
+            <div class="span2"><span>Pedal pedido</span><div class="bar"><i id="throttleBar"></i></div><span>Volante pedido</span><div class="bar"><i id="steerBar"></i></div></div>
+            <div class="span3"><span>Qué pasó en este paso</span><strong id="events" class="small">—</strong></div>
+          </div>
+        </details>
+      </section>
+
+      <nav class="tabs" role="tablist" aria-label="Secciones">
+        <button role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+        <button role="tab" data-tab="entrenamiento" aria-selected="false">Entrenamiento y episodios</button>
+        <button role="tab" data-tab="modelos" aria-selected="false">Modelos y versiones</button>
+        <button role="tab" data-tab="glosario" aria-selected="false">Qué es cada cosa</button>
+      </nav>
+
+      <section class="panel" id="tab-resumen" role="tabpanel">
+        <div class="plain-grid" id="plainGrid"></div>
+        <h2>La hipótesis <span id="selection"></span></h2>
+        <div class="cards" id="criteria"></div>
+        <p class="note" id="hypothesis"></p>
+        <h2>Resultados en las mismas 30 pistas del N4 al N7</h2>
+        <div class="table-wrap"><table id="compareTable"><thead><tr><th>Quién maneja</th><th>Condición</th><th>Vueltas completas</th><th>Vueltas limpias</th><th>Tiempo de vuelta</th><th>Accidentes por vuelta</th><th>Velocidad al chocar</th></tr></thead><tbody></tbody></table></div>
+        <p class="note">Vuelta completa: llega a la meta (puede haber chocado hasta 4 veces). Vuelta limpia: llega a la meta sin ningún accidente. PPO N8: promedio de 3 semillas. Ninguna de estas 30 pistas se usó para entrenar.</p>
+      </section>
+
+      <section class="panel" id="tab-entrenamiento" role="tabpanel" hidden>
+        <div class="stats" id="trainStats"></div>
+        <h2>Cómo terminó cada episodio de entrenamiento</h2>
+        <div id="causeBars"></div>
+        <h2>Cada semilla: imitación, práctica y parada temprana</h2>
+        <div class="table-wrap"><table id="seedTable"><thead><tr><th>Semilla</th><th>Imitación: rondas</th><th>Imitación: episodios</th><th>Práctica PPO: pasos</th><th>Práctica PPO: episodios</th><th>Por qué paró</th><th>Mejor punto</th><th>Examen (limpias / completas)</th></tr></thead><tbody></tbody></table></div>
+        <div class="chart-grid">
+          <figure><figcaption>Vueltas limpias en validación durante la práctica con PPO</figcaption><svg id="cleanChart" viewBox="0 0 560 260" role="img" aria-label="Vueltas limpias en validación por pasos de PPO"></svg></figure>
+          <figure><figcaption>Tiempo de vuelta en validación (segundos)</figcaption><svg id="timeChart" viewBox="0 0 560 260" role="img" aria-label="Tiempo de vuelta en validación por pasos de PPO"></svg></figure>
+          <figure><figcaption>La clase con el maestro: vueltas completas después de cada ronda</figcaption><svg id="imitationChart" viewBox="0 0 560 260" role="img" aria-label="Avance de la imitación por ronda"></svg></figure>
+        </div>
+        <p class="note">Una línea por semilla. ● = punto que se guardó (el mejor en las 20 pistas de validación). ✕ = donde el entrenamiento se detuvo. La línea punteada azul es el maestro en esas mismas pistas.</p>
+        <h2>Cómo se entrena ahora</h2>
+        <div class="steps" id="explainGrid"></div>
+      </section>
+
+      <section class="panel" id="tab-modelos" role="tabpanel" hidden>
+        <div class="stats" id="catalogStats"></div>
+        <h2>Experimento por experimento</h2>
+        <div class="table-wrap"><table id="catalogTable"><thead><tr><th>Versión</th><th>Qué se probó</th><th>Tipo de modelo</th><th>Modelos entrenados</th><th>Episodios</th><th>Pasos</th><th>Mejor resultado</th><th>Hipótesis</th></tr></thead><tbody></tbody></table></div>
+        <p class="note" id="catalogNote"></p>
+        <h2>Cómo se versiona cada cosa</h2>
+        <div class="table-wrap"><table id="versionTable"><thead><tr><th>Qué</th><th>Dónde queda</th><th>Cómo se identifica</th></tr></thead><tbody></tbody></table></div>
+      </section>
+
+      <section class="panel" id="tab-glosario" role="tabpanel" hidden>
+        <h2>Palabras clave</h2>
+        <div class="gloss" id="glossTerms"></div>
+        <h2>Las variables</h2>
+        <div class="gloss" id="glossVars"></div>
+        <h2>Los tipos de modelo que usamos y por qué</h2>
+        <div class="table-wrap"><table id="modelTypes"><thead><tr><th>Modelo</th><th>Qué es</th><th>Dónde se usó</th><th>Por qué</th><th>Límite</th></tr></thead><tbody></tbody></table></div>
+      </section>
+    </main>
+    <script>window.RALLY_AD = "N8 · SUPERAR AL MAESTRO"; window.RALLY_SCREEN = "N8 · SUPERAR AL MAESTRO";</script>
+    <script type="module" src="app-v8.js"></script>
+  </body>
+</html>

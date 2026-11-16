@@ -31,8 +31,9 @@ PATCH_TYPES = ("lodo", "agua", "pasto", "valla", "rampa_foso", "nada")
 
 def load_config(path=DEFAULT_CONFIG, perturbation=None) -> dict:
     config = deepcopy(path) if isinstance(path, dict) else json.loads(Path(path).read_text(encoding="utf-8"))
-    if config["environment_version"] != "rally-v7" or config["reward_version"] not in ("v7", "v5"):
-        raise ValueError("Se requiere environment_version=rally-v7 y reward_version=v7 (intento 1) o v5 (intento 2)")
+    # El N8 usa esta misma física (rally-v8 solo cambia cómo se entrena y los números de la recompensa: v8).
+    if config["environment_version"] not in ("rally-v7", "rally-v8") or config["reward_version"] not in ("v7", "v5", "v8"):
+        raise ValueError("Se requiere environment_version=rally-v7 (recompensa v7 o v5) o rally-v8 (recompensa v8)")
     t, p, g = config["track"], config["physics"], config["generator"]
     for key, value in {**t, **p}.items():
         if not isinstance(value, (int, float)) or value < 0:
