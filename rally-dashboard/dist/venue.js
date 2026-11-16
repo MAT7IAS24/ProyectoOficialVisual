@@ -16,6 +16,7 @@ function canvasTex(w, h, paint) {
 
 export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, HALF, mat, infield = true }) {
   const updaters = [];
+  const lamps = { material: null, positions: [] };
   const uniforms = { uTime: { value: 0 }, uCar: { value: new THREE.Vector3() } };
 
   // ---------- cielo: modelo de atmósfera (Preetham) con el sol en la misma dirección que la luz ----------
@@ -190,9 +191,11 @@ export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, 
     const towerG = new THREE.CylinderGeometry(0.35, 0.55, 1, 8).translate(0, 0.5, 0);
     const panelG = new THREE.BoxGeometry(5, 3, 0.5);
     const lampM = new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#fff6d8', emissiveIntensity: 1.6 });
+    lamps.material = lampM;
     for (const s of [S * 0.1, S * 0.6, S + Math.PI * R / 2, S * 1.1 + Math.PI * R, S * 1.7 + Math.PI * R, L - Math.PI * R / 2]) {
       const p = at(s, OUT * (back + 6), 0), H = top + 22;
       const tw = new THREE.Mesh(towerG, steel); tw.position.copy(p); tw.scale.set(1, H, 1); tw.castShadow = true; scene.add(tw);
+      lamps.positions.push(new THREE.Vector3(p.x, H + 1.5, p.z));
       const panel = new THREE.Mesh(panelG, lampM); panel.position.set(p.x, H + 1.5, p.z); panel.rotation.y = yawAlong(s); panel.rotation.x = -0.35; scene.add(panel);
     }
   }
@@ -251,7 +254,7 @@ export function buildVenue({ scene, renderer, sun, sunDir, at, center, L, S, R, 
   }
 
   return {
-    OUT, sweep, rng, canvasTex,
+    OUT, sweep, rng, canvasTex, sky, lamps,
     update(time, carPos) { uniforms.uTime.value = time; if (carPos) uniforms.uCar.value.copy(carPos); },
   };
 }

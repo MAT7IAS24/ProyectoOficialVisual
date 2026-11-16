@@ -121,13 +121,14 @@ try {
   const camera = new THREE.PerspectiveCamera(55, 1, 0.6, 5000);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; controls.maxPolarAngle = Math.PI / 2 - 0.05; controls.enabled = false;
-  scene.add(new THREE.HemisphereLight('#dfefff', '#5d7f33', 1.2));
+  const hemi = new THREE.HemisphereLight('#dfefff', '#5d7f33', 1.2); scene.add(hemi);
   const sun = new THREE.DirectionalLight('#fff1d6', 4.3);
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.radius = 4; sun.shadow.bias = -0.0004;
   Object.assign(sun.shadow.camera, { left: -60, right: 60, top: 60, bottom: -60, near: 1, far: 400 });
   sun.shadow.normalBias = 0.04;
   scene.add(sun, sun.target);
   const SUN_DIR = new THREE.Vector3(-0.45, 0.8, 0.4).normalize();
+  const headlights = [];
 
   const mats = {};
   const mat = (color, o = {}) => (mats[color + JSON.stringify(o)] ??= new THREE.MeshStandardMaterial({ color, roughness: 0.85, side: THREE.DoubleSide, ...o }));
@@ -236,6 +237,53 @@ try {
   }
 
   const venue = buildVenue({ scene, renderer, sun, sunDir: SUN_DIR, at, center, L, S, R, HALF, mat, infield: false });
+
+  // ---------- hora del día: día, atardecer y noche ----------
+  // Solo cambia la luz y el cielo: la carrera, la física y los datos son los mismos.
+  const nightLights = [];
+  for (const p of venue.lamps.positions) {
+    const l = new THREE.PointLight('#fff1cc', 0, 260, 1.1); l.position.copy(p).add(new THREE.Vector3(0, -2, 0)); scene.add(l); nightLights.push(l);
+  }
+  const TIMES = {
+    dia: { sun: new THREE.Vector3(-0.45, 0.8, 0.4), sunColor: '#fff1d6', sunI: 4.3, sky: '#dfefff', ground: '#5d7f33', hemiI: 1.2,
+           turbidity: 2.6, rayleigh: 2.2, fog: '#b9cfe2', exposure: 0.78, env: 0.4, lamps: 1.6, towers: 0, heads: false, skyOn: true },
+    atardecer: { sun: new THREE.Vector3(-0.85, 0.06, 0.5), sunColor: '#ff9a4d', sunI: 3.2, sky: '#ffb27a', ground: '#3d3324', hemiI: 0.7,
+           turbidity: 10, rayleigh: 3.6, fog: '#e08a5c', exposure: 0.95, env: 0.22, lamps: 2.4, towers: 0, heads: false, skyOn: true },
+    noche: { sun: new THREE.Vector3(0.3, 0.75, -0.4), sunColor: '#a9bcff', sunI: 0.55, sky: '#26324d', ground: '#0d130c', hemiI: 0.22,
+           turbidity: 1, rayleigh: 0.2, fog: '#070b14', exposure: 1.0, env: 0.05, lamps: 6, towers: 1, heads: true, skyOn: false },
+  };
+  let timeOfDay = 'dia';
+  function setTimeOfDay(name) {
+    const t = TIMES[name] ?? TIMES.dia; timeOfDay = name in TIMES ? name : 'dia';
+    SUN_DIR.copy(t.sun).normalize();
+    sun.color.set(t.sunColor); sun.intensity = t.sunI;
+    hemi.color.set(t.sky); hemi.groundColor.set(t.ground); hemi.intensity = t.hemiI;
+    const u = venue.sky.material.uniforms;
+    u.sunPosition.value.copy(SUN_DIR); u.turbidity.value = t.turbidity; u.rayleigh.value = t.rayleigh;
+    u.mieCoefficient.value = name === 'atardecer' ? 0.012 : 0.004;
+    venue.sky.visible = t.skyOn;
+    scene.background = t.skyOn ? null : new THREE.Color('#05070d');
+    scene.fog.color.set(t.fog);
+    renderer.toneMappingExposure = t.exposure;
+    scene.environmentIntensity = t.env;
+    if (venue.lamps.material) venue.lamps.material.emissiveIntensity = t.lamps;
+    nightLights.forEach(l => { l.intensity = t.towers * 170; });
+    headlights.forEach(h => { h.visible = t.heads; });
+    stars.visible = name === 'noche';
+  }
+  // Estrellas para la noche (un solo objeto de puntos).
+  const stars = (() => {
+    const n = 1500, pos = new Float32Array(n * 3), r = venue.rng(9);
+    for (let i = 0; i < n; i++) {
+      const th = r() * Math.PI * 2, ph = Math.acos(0.15 + r() * 0.85), R0 = 3000;
+      pos.set([R0 * Math.sin(ph) * Math.cos(th), R0 * Math.cos(ph), R0 * Math.sin(ph) * Math.sin(th)], i * 3);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const p = new THREE.Points(g, new THREE.PointsMaterial({ color: '#ffffff', size: 2.2, sizeAttenuation: false, fog: false }));
+    p.visible = false; scene.add(p); return p;
+  })();
+  window.addEventListener('rally8:time', e => setTimeOfDay(e.detail));
+  try { const v = new URLSearchParams(location.search).get('hora') || localStorage.getItem('rally-hora'); if (v) setTimeOfDay(v); } catch {}
   const infield = buildInfield({ scene, S, R, HALF, makeCar: color => (models.coche ? prepCar(models.coche, 1, color) : null) });
 
   // ---------- modelos 3D ----------
@@ -342,6 +390,14 @@ try {
     const bb = new THREE.Box3().setFromObject(body);
     for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.07, 0.06), bm); m.position.set(sx * 0.52, bb.max.y * 0.62, bb.min.z + 0.05); brake.add(m); }
     brake.visible = false; body.add(brake);
+    // Faros: dos luces blancas adelante y un cono de luz sobre la pista. Solo se encienden de noche.
+    if (!plain) {
+      const lights = new THREE.Group(), hm = new THREE.MeshBasicMaterial({ color: '#fffbe8', transparent: opacity < 1, opacity });
+      for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.1, 0.06), hm); m.position.set(sx * 0.6, bb.max.y * 0.5, bb.max.z - 0.05); lights.add(m); }
+      const beam = new THREE.SpotLight('#fff4dc', opacity < 1 ? 0 : 60, 70, 0.5, 0.45, 1.2);
+      beam.position.set(0, bb.max.y * 0.55, bb.max.z); beam.target.position.set(0, 0, bb.max.z + 20);
+      lights.add(beam, beam.target); lights.visible = false; body.add(lights); headlights.push(lights);
+    }
     g.userData = { wheels, body, brake };
     g.rotation.order = 'YXZ'; body.rotation.order = 'YXZ';
     return g;
@@ -769,6 +825,7 @@ try {
       updateDrops(paused ? 0 : dt);
       // El sol (y su sombra) acompaña al coche para que la sombra sea nítida donde se mira.
       sun.position.copy(car.position).addScaledVector(SUN_DIR, 150); sun.target.position.copy(car.position);
+      stars.position.copy(camera.position);
       venue.update(now / 1000, car.position); infield.update(now / 1000);
       const prevF = current.frames[Math.max(0, frame - 1)], frac = Math.min(1, (t % stepMs) / stepMs);
       updateLook((prevF?.s ?? 0) + ((f?.s ?? 0) - (prevF?.s ?? 0)) * frac, speed, car.position);
