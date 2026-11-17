@@ -1,8 +1,82 @@
 # Autonomous Rally · Proyecto final de MLOps
 
-Visualización 2 · Universidad Externado de Colombia. Un coche aprende a correr una pista con
-aprendizaje por refuerzo. Cada experimento es una **versión con nombre** (etiqueta de Git) con su
-código, sus datos versionados (DVC), sus corridas (MLflow) y su vista web.
+MLOps · Visualización 2 · Grupo B · Universidad Externado de Colombia · Docente: Julián Zuluaga.
+Equipo: **David Tinjacá, Mattias Morales y David Briñez**.
+
+## Misión
+
+Un vehículo autónomo debe completar una vuelta de 1,1 km en una pista que cambia en cada carrera (barro, agua,
+pasto, fosos, rampas, vallas, lluvia), **lo más rápido posible y sin chocar ni quedarse atascado**. Es el mismo
+reto de un vehículo de rally, inspección o logística rural en terreno variable: cada choque es daño y tiempo
+perdido, y no es viable escribir reglas para cada terreno. Se mide con vueltas completas, vueltas sin choques y
+tiempo de vuelta, siempre en 30 pistas que el agente nunca vio.
+
+**Resultado oficial (N8):** 83 % de vueltas completas, 68,5 s por vuelta (maestro por reglas: 87 %, 70,3 s),
+70 % sin choques (maestro: 83 %). 8 experimentos, 64 modelos, ≈ 259 mil episodios, 54,6 millones de pasos.
+
+## Para revisar la entrega
+
+| Qué | Dónde |
+|---|---|
+| Aplicación (Vercel) | https://autonomous-rally-lake.vercel.app (historial) · demo: https://autonomous-rally-lake.vercel.app/v8.html |
+| Versión entregada | etiqueta `entrega-final` (y `rally-v8-n8` para el resultado oficial del N8) |
+| Ficha del ambiente y sus tres niveles | [docs/ficha-ambiente.md](docs/ficha-ambiente.md) |
+| Comparación de experimentos (hipótesis, runs, estados) | [docs/comparacion-experimentos.md](docs/comparacion-experimentos.md) · configuraciones en `configs/` · informes en `reports/` |
+| Evaluación por caso | [reports/casos/](reports/casos/README.md) y `evaluation.json` de cada modelo |
+| Manifiesto de modelos, evaluación, recuperación y rollback | [docs/modelos.md](docs/modelos.md) · `recuperar_modelo.py` · `tests/test_recuperacion.py` |
+| Incidente de degradación e intervención | [docs/rally-v3.md](docs/rally-v3.md), sección 8 (lluvia: 100 % → 0 % → intervención B aceptada) |
+| Informe de decisiones, resultados, límites y contribuciones | [docs/informe-final.md](docs/informe-final.md) |
+| Presentación | [docs/presentacion-final.pdf](docs/presentacion-final.pdf) |
+| Documentación de cada experimento | `docs/rally-v2.md` … `docs/rally-v8.md` |
+
+## Arquitectura
+
+```
+configs/rally-vN.json      hipótesis, criterios, física, recompensa, parámetros (escritos antes de entrenar)
+race_env_vN.py             ambiente Gymnasium de cada nivel (versión = environment_version)
+training_vN.py             entrenamiento (Q-learning, PPO de Stable-Baselines3, imitación DAgger), evaluación, paquete del modelo
+pipeline_vN.py             flujo Prefect: entrenar 3 semillas → evaluar en 30 pistas → criterio → informe → web
+reports/                   informe JSON por corrida (runs, métricas, decisión) + casos/ (evaluación por pista)
+data/experiments/*.dvc     datos de entrenamiento versionados con DVC
+MLflow (local)             runs, parámetros, métricas y artefactos; Model Registry
+rally-dashboard/dist/      web estática (Three.js) publicada en Vercel + modelos publicados (modelos/nN/)
+recuperar_modelo.py        verifica hashes y repite el examen de un modelo publicado
+tests/                     pruebas de ambiente, recompensa, entrenamiento y recuperación
+```
+
+## Instalación
+
+```bash
+python -m venv .venv && source .venv/bin/activate       # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+```
+
+## Ejecución y reproducción
+
+```bash
+# Pruebas
+python -m unittest discover tests
+
+# Repetir el experimento oficial (3 semillas, examen, informe y datos de la web)
+python pipeline_v8.py                 # con DVC y MLflow
+python pipeline_v8.py --skip-tracking # sin DVC/MLflow (solo informe y web)
+
+# Recuperar y evaluar el modelo recomendado o uno histórico
+python recuperar_modelo.py rally-dashboard/dist/modelos/n8/ppo-recomendado --pistas 5
+python recuperar_modelo.py rally-dashboard/dist/modelos/n7/ppo-recomendado --pistas 5
+
+# Volver al código exacto de una versión
+git checkout rally-v7-n7-maestro
+
+# Ver la web en local
+cd rally-dashboard/dist && python -m http.server 8000
+```
+
+Los resultados son reproducibles: semillas fijas (7, 21, 42), pistas de examen fijas (semillas 100000–100029) y
+política determinista en el examen.
+
+## Versiones
 
 | Versión | Qué agrega | Resultado | Código | Documentación |
 |---|---|---|---|---|
@@ -15,10 +89,8 @@ código, sus datos versionados (DVC), sus corridas (MLflow) y su vista web.
 | **N7** · `rally-v7-n7-maestro` | Aprender de un maestro: PPO primero imita a las reglas (DAgger) y después afina solo. Misma física del N6, mirada de piloto (250 sensores). 3 intentos; los dos primeros (PPO desde cero, etiqueta `rally-v7-n7`) quedaron rechazados y guardados. Web: ruedas arregladas, polvo, chispas, confeti, luces de freno y línea de cada coche | Intento 3: PPO 80 % (N6: 12 %), 1,28 accidentes por vuelta (N6: 2,29), lluvia 58 %; meta 70 %: aceptado. Solo imitando: 83 %; reglas: 87 % | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v7-n7-maestro) | [rally-v7.md](docs/rally-v7.md) |
 | **N8** · `rally-v8-n8` | Superar al maestro: mismo ambiente del N7; entrenamiento reestructurado (parada temprana, práctica con lluvia y ruido, corte de episodios, libro de episodios, recompensa v8). 3 intentos (cada uno continúa desde el anterior; el 3.º no mejoró y se queda el 2.º). Web nueva: pantalla completa, pits y lago, día/atardecer/noche, pestañas de modelos, versiones y episodios | 70 % de vueltas limpias (maestro 83 %), 83 % completas, vuelta 68,5 s (maestro 70,3 s), lluvia 83 %, 0,80 choques; 2 de 3: no confirmada. 53.858 episodios y 14,9 M pasos con los 3 intentos | [ver](https://github.com/MAT7IAS24/ProyectoOficialVisual/tree/rally-v8-n8) | [rally-v8.md](docs/rally-v8.md) |
 
-**Web pública:** https://autonomous-rally-lake.vercel.app (Vercel, equipo visual-2).
-`rally-dashboard/dist/historial.html` es la portada con el historial y enlaces a la carrera
-de cada versión (`index.html`, `v2.html`, `v3.html`, `v4.html`, `v5.html`, `v6.html`, `v7.html`). Para volver exactamente a una versión:
-`git checkout rally-v3-n3` (o la etiqueta que corresponda).
+
+Para volver exactamente a una versión: `git checkout <etiqueta>`.
 
 ---
 
